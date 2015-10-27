@@ -1,0 +1,101 @@
+topdir = ../..
+srcdir = $(topdir)/src
+testdir = $(topdir)/test
+depsdir = $(topdir)/deps
+
+uname_S := $(shell sh -c "uname -s 2>/dev/null || echo not")
+OPTIMIZATION ?= -O1
+
+WARN = -pipe -g -fPIC -W -Wall -Wswitch -Wsign-promo -Wredundant-decls -Wformat \
+       -Wshadow -Wpointer-arith -Wwrite-strings -Wconversion -Wreorder -Woverloaded-virtual
+#-Weffc++ 
+OPT = $(OPTIMIZATION)
+DEBUG = -g -ggdb -DDEBUG
+
+CXXFLAGS := -c $(OPT) $(WARN) $(DEBUG)
+CXXFLAGS += -I$(srcdir) -I$(depsdir)/libev-4.11
+CXXFLAGS += -I$(testdir)/lib
+CXXFLAGS += -I$(topdir)/test/gtest/include
+CXXFLAGS += -I$(topdir)/baidu/public/nshead/output/include
+CXXFLAGS += -I$(topdir)/baidu/public/mcpack/output/include
+CXXFLAGS += -I$(topdir)/baidu/lib2-64/bsl/include
+
+LDFLAGS := $(DEBUG)
+LDFLAGS += -lpthread
+
+LIBS = $(depsdir)/libev-4.11/.libs/libev.a \
+       $(topdir)/test/gtest/lib/gtest.a \
+       $(topdir)/baidu/public/nshead/output/libnshead.a \
+       $(topdir)/baidu/public/mcpack/output/lib/libmcpack.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_archive.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_check_cast.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_exception.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_pool.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_ResourcePool.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_utils.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_var.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_var_implement.a \
+       $(topdir)/baidu/lib2-64/bsl/lib/libbsl_var_utils.a \
+
+ifeq ($(uname_S), Linux)
+  CXX=g++
+  LD=g++
+else
+  CXX=c++
+  LD=c++
+endif
+
+#PATTERN=test*.cpp
+#TESTFILES=$(wildcard $(PATTERN))
+#PROG_NAME=$(basename $(TESTFILES))
+TEST_FILES = test_db.cpp 
+#../replication/test_replication.cpp
+PROG_NAME = $(basename $(TEST_FILES))
+TEST_OBJS = $(addsuffix .o,$(PROG_NAME))
+
+SRC_FILES = db/env.cpp  \
+            db/db.cpp db/command.cpp \
+            binlog/binlog.cpp binlog/big_file.cpp \
+            util/log.cpp util/url_snprintf.cpp \
+            event/dispatcher.cpp event/worker.cpp event/event.cpp event/thread.cpp \
+            util/file.cpp util/network.cpp util/sds.cpp util/zmalloc.cpp util/crc32c.cpp \
+            ../test/lib/mcpack_reader.cpp ../test/lib/mcpack_writer.cpp
+
+MODULES = $(addprefix $(srcdir)/,$(basename $(SRC_FILES)))
+AR_OBJS = $(addsuffix .o,$(MODULES))
+
+ALL_OBJS = $(AR_OBJS) $(TEST_OBJS)
+
+all: $(AR_OBJS) $(PROG_NAME)
+	@echo "Done :)"
+
+.PHONY: all
+
+../replication/test_replication: $(AR_OBJS) ../replication/test_replication.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+test_db: $(AR_OBJS) test_db.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+#event.o: $(srcdir)/event/event.cpp
+#	$(CXX) $(CXXFLAGS) $?
+#test_db_wrapper: $(AR_OBJS) test_db_wrapper.o
+#	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+$(ALL_OBJS) : %.o : %.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@
+
+clean:
+	-(rm $(PROG_NAME) $(TEST_OBJS) $(AR_OBJS))
+
+.PHONY: clean
+
+
+#$(PROG_NAME) : % : %.o
+#	$(LD) -o $@ $^ $(LDFLAGS) $(AR_OBJS) $(LIBS)
+
+#log.o:
+#	cd util && g++ -c log.cpp && cd ..
+#	cd util && g++ -o test_log -lpthread test_log.cpp log.o ./gtest/lib/gtest.a -I./libevent/include -L./libevent/lib -Wl,-Bstatic -levent -Wl,-Bdynamic -lrt -I./gtest/include 
+

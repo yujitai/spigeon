@@ -1,0 +1,59 @@
+#edit-mode: -*- python -*-
+#coding:utf8
+
+#工作路径.
+WORKROOT('../../')
+
+#使用硬链接copy.
+CopyUsingHardLink(True)
+
+#C预处理器参数.
+CPPFLAGS('-D_GNU_SOURCE -D__STDC_LIMIT_MACROS -DFRAMEWORK_VERSION=\"\\\"`./version.sh`\\\"\"')
+
+#C编译参数.
+CFLAGS('-g -ggdb -pipe -W -Wall -O0 -DDEBUG')
+
+#C++编译参数.
+CXXFLAGS('-g -ggdb -pipe -W -Wall -O0 -DDEBUG')
+
+#IDL编译参数
+IDLFLAGS('--compack')
+
+#UBRPC编译参数
+UBRPCFLAGS('--compack')
+
+#头文件路径.
+INCPATHS('. ./src ./deps/libev-4.11 ./deps/evhttpclient ./deps ./deps/protobuf/src')
+
+#使用库
+#LIBS('')
+LIBS('')
+
+#链接参数.
+LDFLAGS('-lpthread -lcrypto -lrt')
+
+#依赖模块
+CONFIGS('newcommon/mcpack@mcpack_1-3-17-0_PD_BL')
+
+#After you add files into your project, you may need to trigger 
+#the git2svn hook to build new Makefile for svn.
+#The best way is change COMAKE a little bit, so the md5 will be changed too.
+user_sources=GLOB('./src/server/*.cpp') + ' ' \
+            + GLOB('./src/client/*.cpp') + ' ' \
+            + GLOB('./src/inc/*.cpp') + ' ' \
+            + GLOB('./src/db/*.cpp') + ' ' \
+            + GLOB('./src/binlog/*.cpp') + ' ' \
+            + GLOB('./src/util/*.cpp') + ' ' \
+            + GLOB('./src/replication/*.cpp') + ' ' \
+            + GLOB('./src/command/*.cpp') + ' ' \
+            + GLOB('./src/command/*.pb.cc')
+
+user_headers=GLOB('./src/server/*.h') + ' ' \
+            + GLOB('./src/client/*.h') + ' ' \
+            + GLOB('./src/inc/*.h') + ' ' \
+            + GLOB('./src/db/*.h') + ' ' \
+            + GLOB('./src/binlog/*.h') + ' ' \
+            + GLOB('./src/util/*.h')
+
+StaticLibrary('storeframework-partial', Sources(user_sources), HeaderFiles(user_headers))
+

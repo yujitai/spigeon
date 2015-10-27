@@ -1,0 +1,9 @@
+package store_list;
+
+message list{
+    message item{
+        required bytes member = 1;
+        optional bytes extra = 2;
+    }
+    repeated item itemlist = 1;
+}

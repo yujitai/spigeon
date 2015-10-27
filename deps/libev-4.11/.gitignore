@@ -1,0 +1,10 @@
+.deps/
+.libs/
+Makefile
+config.h
+config.log
+config.status
+ev.lo
+event.lo
+libev.la
+libtool
