@@ -1,5 +1,0 @@
-libevhttpclient.so
-tests/basic
-tests/multiple
-tests/multiple_timeout
-tests/server
