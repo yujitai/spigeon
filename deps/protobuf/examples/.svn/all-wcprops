@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples
+END
+AddPerson.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/AddPerson.java
+END
+ListPeople.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/ListPeople.java
+END
+add_person.cc
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/add_person.cc
+END
+addressbook.proto
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/addressbook.proto
+END
+list_people.cc
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/list_people.cc
+END
+add_person.py
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/add_person.py
+END
+list_people.py
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/list_people.py
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/examples/README.txt
+END

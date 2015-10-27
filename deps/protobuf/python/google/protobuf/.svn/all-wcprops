@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf
+END
+reflection.py
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/reflection.py
+END
+service_reflection.py
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/service_reflection.py
+END
+message_factory.py
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/message_factory.py
+END
+text_format.py
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/text_format.py
+END
+descriptor.py
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/descriptor.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/__init__.py
+END
+service.py
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/service.py
+END
+descriptor_database.py
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/descriptor_database.py
+END
+message.py
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/message.py
+END
+descriptor_pool.py
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/google/protobuf/descriptor_pool.py
+END

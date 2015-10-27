@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src
+END
+stats.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/stats.c
+END
+mb.c
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/mb.c
+END
+mutex.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/mutex.c
+END
+ckh.c
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/ckh.c
+END
+prof.c
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/prof.c
+END
+extent.c
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/extent.c
+END
+quarantine.c
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/quarantine.c
+END
+chunk.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/chunk.c
+END
+base.c
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/base.c
+END
+zone.c
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/zone.c
+END
+bitmap.c
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/bitmap.c
+END
+atomic.c
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/atomic.c
+END
+util.c
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/util.c
+END
+chunk_dss.c
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/chunk_dss.c
+END
+rtree.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/rtree.c
+END
+ctl.c
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/ctl.c
+END
+chunk_mmap.c
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/chunk_mmap.c
+END
+hash.c
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/hash.c
+END
+jemalloc.c
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/jemalloc.c
+END
+arena.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/arena.c
+END
+tcache.c
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/tcache.c
+END
+huge.c
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/huge.c
+END
+tsd.c
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/src/tsd.c
+END

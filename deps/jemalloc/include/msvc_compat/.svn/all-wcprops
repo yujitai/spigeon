@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/include/msvc_compat
+END
+strings.h
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/include/msvc_compat/strings.h
+END
+inttypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/include/msvc_compat/inttypes.h
+END
+stdint.h
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/include/msvc_compat/stdint.h
+END
+stdbool.h
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/include/msvc_compat/stdbool.h
+END

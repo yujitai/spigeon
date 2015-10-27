@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/fused-src/gtest
+END
+gtest-all.cc
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/fused-src/gtest/gtest-all.cc
+END
+gtest.h
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/fused-src/gtest/gtest.h
+END
+gtest_main.cc
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/fused-src/gtest/gtest_main.cc
+END

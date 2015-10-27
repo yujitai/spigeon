@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/app/search/ksarch/!svn/ver/52883/trunk/store/store-framework/deps/libatomic
+END
+atomic.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libatomic/atomic.h
+END
+libatomic.a
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/52883/trunk/store/store-framework/deps/libatomic/libatomic.a
+END
+atomic.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libatomic/atomic.cpp
+END

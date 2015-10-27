@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest
+END
+gtest-printers.h
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-printers.h
+END
+gtest_prod.h
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest_prod.h
+END
+gtest-spi.h
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-spi.h
+END
+gtest-param-test.h
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-param-test.h
+END
+gtest-param-test.h.pump
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-param-test.h.pump
+END
+gtest_pred_impl.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest_pred_impl.h
+END
+gtest-death-test.h
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-death-test.h
+END
+gtest-typed-test.h
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-typed-test.h
+END
+gtest.h
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest.h
+END
+gtest-test-part.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-test-part.h
+END
+gtest-message.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/include/gtest/gtest-message.h
+END

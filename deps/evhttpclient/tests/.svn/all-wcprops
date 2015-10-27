@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/evhttpclient/tests
+END
+basic.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/evhttpclient/tests/basic.cpp
+END
+multiple_timeout.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/evhttpclient/tests/multiple_timeout.cpp
+END
+server.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/evhttpclient/tests/server.cpp
+END
+multiple.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/evhttpclient/tests/multiple.cpp
+END

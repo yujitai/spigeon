@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc
+END
+configure
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/configure
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/Makefile.in
+END
+VERSION
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/VERSION
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/ChangeLog
+END
+config.stamp
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/config.stamp
+END
+config.guess
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/config.guess
+END
+config.sub
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/config.sub
+END
+config.stamp.in
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/config.stamp.in
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/README
+END
+configure.ac
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/configure.ac
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/.gitignore
+END
+INSTALL
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/INSTALL
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/COPYING
+END
+autogen.sh
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/autogen.sh
+END
+install-sh
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/jemalloc/install-sh
+END

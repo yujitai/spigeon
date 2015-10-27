@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/app/search/ksarch/!svn/ver/52883/trunk/store/store-framework/deps/protobuf
+END
+configure
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/configure
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/Makefile.in
+END
+generate_descriptor_proto.sh
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/generate_descriptor_proto.sh
+END
+INSTALL.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/INSTALL.txt
+END
+CHANGES.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/CHANGES.txt
+END
+COPYING.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/COPYING.txt
+END
+depcomp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/depcomp
+END
+config.guess
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/config.guess
+END
+ltmain.sh
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/ltmain.sh
+END
+config.sub
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/config.sub
+END
+config.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/config.h.in
+END
+protobuf-lite.pc.in
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/protobuf-lite.pc.in
+END
+configure.ac
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/configure.ac
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/.gitignore
+END
+protobuf.pc.in
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/protobuf.pc.in
+END
+missing
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/missing
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/Makefile.am
+END
+CONTRIBUTORS.txt
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/CONTRIBUTORS.txt
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/README.txt
+END
+autogen.sh
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/autogen.sh
+END
+aclocal.m4
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/aclocal.m4
+END
+install-sh
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/install-sh
+END

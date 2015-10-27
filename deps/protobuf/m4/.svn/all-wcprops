@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4
+END
+ltsugar.m4
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/ltsugar.m4
+END
+acx_pthread.m4
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/acx_pthread.m4
+END
+acx_check_suncc.m4
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/acx_check_suncc.m4
+END
+libtool.m4
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/libtool.m4
+END
+ltversion.m4
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/ltversion.m4
+END
+stl_hash.m4
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/stl_hash.m4
+END
+ac_system_extensions.m4
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/ac_system_extensions.m4
+END
+lt~obsolete.m4
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/lt~obsolete.m4
+END
+ltoptions.m4
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/m4/ltoptions.m4
+END

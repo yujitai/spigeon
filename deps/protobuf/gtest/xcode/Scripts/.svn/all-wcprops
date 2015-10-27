@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/xcode/Scripts
+END
+runtests.sh
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/xcode/Scripts/runtests.sh
+END
+versiongenerate.py
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/gtest/xcode/Scripts/versiongenerate.py
+END

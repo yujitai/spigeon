@@ -1,0 +1,227 @@
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11
+END
+libev.m4
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/libev.m4
+END
+ev_poll.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_poll.c
+END
+configure
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/configure
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/Makefile.in
+END
+ev++.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev++.h
+END
+depcomp
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/depcomp
+END
+ev_wrap.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_wrap.h
+END
+ev_select.c
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_select.c
+END
+config.guess
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/config.guess
+END
+ev_vars.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_vars.h
+END
+ev.c
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev.c
+END
+ev.pod
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev.pod
+END
+ltmain.sh
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ltmain.sh
+END
+config.sub
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/config.sub
+END
+ev_port.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_port.c
+END
+ev.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev.h
+END
+Symbols.ev
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/Symbols.ev
+END
+configure.ac
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/configure.ac
+END
+Symbols.event
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/Symbols.event
+END
+Changes
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/Changes
+END
+ev.3
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev.3
+END
+autogen.sh
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/autogen.sh
+END
+mkinstalldirs
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/mkinstalldirs
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/LICENSE
+END
+ev_epoll.c
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_epoll.c
+END
+stamp-h1
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/stamp-h1
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/README
+END
+config.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/config.h.in
+END
+event.c
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/event.c
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/.gitignore
+END
+event.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/event.h
+END
+missing
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/missing
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/Makefile.am
+END
+ev_kqueue.c
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_kqueue.c
+END
+aclocal.m4
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/aclocal.m4
+END
+ev_win32.c
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/ev_win32.c
+END
+install-sh
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/libev-4.11/install-sh
+END

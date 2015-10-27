@@ -1,0 +1,131 @@
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io
+END
+coded_stream.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/coded_stream.h
+END
+coded_stream_inl.h
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/coded_stream_inl.h
+END
+zero_copy_stream_impl.cc
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream_impl.cc
+END
+zero_copy_stream_impl.h
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream_impl.h
+END
+gzip_stream_unittest.sh
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/gzip_stream_unittest.sh
+END
+package_info.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/package_info.h
+END
+tokenizer_unittest.cc
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/tokenizer_unittest.cc
+END
+tokenizer.cc
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/tokenizer.cc
+END
+tokenizer.h
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/tokenizer.h
+END
+zero_copy_stream_impl_lite.cc
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream_impl_lite.cc
+END
+printer_unittest.cc
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/printer_unittest.cc
+END
+zero_copy_stream_unittest.cc
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream_unittest.cc
+END
+printer.cc
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/printer.cc
+END
+zero_copy_stream.cc
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream.cc
+END
+gzip_stream.cc
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/gzip_stream.cc
+END
+zero_copy_stream_impl_lite.h
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream_impl_lite.h
+END
+printer.h
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/printer.h
+END
+zero_copy_stream.h
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/zero_copy_stream.h
+END
+gzip_stream.h
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/gzip_stream.h
+END
+coded_stream_unittest.cc
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/coded_stream_unittest.cc
+END
+coded_stream.cc
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/src/google/protobuf/io/coded_stream.cc
+END

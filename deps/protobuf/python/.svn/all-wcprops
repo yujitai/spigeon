@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python
+END
+ez_setup.py
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/ez_setup.py
+END
+setup.py
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/setup.py
+END
+mox.py
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/mox.py
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/README.txt
+END
+stubout.py
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/python/stubout.py
+END

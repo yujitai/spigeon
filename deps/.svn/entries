@@ -1,0 +1,80 @@
+10
+
+dir
+195367
+https://svn.baidu.com/app/search/ksarch/trunk/store/store-framework/deps
+https://svn.baidu.com/app/search/ksarch
+
+
+
+2013-11-06T04:30:37.420807Z
+52883
+li_zhe
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+545a5917-7b6a-4334-884e-06b5ee0f0351
+
+protobuf
+dir
+
+libev-4.11
+dir
+
+libatomic
+dir
+
+jemalloc
+dir
+
+evhttpclient
+dir
+
+new-config
+dir
+
+makefile
+file
+
+
+
+
+2015-07-29T03:33:45.000000Z
+2ad754326ffd421ddb92b51ebffc151c
+2013-10-25T07:53:31.079230Z
+46714
+li_zhe
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1165
+

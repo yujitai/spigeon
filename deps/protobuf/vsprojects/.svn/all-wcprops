@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects
+END
+libprotoc.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/libprotoc.vcproj
+END
+test_plugin.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/test_plugin.vcproj
+END
+libprotobuf-lite.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/libprotobuf-lite.vcproj
+END
+tests.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/tests.vcproj
+END
+extract_includes.bat
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/extract_includes.bat
+END
+protoc.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/protoc.vcproj
+END
+libprotobuf.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/libprotobuf.vcproj
+END
+config.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/config.h
+END
+protobuf.sln
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/protobuf.sln
+END
+readme.txt
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/readme.txt
+END
+lite-test.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/lite-test.vcproj
+END
+convert2008to2005.sh
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/app/search/ksarch/!svn/ver/38322/trunk/store/store-framework/deps/protobuf/vsprojects/convert2008to2005.sh
+END
