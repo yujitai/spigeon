@@ -62,7 +62,12 @@ class EventLoop {
     /* Global current time */
     static unsigned long current_time();
     /* reference to owner of the EventLoop */
-    void *owner;                         
+    void *owner;
+
+    inline struct ev_loop* getLoop() {
+        return loop; 
+    }   
+  
   private:
     friend class HttpClient;
     struct ev_loop *loop;
