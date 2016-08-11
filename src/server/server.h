@@ -25,6 +25,7 @@ struct GenericServerOptions {
     long long max_query_buffer_size;
     int max_reply_list_size;
     worker_factory_func_t worker_factory_func;
+    int ssl_open;
 };
 
 class GenericServer : public Module {

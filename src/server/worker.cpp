@@ -17,7 +17,8 @@ Connection::Connection(int client_fd)
           bytes_processed(0), bytes_expected(1), cur_resp_pos(0),
           reply_list_size(0),
           watcher(NULL), timer(NULL),
-          priv_data(NULL), priv_data_destructor(NULL) {
+          priv_data(NULL), priv_data_destructor(NULL),
+          ssl(NULL), sslConnected(false) {
     querybuf = sdsempty();
 }
 
@@ -26,6 +27,10 @@ Connection::~Connection() {
     std::list<Slice>::iterator it;
     for (it = reply_list.begin(); it != reply_list.end(); ++it) {
         zfree((void*)(*it).data());
+    }
+    if (ssl) {
+        SSL_shutdown (ssl);
+        SSL_free(ssl);
     }
 }
 
@@ -92,6 +97,7 @@ void GenericWorker::read_query(int fd) {
     c->querybuf = sdsMakeRoomFor(c->querybuf, readlen);
     nread = sock_read_data(fd, c->querybuf+qblen, readlen);
     if (nread == NET_ERROR) {
+        log_debug("sock_read_data: return error, close connection");
         close_conn(c);
         return;
     } else if (nread > 0) {
@@ -101,6 +107,7 @@ void GenericWorker::read_query(int fd) {
 
     int ret = process_read_query(c);
     if (ret == WORKER_ERROR) {
+        log_debug("process_read_query: return error, close connection");
         close_conn(c);
         return;
     } else if (ret == WORKER_CONNECTION_REMOVED) {
@@ -142,13 +149,14 @@ void GenericWorker::write_reply(int fd) {
         log_warning("connection not exists");
         return;
     }
-    
+
     while (!c->reply_list.empty()) {
         Slice reply = c->reply_list.front();
         int nwritten = sock_write_data(fd,
                                        reply.data() + c->cur_resp_pos,
                                        reply.size() - c->cur_resp_pos);
         if (nwritten == NET_ERROR) {
+            log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;
         } else if( nwritten == 0) {         /* would block */
@@ -192,7 +200,11 @@ Connection *GenericWorker::new_conn(int fd) {
     c->watcher = el->create_io_event(conn_io_cb, (void*)c);
     c->timer = el->create_timer(timeout_cb, (void*)c, true);
     /* start io and timeout */
-    enable_events(c, EventLoop::READ);
+    if (options.ssl_open) {
+        enable_events(c, EventLoop::READ | EventLoop::WRITE);
+    } else {
+        enable_events(c, EventLoop::READ);
+    }
     start_timer(c);
 
     if ((unsigned int)fd >= conns.size())

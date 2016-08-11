@@ -8,6 +8,7 @@
 #include "server/dispatcher.h"
 #include "util/sds.h"
 #include "util/slice.h"
+#include <openssl/ssl.h>
 
 namespace store {
 
@@ -27,7 +28,9 @@ class Connection {
     int fd;
     char ip[20];
     int port;
-    
+    SSL *ssl;
+    bool sslConnected;
+
     sds querybuf;
     // current porcessing state 
     int current_state;
@@ -89,8 +92,8 @@ class GenericWorker: public Runnable {
     void run();
     void mq_push(void *msg);            // push into message queue
     bool mq_pop(void **msg);            // pop from message queue
-    void read_query(int fd);
-    void write_reply(int fd);
+    virtual void read_query(int fd);
+    virtual void write_reply(int fd);
     int notify(int msg);
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);

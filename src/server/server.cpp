@@ -52,7 +52,9 @@ int GenericServer::init_conf() {
                                             1000,               // tick
                                             10 * 1024 * 1024,   // max_query_buffer_size
                                             1024,               // max_reply_list_size
-                                            NULL };
+                                            NULL,
+                                            0,                  //ssl server flag
+                                            };
     return SERVER_MODULE_OK;
 }
 
