@@ -16,7 +16,7 @@ Pack::~Pack() {
 }
 
 int Pack::open(const Slice& buf, enum OpMode mode) {
-    size_t tmp_buf_len = 2 * buf.size() + 10240; //FIXME: how big is enough?
+    size_t tmp_buf_len = 3 * buf.size() + 10240; //FIXME: how big is enough?
     char* tmp_buf = (char*)zmalloc(tmp_buf_len);
     switch (mode) {
     case READ:
