@@ -160,6 +160,7 @@ void GenericWorker::write_reply(int fd) {
             close_conn(c);
             return;
         } else if( nwritten == 0) {         /* would block */
+            log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->cur_resp_pos), c->fd, c->ip);
             return;
         } else if ((nwritten + c->cur_resp_pos) == reply.size()) { /* finish */
             c->reply_list.pop_front();
@@ -196,6 +197,7 @@ Connection *GenericWorker::new_conn(int fd) {
     Connection *c = new Connection(fd);
     sock_peer_to_str(fd, c->ip, &(c->port));
     c->last_interaction = el->now();
+    c->begin_interaction = c->last_interaction;
     /* create io event and timeout for the connection */
     c->watcher = el->create_io_event(conn_io_cb, (void*)c);
     c->timer = el->create_timer(timeout_cb, (void*)c, true);
@@ -230,6 +232,7 @@ void GenericWorker::close_all_conns() {
 }
 
 void GenericWorker::remove_conn(Connection *c) {
+    c->last_interaction = el->now();
     before_remove_conn(c);
     el->delete_io_event(c->watcher);  
     el->delete_timer(c->timer);

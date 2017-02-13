@@ -50,6 +50,7 @@ class Connection {
     void *priv_data;                           // user specific data
     void (*priv_data_destructor)(void*);
 
+    unsigned long begin_interaction;
     unsigned long last_interaction;
   
     Connection(int fd);
