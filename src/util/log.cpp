@@ -356,4 +356,15 @@ int log_close() {
     }
 }
 
+int log_join() {
+    //g_log_running = false;
+    int ret = pthread_join(g_log_thread, NULL);
+    if (ret) {
+        perror("error join log thread");
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
 }  // namespace store

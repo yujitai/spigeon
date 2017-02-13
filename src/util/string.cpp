@@ -11,6 +11,7 @@
  * @brief 
  **/
 
+#include <stdio.h>
 #include <string>
 #include <stdarg.h>
 #include <stddef.h>

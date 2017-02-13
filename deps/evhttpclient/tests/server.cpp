@@ -28,6 +28,7 @@
 #include <vector>
 #include <stdio.h>
 #include <ev.h>
+#include <unistd.h>
 #include <evhttpclient.h>
 
 using namespace std;

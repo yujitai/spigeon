@@ -66,6 +66,7 @@ void log_data_free(log_data_t* ld);
 
 int log_init(const char* dir, const char* bin_name, int log_level = STORE_LOG_DEBUG);
 int log_close();
+int log_join();
 void log_data_push(log_data_t* ld, const char* key, const char* value);  // alias for log_data_push_str
 void log_set_thread_log_data(log_data_t* ld);
 log_data_t* log_get_thread_log_data();
