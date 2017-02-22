@@ -21,8 +21,8 @@ namespace store {
 static const size_t FILE_NAME_MAX    = 1024;
 static const size_t BIN_NAME_MAX     = 32;
 static const int    LOG_MSLEEP_TIME  = 5;
-static const int    LOG_BUF_LEN_MAX  = 2 * 1024;
-static const int    LOG_ITEM_LEN_MAX = 1024;
+static const int    LOG_BUF_LEN_MAX  = 2 * 2048;
+static const int    LOG_ITEM_LEN_MAX = 2048;
 
 typedef struct log_data_t {
     char   buf[LOG_ITEM_LEN_MAX];
