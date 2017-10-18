@@ -20,6 +20,7 @@ enum log_error_t {
 };
 
 enum log_level_t {
+    STORE_LOG_MONITOR = 32,
     STORE_LOG_DEBUG   = 16,
     STORE_LOG_TRACE   = 8,
     STORE_LOG_NOTICE  = 4,
@@ -34,7 +35,7 @@ struct log_data_t;
     if (ld == NULL) {                       \
         ld = (log_data_t*)pthread_getspecific(g_log_data_thread_key); \
     }                                       \
-    if (g_log_level >= STORE_LOG_ ## lvl) { \
+    if (g_log_level >= STORE_LOG_ ## lvl || STORE_LOG_MONITOR == STORE_LOG_ ## lvl) { \
         log_printf(ld, STORE_LOG_ ## lvl, __FILE__ ":" LINESTR, __FUNCTION__, #lvl, __VA_ARGS__); \
     }                                       \
 } while(0)
@@ -48,6 +49,7 @@ struct log_data_t;
 #define rlog_notice(data, ...) log_base(data, NOTICE, __VA_ARGS__)
 #define rlog_warning(data, ...) log_base(data, WARNING, __VA_ARGS__)
 #define rlog_fatal(data, ...) log_base(data, FATAL, __VA_ARGS__)
+#define log_monitor(...) log_base(NULL, MONITOR, __VA_ARGS__)
 #define log_debug(...)   log_base(NULL, DEBUG, __VA_ARGS__)
 #define log_trace(...)   log_base(NULL, TRACE, __VA_ARGS__)
 #define log_notice(...)  log_base(NULL, NOTICE, __VA_ARGS__)

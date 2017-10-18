@@ -42,8 +42,10 @@ int g_log_level;
 static bool  g_write_to_stderr = false;
 static char  g_log_filename[FILE_NAME_MAX];
 static char  g_logwf_filename[FILE_NAME_MAX];
+static char   g_logmonitor_filename[FILE_NAME_MAX];
 static FILE* g_log_f = NULL;
 static FILE* g_logwf_f = NULL;
+static FILE* g_logmonitor_f = NULL;
 static char  g_log_dir[FILE_NAME_MAX];
 static char  g_bin_name[BIN_NAME_MAX];
 typedef std::list<log_buf_t*> store_log_list_t;
@@ -161,7 +163,10 @@ int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const ch
     int   ret;
     char* buf = p_log->buf;
     int   size = (int)sizeof(p_log->buf);
-
+    //学生端网络监控日志
+    if(level == STORE_LOG_MONITOR){
+        goto user_msg;
+    }
     // prefix part
     // construct time
     time_t nowtime = get_current_time();
@@ -203,18 +208,24 @@ int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const ch
         _ADD_BLANK_SPACE(buf, size);
         cur = cur->next;
     }
-
+user_msg:
     // user message part
     va_list fmtargs;
     va_start(fmtargs, format);
-    ret = snprintf(buf, size, "msg=");
-    _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+    if(STORE_LOG_MONITOR != level){
+        ret = snprintf(buf, size, "msg=");
+        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+    }
     ret = ENCODED_VSNPRINTF(buf, size, format, fmtargs);
     _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
     va_end(fmtargs);
 
     // put ending "]\n" to buf
-    ret = snprintf(buf, size, "]\n");
+    if(STORE_LOG_MONITOR != level){
+        ret = snprintf(buf, size, "]\n");
+    } else {
+        ret = snprintf(buf, size, "\n");
+    }
     _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
     if (*(buf - 1) != '\n') {
         *(buf-1) = '\n';
@@ -253,8 +264,7 @@ static void* log_thread_loop(void*) {
     const unsigned int usecs = LOG_MSLEEP_TIME * 1000;
 
     while(g_log_running) {
-        usleep(usecs);
-        
+        usleep(usecs); 
         //check if file is moved or deleted
         if (stat(g_log_filename, &stat_data) < 0) {
             ftemp = fopen(g_log_filename, "a");
@@ -272,8 +282,17 @@ static void* log_thread_loop(void*) {
                 ftemp = NULL;
             }
         }
+        if (stat(g_logmonitor_filename, &stat_data) < 0) {
+            ftemp = fopen(g_logmonitor_filename, "a");
+            if (ftemp != NULL) {
+                fclose(g_logmonitor_f);
+                g_logmonitor_f = ftemp;
+                ftemp = NULL;
+            }
+        }
         bool write_log = false;
         bool write_logwf = false;
+        bool write_logmonitor = false;
         while (!g_log_list.empty()) {
             log_buf_t* p_log = NULL;
             p_log = *g_log_list.begin();
@@ -281,9 +300,12 @@ static void* log_thread_loop(void*) {
             if (p_log->level <= STORE_LOG_WARNING) {
                 logfile = g_logwf_f;
                 write_logwf = true;
-            } else {
+            } else if(p_log->level <= STORE_LOG_DEBUG){
                 logfile = g_log_f;
                 write_log = true;
+            } else {
+                logfile = g_logmonitor_f;
+                write_logmonitor = true;
             }
             fwrite(p_log->buf, 1, p_log->len, logfile);
             pthread_mutex_lock(&g_log_list_mutex);
@@ -296,6 +318,9 @@ static void* log_thread_loop(void*) {
         }
         if (write_logwf) {
             fflush(g_logwf_f);
+        }
+        if (write_logmonitor) {
+            fflush(g_logmonitor_f);
         }
     }
     return NULL;
@@ -320,6 +345,7 @@ int log_init(const char* dir, const char* bin_name, int log_level) {
     snprintf(g_bin_name, sizeof(g_bin_name), "%s", bin_name);
     snprintf(g_log_filename, sizeof(g_log_filename), "%s/%s.log", g_log_dir, g_bin_name);
     snprintf(g_logwf_filename, sizeof(g_logwf_filename), "%s/%s.log.wf", g_log_dir, g_bin_name);
+    snprintf(g_logmonitor_filename, sizeof(g_logmonitor_filename), "%s/%s.log.monitor", g_log_dir, g_bin_name);
     g_log_f = fopen(g_log_filename, "a");
     if (NULL == g_log_f) {
         perror("open log file failed");
@@ -330,7 +356,11 @@ int log_init(const char* dir, const char* bin_name, int log_level) {
         perror("open logwf file failed");
         return LOG_OPEN_FILE_ERROR;
     }
-
+    g_logmonitor_f = fopen(g_logmonitor_filename, "a");
+    if (NULL == g_logmonitor_f) {
+        perror("open logmonitor file failed");
+        return LOG_OPEN_FILE_ERROR;
+    }
     ret = pthread_key_create(&g_log_data_thread_key, NULL);
     if (ret != 0) {
         perror("create pthread_key failed");
