@@ -13,12 +13,10 @@ namespace store {
 static const size_t INITIAL_FD_NUM = 1024;
 
 Connection::Connection(int client_fd)
-        : fd(client_fd), current_state(0),
+        : fd(client_fd), ssl(NULL), sslConnected(false), current_state(0),
           bytes_processed(0), bytes_expected(1), cur_resp_pos(0),
-          reply_list_size(0),
-          watcher(NULL), timer(NULL),
-          priv_data(NULL), priv_data_destructor(NULL),
-          ssl(NULL), sslConnected(false) {
+          reply_list_size(0), watcher(NULL), timer(NULL),
+          priv_data(NULL), priv_data_destructor(NULL) {
     querybuf = sdsempty();
 }
 
@@ -218,9 +216,10 @@ Connection *GenericWorker::new_conn(int fd) {
 }
 
 void GenericWorker::close_conn(Connection *c) {
-    log_debug("close connection");    
-    close(c->fd);    
+    log_debug("close connection");
+    int socket_fd = c->fd; 
     remove_conn(c);
+    close(socket_fd);
 }
 
 void GenericWorker::close_all_conns() {
