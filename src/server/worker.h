@@ -25,34 +25,24 @@ class DBDispatcher;
 
 class Connection {
   public:
-    int fd;
-    char ip[20];
-    int port;
-    SSL *ssl;
-    bool sslConnected;
-
-    sds querybuf;
-    // current porcessing state 
-    int current_state;
-    // the length we already processed. ie the header size
-    size_t bytes_processed;
-    // the length we expect the current header/body to be in 
-    size_t bytes_expected;
-
-    // current postion inside a reply 
-    size_t cur_resp_pos;
-    std::list<Slice> reply_list;
-    int reply_list_size;
-
-    IOWatcher *watcher;
+    char         ip[20];
+    bool         sslConnected;
+    int          fd;
+    int          port;
+    int          reply_list_size;
+    int          current_state;
+    size_t       bytes_processed;
+    size_t       bytes_expected;
+    size_t       cur_resp_pos;
+    SSL          *ssl;
+    sds          querybuf;
+    IOWatcher    *watcher;
     TimerWatcher *timer;
-
-    void *priv_data;                           // user specific data
+    void         *priv_data;
     void (*priv_data_destructor)(void*);
-
     unsigned long begin_interaction;
     unsigned long last_interaction;
-  
+    std::list<Slice> reply_list; 
     Connection(int fd);
     ~Connection();
 
@@ -99,6 +89,10 @@ class GenericWorker: public Runnable {
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
     virtual void process_cron_work();
+    int64_t get_clients_count();
+    void set_clients_count(int64_t count);
+    void set_worker_id(uint32_t id);
+    uint32_t get_worker_id();
   protected:
     void stop();
     Connection *new_conn(int fd);
@@ -122,7 +116,8 @@ class GenericWorker: public Runnable {
     EventLoop *el;
     IOWatcher *pipe_watcher;
     TimerWatcher *cron_timer;
-    
+    int64_t online_count;
+    uint32_t worker_id;
     int notify_recv_fd;           // recving end of notify pipe
     int notify_send_fd;           // sending end of notify pipe
     std::vector<Connection*> conns; // connections currently alive

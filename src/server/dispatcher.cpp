@@ -194,5 +194,20 @@ int GenericDispatcher::notify(int msg) {
         return DISPATCHER_ERROR;
     }
 }
-
+int64_t GenericDispatcher::get_clients_count(std::string &clients_detail){
+    std::stringstream temp;
+    int64_t current_count = 0;
+    temp << "[";
+    for (size_t i = 0; i < workers.size(); i++) {
+        if (workers[i] != NULL) {
+            uint32_t workerid_temp = workers[i]->get_worker_id();
+            int64_t  count_temp = workers[i]->get_clients_count();
+            current_count += count_temp;
+            temp << "," << workerid_temp << ":" << count_temp;
+        }
+    }
+    temp << "]";
+    clients_detail = temp.str().c_str();
+    return current_count;
+}
 }

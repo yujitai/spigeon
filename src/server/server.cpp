@@ -113,5 +113,7 @@ void GenericServer::run() {
 void GenericServer::stop() {
     dispatcher->notify(GenericDispatcher::QUIT);
 }
-
+int64_t GenericServer::get_clients_count(std::string &clients_detail){
+    return dispatcher->get_clients_count(clients_detail);
+}
 }

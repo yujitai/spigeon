@@ -13,10 +13,9 @@ namespace store {
 static const size_t INITIAL_FD_NUM = 1024;
 
 Connection::Connection(int client_fd)
-        : fd(client_fd), ssl(NULL), sslConnected(false), current_state(0),
-          bytes_processed(0), bytes_expected(1), cur_resp_pos(0),
-          reply_list_size(0), watcher(NULL), timer(NULL),
-          priv_data(NULL), priv_data_destructor(NULL) {
+        : sslConnected(false), fd(client_fd), reply_list_size(0), current_state(0),
+          bytes_processed(0), bytes_expected(1), cur_resp_pos(0),ssl(NULL), watcher(NULL), 
+          timer(NULL), priv_data(NULL), priv_data_destructor(NULL) {
     querybuf = sdsempty();
 }
 
@@ -247,19 +246,34 @@ void GenericWorker::remove_conn(Connection *c) {
 void GenericWorker::process_cron_work() {
 }
 
+int64_t GenericWorker::get_clients_count(){
+    return online_count;
+}
+void GenericWorker::set_clients_count(int64_t count){
+     online_count = count;
+     return;
+}
 GenericWorker::GenericWorker(const GenericServerOptions &o)
         : options(o), el(NULL), pipe_watcher(NULL), cron_timer(NULL)
 {
     conns.resize(INITIAL_FD_NUM, NULL);
     el = new EventLoop((void*)this, false);
+    online_count = 0;
+    worker_id = 0;
 }
-
 
 GenericWorker::~GenericWorker() {
     close_all_conns();
     delete el;
 }
+void GenericWorker::set_worker_id(uint32_t id) {
+    worker_id = id;
+    return;
+}
 
+uint32_t GenericWorker::get_worker_id() {
+    return worker_id;
+}
 int GenericWorker::init() {
     int fds[2];
     if (pipe(fds)) {
