@@ -42,7 +42,9 @@ class Connection {
     void (*priv_data_destructor)(void*);
     unsigned long begin_interaction;
     unsigned long last_interaction;
+    unsigned long last_recv_request;
     std::list<Slice> reply_list; 
+    std::vector<uint64_t> ping_times;
     Connection(int fd);
     ~Connection();
 

@@ -103,12 +103,9 @@ void GenericWorker::read_query(int fd) {
     c->last_interaction = el->now();
 
     int ret = process_read_query(c);
-    if (ret == WORKER_ERROR) {
+    if(WORKER_CONNECTION_REMOVED != ret  && WORKER_OK != ret){
         log_debug("process_read_query: return error, close connection");
         close_conn(c);
-        return;
-    } else if (ret == WORKER_CONNECTION_REMOVED) {
-        return;
     }
 }
 
@@ -195,6 +192,7 @@ Connection *GenericWorker::new_conn(int fd) {
     sock_peer_to_str(fd, c->ip, &(c->port));
     c->last_interaction = el->now();
     c->begin_interaction = c->last_interaction;
+    c->last_recv_request = c->last_interaction;
     /* create io event and timeout for the connection */
     c->watcher = el->create_io_event(conn_io_cb, (void*)c);
     c->timer = el->create_timer(timeout_cb, (void*)c, true);
