@@ -39,6 +39,7 @@ public:
     int get_uint64(const char *key, uint64_t* value);
     int get_array(const char *key, Pack* pack, size_t* arr_size);
     int get_object_arr(int index, Pack* pack);
+    int get_str_arr(int index,Slice* value);
 
     int put_raw(const char *key, const Slice& value);
     int put_str(const char *key, const Slice& value);

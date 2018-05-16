@@ -163,83 +163,102 @@ int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const ch
     int   ret;
     char* buf = p_log->buf;
     int   size = (int)sizeof(p_log->buf);
+
     //学生端网络监控日志
     if(level == STORE_LOG_MONITOR){
-        goto user_msg;
-    }
-    // prefix part
-    // construct time
-    time_t nowtime = get_current_time();
-    char timebuf[32];
-    struct tm* nowtm;
-    nowtm = localtime(&nowtime);
-    strftime(timebuf, sizeof(timebuf), "%m-%d %X", nowtm);
-    ret = snprintf(buf, size, "%s: %s %s * %d [", levelstr, timebuf, g_bin_name, getpid());
-    _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+        // user message part
+        va_list fmtargs;
+        va_start(fmtargs, format);
+        ret = ENCODED_VSNPRINTF(buf, size, format, fmtargs);
+        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+        va_end(fmtargs);
 
-    // suffix part
-    if (fileline) {
-        ret = snprintf(buf, size, "file=");
+        // put ending "]\n" to buf
+        ret = snprintf(buf, size, "\n");
         _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-        ret = ENCODED_SNPRINTF(buf, size, "%s", fileline);
-        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-    }
-    if (function) {
-        ret = snprintf(buf, size, " function=");
-        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-        ret = ENCODED_SNPRINTF(buf, size, "%s", function);
-        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-        _ADD_BLANK_SPACE(buf, size);
-    }
-    log_data_t *cur = ld;
-    while(cur) {
-        if (size > cur->len) {
-            ret = cur->len;
-        } else if (size > 0) {
-            ret = size - 1;
-        } else {
-            ret = 0;
+        if (*(buf - 1) != '\n') {
+            *(buf-1) = '\n';
         }
-        memcpy(buf, cur->buf, ret);
-        buf[ret] = '\0';
-        buf += ret;
-        size -= ret;
-        // use blank space to seperate log_data_pushed items
-        _ADD_BLANK_SPACE(buf, size);
-        cur = cur->next;
+        p_log->len = buf - p_log->buf;
+        ret = p_log->len;
+
+        // push back to the logging list
+        if (g_write_to_stderr) {
+            fprintf(stderr, "%s", p_log->buf);
+        }
+        pthread_mutex_lock(&g_log_list_mutex);
+        g_log_list.push_back(p_log);
+        pthread_mutex_unlock(&g_log_list_mutex);
     }
-user_msg:
-    // user message part
-    va_list fmtargs;
-    va_start(fmtargs, format);
-    if(STORE_LOG_MONITOR != level){
+    else {
+        // prefix part
+        // construct time
+        time_t nowtime = get_current_time();
+        char timebuf[32];
+        struct tm* nowtm;
+        nowtm = localtime(&nowtime);
+        strftime(timebuf, sizeof(timebuf), "%m-%d %X", nowtm);
+        ret = snprintf(buf, size, "%s: %s %s * %d [", levelstr, timebuf, g_bin_name, getpid());
+        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+
+        // suffix part
+        if (fileline) {
+            ret = snprintf(buf, size, "file=");
+            _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+            ret = ENCODED_SNPRINTF(buf, size, "%s", fileline);
+            _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+        }
+        if (function) {
+            ret = snprintf(buf, size, " function=");
+            _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+            ret = ENCODED_SNPRINTF(buf, size, "%s", function);
+            _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+            _ADD_BLANK_SPACE(buf, size);
+        }
+        log_data_t *cur = ld;
+        while(cur) {
+            if (size > cur->len) {
+                ret = cur->len;
+            } else if (size > 0) {
+                ret = size - 1;
+            } else {
+                ret = 0;
+            }
+            memcpy(buf, cur->buf, ret);
+            buf[ret] = '\0';
+            buf += ret;
+            size -= ret;
+            // use blank space to seperate log_data_pushed items
+            _ADD_BLANK_SPACE(buf, size);
+            cur = cur->next;
+        }
+
+        // user message part
+        va_list fmtargs;
+        va_start(fmtargs, format);
         ret = snprintf(buf, size, "msg=");
         _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-    }
-    ret = ENCODED_VSNPRINTF(buf, size, format, fmtargs);
-    _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-    va_end(fmtargs);
+        ret = ENCODED_VSNPRINTF(buf, size, format, fmtargs);
+        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+        va_end(fmtargs);
 
-    // put ending "]\n" to buf
-    if(STORE_LOG_MONITOR != level){
+        // put ending "]\n" to buf
         ret = snprintf(buf, size, "]\n");
-    } else {
-        ret = snprintf(buf, size, "\n");
-    }
-    _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
-    if (*(buf - 1) != '\n') {
-        *(buf-1) = '\n';
-    }
-    p_log->len = buf - p_log->buf;
-    ret = p_log->len;
+        _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
+        if (*(buf - 1) != '\n') {
+            *(buf-1) = '\n';
+        }
+        p_log->len = buf - p_log->buf;
+        ret = p_log->len;
 
-    // push back to the logging list
-    if (g_write_to_stderr) {
-        fprintf(stderr, "%s", p_log->buf);
+        // push back to the logging list
+        if (g_write_to_stderr) {
+            fprintf(stderr, "%s", p_log->buf);
+        }
+        pthread_mutex_lock(&g_log_list_mutex);
+        g_log_list.push_back(p_log);
+        pthread_mutex_unlock(&g_log_list_mutex);
     }
-    pthread_mutex_lock(&g_log_list_mutex);
-    g_log_list.push_back(p_log);
-    pthread_mutex_unlock(&g_log_list_mutex);
 
     // ret the written log size
     return ret;

@@ -241,4 +241,16 @@ int Pack::get_object_arr(int index, Pack* pack) {
     return PACK_OK;
 }
 
+int Pack::get_str_arr(int index, Slice* value) {
+    const char* v = (const char*)mc_pack_get_str_arr(_pack, index);
+    long pack_err = MC_PACK_PTR_ERR(v);
+    if (pack_err) {
+        log_debug("pack get failed! error[%s]", mc_pack_perror(pack_err));
+        v = NULL;
+        return PACK_GET_ERROR;
+    }
+    *value = Slice(v, strlen(v));;
+    return PACK_OK;
+}
+
 }  // namespace store
