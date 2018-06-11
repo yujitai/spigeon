@@ -163,13 +163,15 @@ int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const ch
     int   ret;
     char* buf = p_log->buf;
     int   size = (int)sizeof(p_log->buf);
+    log_data_t *cur = ld;
+    time_t nowtime = get_current_time();
+
     //学生端网络监控日志
     if(level == STORE_LOG_MONITOR){
         goto user_msg;
     }
     // prefix part
     // construct time
-    time_t nowtime = get_current_time();
     char timebuf[32];
     struct tm* nowtm;
     nowtm = localtime(&nowtime);
@@ -191,7 +193,6 @@ int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const ch
         _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
         _ADD_BLANK_SPACE(buf, size);
     }
-    log_data_t *cur = ld;
     while(cur) {
         if (size > cur->len) {
             ret = cur->len;
