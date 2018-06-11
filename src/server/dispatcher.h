@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include "server/thread.h"
 #include "util/lock.h"
 #include "server/server.h"
@@ -30,6 +31,7 @@ public:
     int notify(int msg);
     int dispatch_new_conn(int fd);        // dispatch a new conn
     virtual void process_notify(int msg);
+    virtual int64_t get_clients_count(std::string &clients_detail);
 protected:
     void stop();
     virtual int spawn_worker();

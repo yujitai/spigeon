@@ -2,7 +2,8 @@
 #define _SERVER_MODULE_H_
 #include "util/config_file.h"
 #include "inc/module.h"
-
+#include <stdint.h>
+#include <string>
 namespace store {
 
 enum {
@@ -43,6 +44,7 @@ public:
     void run();
 
     void stop();
+    int64_t get_clients_count(std::string &clients_detail);
 protected:
     GenericServerOptions options;
     GenericDispatcher *dispatcher;
