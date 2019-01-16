@@ -264,6 +264,8 @@ static void* log_thread_loop(void*) {
     FILE* ftemp = NULL;
     const unsigned int usecs = LOG_MSLEEP_TIME * 1000;
 
+    pthread_setname_np(pthread_self(), "framework_log");
+
     while(g_log_running) {
         usleep(usecs); 
         //check if file is moved or deleted

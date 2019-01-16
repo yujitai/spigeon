@@ -2,6 +2,10 @@
 namespace store {
 void *run(void *arg) {
     Runnable *runnable = (Runnable*)arg;
+    if (runnable->thread_name != "") {
+      //prctl(PR_SET_NAME, runnable->thread_name.c_str());
+      pthread_setname_np(pthread_self(), runnable->thread_name.c_str());
+    }
     runnable->run();
     pthread_exit(NULL);
 }

@@ -79,7 +79,7 @@ class GenericWorker: public Runnable {
         NEWCONNECTION = 1
     };
     
-    GenericWorker(const GenericServerOptions &options);
+    GenericWorker(const GenericServerOptions &options, std::string thread_name = "");
     virtual ~GenericWorker();
     virtual int init();
     void run();

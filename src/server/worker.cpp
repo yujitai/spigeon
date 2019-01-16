@@ -251,8 +251,8 @@ void GenericWorker::set_clients_count(int64_t count){
      online_count = count;
      return;
 }
-GenericWorker::GenericWorker(const GenericServerOptions &o)
-        : options(o), el(NULL), pipe_watcher(NULL), cron_timer(NULL)
+GenericWorker::GenericWorker(const GenericServerOptions &o, std::string thread_name)
+        : Runnable(thread_name), options(o), el(NULL), pipe_watcher(NULL), cron_timer(NULL)
 {
     conns.resize(INITIAL_FD_NUM, NULL);
     el = new EventLoop((void*)this, false);
