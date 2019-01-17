@@ -5,7 +5,7 @@
 WORKROOT('../../')
 
 #使用硬链接copy.
-CopyUsingHardLink(True)
+COPY_USING_HARD_LINK(True)
 
 #C预处理器参数.
 CPPFLAGS('-D_GNU_SOURCE -D__STDC_LIMIT_MACROS -DFRAMEWORK_VERSION=\"\\\"`./version.sh`\\\"\"')
@@ -16,11 +16,6 @@ CFLAGS('-g -ggdb -pipe -W -Wall -O0 -DDEBUG')
 #C++编译参数.
 CXXFLAGS('-g -ggdb -pipe -W -Wall -O0 -DDEBUG')
 
-#IDL编译参数
-IDLFLAGS('--compack')
-
-#UBRPC编译参数
-UBRPCFLAGS('--compack')
 
 #头文件路径.
 INCPATHS('. ./src ./deps/libev-4.11 ./deps/evhttpclient ./deps ./deps/protobuf/src')
@@ -33,7 +28,7 @@ LIBS('')
 LDFLAGS('-lpthread -lcrypto -lrt')
 
 #依赖模块
-CONFIGS('newcommon/mcpack@mcpack_1-3-17-0_PD_BL')
+DEP_CONFIGS('newcommon', 'mcpack', '/home/yujitai/dev/zrtc/newcommon/mcpack')
 
 #After you add files into your project, you may need to trigger 
 #the git2svn hook to build new Makefile for svn.
@@ -53,7 +48,8 @@ user_headers=GLOB('./src/server/*.h') + ' ' \
             + GLOB('./src/inc/*.h') + ' ' \
             + GLOB('./src/db/*.h') + ' ' \
             + GLOB('./src/binlog/*.h') + ' ' \
-            + GLOB('./src/util/*.h')
+            + GLOB('./src/util/*.h') + ' ' \
+            + GLOB('./src/*.h')
 
 StaticLibrary('storeframework-partial', Sources(user_sources), HeaderFiles(user_headers))
 

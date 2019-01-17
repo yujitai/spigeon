@@ -60,6 +60,10 @@ mkdir output/lib -p
 mv libstoreframework.a output/lib
 rm libstoreframework-partial.a
 
+# 新版buildmake会拷贝头文件到output/include目录
+# 暂时先兼容新版buildmake
+rm output/include/*.h
+
 # copy headers
 mkdir -p output/include output/include/server output/include/util output/include/db output/include/inc output/include/client output/include/engine
 cp src/server/*.h output/include/server/
@@ -69,4 +73,5 @@ cp src/engine/*.h output/include/engine/
 cp src/client/*.h output/include/client/
 cp src/db/db_define.h output/include/db/
 cp src/*.h output/include/
+
 
