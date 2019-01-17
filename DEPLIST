@@ -1,8 +1,0 @@
-#edit-mode: -*- python -*-
-#coding:utf8 
-
-#工作路径.
-WORKROOT('../../')
-
-DEP_CONFIGS('newlib2-64/bsl@bsl_1-1-1-1_PD_BL')
-DEP_CONFIGS('newcommon/mcpack@mcpack_1-3-17-0_PD_BL')
