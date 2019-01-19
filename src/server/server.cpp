@@ -17,6 +17,10 @@ static command_t server_cmd_table[] = {
       conf_set_num_slot,
       offsetof(GenericServerOptions, worker_num) },
 
+    { "server_type",
+      conf_set_num_slot,
+      offsetof(GenericServerOptions, server_type) },
+
     { "connection_timeout",
       conf_set_usec_slot,
       offsetof(GenericServerOptions, connection_timeout) },
@@ -48,6 +52,7 @@ int GenericServer::init_conf() {
     options = (struct GenericServerOptions){NULL,   // host
                                             0,      // port
                                             8,      // worker_num
+                                            G_SERVER_TCP,
                                             60 * 1000 * 1000,   // connection_timeout
                                             1000,               // tick
                                             10 * 1024 * 1024,   // max_query_buffer_size
@@ -76,6 +81,7 @@ int GenericServer::load_conf(const char *filename) {
                 "host: %s\n"
                 "port: %d\n"
                 "worker_num: %d\n"
+                "server_type: %d\n"
                 "connection_timeout: %lld\n"
                 "tick: %lld\n"
                 "max_query_buffer_size: %lld\n"
@@ -83,6 +89,7 @@ int GenericServer::load_conf(const char *filename) {
                 options.host,
                 options.port,
                 options.worker_num,
+                options.server_type,
                 options.connection_timeout,
                 options.tick,
                 options.max_query_buffer_size,

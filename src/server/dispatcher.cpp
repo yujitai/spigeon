@@ -32,35 +32,41 @@ GenericDispatcher::~GenericDispatcher() {
 }
 
 int GenericDispatcher::init() {
-    int fds[2];
-    if (pipe(fds)) {
-        log_fatal("can't create notify pipe");
-        return DISPATCHER_ERROR;
+    //set up pipe fd
+    if (options.server_type == G_SERVER_PIPE || options.server_type == G_SERVER_TCP || options.server_type == G_SERVER_UDP) {
+        int fds[2];
+        if (pipe(fds)) {
+            log_fatal("can't create notify pipe");
+            return DISPATCHER_ERROR;
+        }
+        notify_recv_fd = fds[0];
+        notify_send_fd = fds[1];
+        pipe_watcher = el->create_io_event(recv_notify, (void*)this);
+        if (pipe_watcher == NULL)
+            return DISPATCHER_ERROR;
+        el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
     }
-    notify_recv_fd = fds[0];
-    notify_send_fd = fds[1];
-    pipe_watcher = el->create_io_event(recv_notify, (void*)this);
-    if (pipe_watcher == NULL)
-        return DISPATCHER_ERROR;
-    el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
+    // set up the server tcp socket
+    if (options.server_type == G_SERVER_TCP) {
+        listen_fd = create_tcp_server(options.port, options.host);
+        if (listen_fd == NET_ERROR) {
+            log_fatal("Can't create tcp server on %s:%d",
+                      options.host, options.port);
+            return DISPATCHER_ERROR;
+        }
+        log_trace("start listen port %d", options.port);
 
-    // set up the server socket
-    listen_fd = create_tcp_server(options.port, options.host);
-    if (listen_fd == NET_ERROR) {
-        log_fatal("Can't create tcp server on %s:%d",
-                  options.host, options.port);
-        return DISPATCHER_ERROR;
+        io_watcher = el->create_io_event(accept_new_conn, (void*)this);
+        if (io_watcher == NULL) {
+            log_fatal("Can't create io event for accept_new_conn");
+            return DISPATCHER_ERROR;
+        }
+        el->start_io_event(io_watcher, listen_fd, EventLoop::READ);
     }
-    log_trace("start listen port %d", options.port);
+    // set up the server udp socket
+    if (options.server_type == G_SERVER_UDP) {
+    }
 
-    io_watcher = el->create_io_event(accept_new_conn, (void*)this);
-    if (io_watcher == NULL) {
-        log_fatal("Can't create io event for accept_new_conn");
-        return DISPATCHER_ERROR;
-    }
-  
-    el->start_io_event(io_watcher, listen_fd, EventLoop::READ);
-  
     for (int i = 0; i < options.worker_num; i++) {
         if (spawn_worker() == DISPATCHER_ERROR) {
             return DISPATCHER_ERROR;
@@ -194,6 +200,15 @@ int GenericDispatcher::notify(int msg) {
         return DISPATCHER_ERROR;
     }
 }
+
+void GenericDispatcher::mq_push(void *msg) {
+    mq.produce(msg);
+}
+
+bool GenericDispatcher::mq_pop(void **msg) {
+    return mq.consume(msg);
+}
+
 int64_t GenericDispatcher::get_clients_count(std::string &clients_detail){
     std::stringstream temp;
     int64_t current_count = 0;

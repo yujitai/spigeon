@@ -87,7 +87,7 @@ class GenericWorker: public Runnable {
     bool mq_pop(void **msg);            // pop from message queue
     virtual void read_query(int fd);
     virtual void write_reply(int fd);
-    int notify(int msg);
+    virtual int notify(int msg);
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
     virtual void process_cron_work();
