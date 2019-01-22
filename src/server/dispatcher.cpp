@@ -77,9 +77,11 @@ int GenericDispatcher::init() {
 
 void GenericDispatcher::stop() {
     // stop pipe watcher
-    el->delete_io_event(pipe_watcher);
+    if (pipe_watcher)
+        el->delete_io_event(pipe_watcher);
     // stop event loop
-    el->delete_io_event(io_watcher);
+    if (io_watcher)
+        el->delete_io_event(io_watcher);
     el->stop();
     log_notice("event loop stopped");
     // close socket
@@ -159,7 +161,10 @@ int GenericDispatcher::dispatch_new_conn(int fd) {
     // just use a round-robin right now..
     GenericWorker *worker = workers[next_worker];
     next_worker = (next_worker+1)%workers.size();
-    worker->mq_push((void*)(long)fd);
+    int *nfd = new int;
+    *nfd = fd;
+    worker->mq_push((void*)nfd);
+    //worker->mq_push((void*)(long)fd);
     /* notify the worker the arrival of a new connection */
     if (worker->notify(GenericWorker::NEWCONNECTION) != WORKER_OK) {
         log_warning("Failed to write worker notify pipe");
@@ -179,17 +184,23 @@ void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
         return;
     }
     GenericDispatcher *dispatcher = (GenericDispatcher*)data;
-    dispatcher->process_notify(msg);
+    dispatcher->process_internal_notify(msg);
 }
 
-void GenericDispatcher::process_notify(int msg) {
+void GenericDispatcher::process_internal_notify(int msg) {
     switch (msg) {
         case QUIT:                       // stop
+            printf("dispatcher quit le\n");
             stop();
             break;
         default:
-            log_warning("unknow notification: %d", msg);
+            process_notify(msg);
+            break;
     }    
+}
+
+void GenericDispatcher::process_notify(int msg) {
+    log_warning("unknow notification: %d", msg);
 }
 
 int GenericDispatcher::notify(int msg) {

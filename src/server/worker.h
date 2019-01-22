@@ -95,6 +95,8 @@ class GenericWorker: public Runnable {
     void set_clients_count(int64_t count);
     void set_worker_id(uint32_t id);
     uint32_t get_worker_id();
+  public:
+    void process_internal_notify(int msg);
   protected:
     void stop();
     Connection *new_conn(int fd);

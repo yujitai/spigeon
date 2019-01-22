@@ -31,8 +31,7 @@ Connection::~Connection() {
     }
 }
 
-static void recv_notify(EventLoop *el, IOWatcher *w,
-                        int fd, int revents, void *data) {
+static void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
     UNUSED(el);
     UNUSED(w);
     UNUSED(revents);
@@ -41,9 +40,8 @@ static void recv_notify(EventLoop *el, IOWatcher *w,
         log_warning("can't read from noitfy pipe");
         return;
     }
-    
     GenericWorker *worker = (GenericWorker*)data;
-    worker->process_notify(msg);
+    worker->process_internal_notify(msg);
 }
 
 // callback for connection io events 
@@ -258,7 +256,7 @@ GenericWorker::GenericWorker(const GenericServerOptions &o, std::string thread_n
     el = new EventLoop((void*)this, false);
     online_count = 0;
     worker_id = 0;
-    printf("GenericWorker el = %x\n", el);
+    printf("GenericWorker el = %x this = %x\n", el, this);
 }
 
 GenericWorker::~GenericWorker() {
@@ -331,20 +329,26 @@ int GenericWorker::notify(int msg) {
         return WORKER_ERROR;
 }
 
-void GenericWorker::process_notify(int msg) {
+void GenericWorker::process_internal_notify(int msg) {
     switch (msg) {
         case QUIT:                       // stop
+            printf("worker le quit\n");
             stop();
             break;
         case NEWCONNECTION:                           // new connection
-            int client_fd;
+            int* client_fd;
             if (mq_pop((void**)&client_fd)) {
-                new_conn(client_fd);
+                new_conn(*client_fd);
             }
             break;
         default:
-            log_warning("unknow notify: %d", msg);
+            process_notify(msg);
+            break;
     }
+}
+
+void GenericWorker::process_notify(int msg) {
+    log_warning("unknow notify: %d", msg);
 }
 
 void GenericWorker::process_timeout(Connection *c) {
