@@ -256,7 +256,6 @@ GenericWorker::GenericWorker(const GenericServerOptions &o, std::string thread_n
     el = new EventLoop((void*)this, false);
     online_count = 0;
     worker_id = 0;
-    printf("GenericWorker el = %x this = %x\n", el, this);
 }
 
 GenericWorker::~GenericWorker() {
@@ -272,7 +271,6 @@ uint32_t GenericWorker::get_worker_id() {
     return worker_id;
 }
 int GenericWorker::init() {
-    printf("GenericWorker init\n");
     int fds[2];
     if (pipe(fds)) {
         log_fatal("can't create notify pipe");
@@ -332,7 +330,6 @@ int GenericWorker::notify(int msg) {
 void GenericWorker::process_internal_notify(int msg) {
     switch (msg) {
         case QUIT:                       // stop
-            printf("worker le quit\n");
             stop();
             break;
         case NEWCONNECTION:                           // new connection

@@ -190,7 +190,6 @@ void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
 void GenericDispatcher::process_internal_notify(int msg) {
     switch (msg) {
         case QUIT:                       // stop
-            printf("dispatcher quit le\n");
             stop();
             break;
         default:
