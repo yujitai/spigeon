@@ -45,6 +45,15 @@ static stat_data_t *stat_init_thread_data() {
 }
 
 // stat_close? TODO
+static void stat_destroy_thread_data() {
+    MutexHolder holder(stat_thread_data_list_mutex);
+    for (std::vector<stat_data_t*>::iterator data_iter = stat_thread_data_list.begin();
+        data_iter != stat_thread_data_list.end();
+        ++data_iter) {
+        delete *data_iter;
+    }
+    stat_thread_data_list.clear();
+}
 
 static inline stat_data_t *stat_get_thread_data() { 
     ASSERT_EQUAL_0(pthread_once(&stat_pthread_once, stat_create_pthread_key)); 
@@ -54,6 +63,10 @@ static inline stat_data_t *stat_get_thread_data() {
         return (stat_data_t*)d;
     }
     return stat_init_thread_data();
+}
+
+void stat_destroy() {
+    stat_destroy_thread_data();
 }
 
 void stat_set(const char *key, int64_t value) {

@@ -26,6 +26,8 @@ namespace store {
  * 统计时按线程维度记录数据，查询时可以做sum/max的计算
  */
 
+//destroy
+void stat_destroy();
 // set
 void stat_set(const char *key, int64_t value);
 // 仅当大于时才set

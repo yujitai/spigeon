@@ -17,7 +17,7 @@ void accept_new_conn(EventLoop *el, IOWatcher *w, int fd, int revents, void *dat
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
         : options(o),
           el(NULL), io_watcher(NULL), pipe_watcher(NULL),
-          next_worker(0) {
+          next_worker(0), listen_fd(0) {
     el = new EventLoop((void*)this, false);
 }
 

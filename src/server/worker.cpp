@@ -25,6 +25,7 @@ Connection::~Connection() {
     for (it = reply_list.begin(); it != reply_list.end(); ++it) {
         zfree((void*)(*it).data());
     }
+    reply_list.clear();
     if (ssl) {
         SSL_shutdown (ssl);
         SSL_free(ssl);
@@ -261,6 +262,7 @@ GenericWorker::GenericWorker(const GenericServerOptions &o, std::string thread_n
 GenericWorker::~GenericWorker() {
     close_all_conns();
     delete el;
+    stat_destroy();
 }
 void GenericWorker::set_worker_id(uint32_t id) {
     worker_id = id;
@@ -336,6 +338,7 @@ void GenericWorker::process_internal_notify(int msg) {
             int* client_fd;
             if (mq_pop((void**)&client_fd)) {
                 new_conn(*client_fd);
+                delete client_fd;
             }
             break;
         default:

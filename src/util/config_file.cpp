@@ -42,6 +42,8 @@ int parse_conf(config_node_t *node, command_t *cmd_table, void *conf) {
             return CONFIG_ERROR;
         }
     }
+    while(argc--)
+        sdsfree(argv[argc]);
     zfree(argv);
     return CONFIG_OK;
 }
