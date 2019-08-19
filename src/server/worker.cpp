@@ -256,7 +256,7 @@ GenericWorker::GenericWorker(const GenericServerOptions &o, std::string thread_n
     conns.resize(INITIAL_FD_NUM, NULL);
     el = new EventLoop((void*)this, false);
     online_count = 0;
-    worker_id = 0;
+    worker_id = "";
 }
 
 GenericWorker::~GenericWorker() {
@@ -264,14 +264,16 @@ GenericWorker::~GenericWorker() {
     delete el;
     stat_destroy();
 }
-void GenericWorker::set_worker_id(uint32_t id) {
+
+void GenericWorker::set_worker_id(const std::string& id) {
     worker_id = id;
     return;
 }
 
-uint32_t GenericWorker::get_worker_id() {
+const std::string& GenericWorker::get_worker_id() {
     return worker_id;
 }
+
 int GenericWorker::init() {
     int fds[2];
     if (pipe(fds)) {

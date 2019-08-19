@@ -152,21 +152,23 @@ void log_data_push_double(log_data_t* ld, const char* key, double value) {
     _PUSH(ld, key, value, "%lf");
 }
 
-int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const char* function, const char *levelstr, const char* format, ...) {
+int log_printf(log_data_t *ld, log_level_t level, const char *fileline, 
+        const char* function, const char *levelstr, const char* format, ...) 
+{
     log_buf_t* p_log = (log_buf_t*)zmalloc(sizeof(log_buf_t));
     if (NULL == p_log) {
         fprintf(stderr, "zmalloc failed!");
         return LOG_MALLOC_ERROR;
     }
     p_log->level = level;
-
+    
     int   ret;
     char* buf = p_log->buf;
     int   size = (int)sizeof(p_log->buf);
     log_data_t *cur = ld;
     time_t nowtime = get_current_time();
 
-    //学生端网络监控日志
+    // 学生端网络监控日志
     if(level == STORE_LOG_MONITOR){
         goto user_msg;
     }
@@ -176,7 +178,18 @@ int log_printf(log_data_t *ld, log_level_t level, const char *fileline, const ch
     struct tm* nowtm;
     nowtm = localtime(&nowtime);
     strftime(timebuf, sizeof(timebuf), "%m-%d %X", nowtm);
-    ret = snprintf(buf, size, "%s: %s %s * %d [", levelstr, timebuf, g_bin_name, getpid());
+    //(yujitai) add color control code
+    if (STORE_LOG_WARNING == level) {
+        ret = snprintf(buf, size, "%s%s: %s %s * %d [", YELLOW, levelstr, timebuf, g_bin_name, getpid());
+    } else if (STORE_LOG_FATAL == level){
+        ret = snprintf(buf, size, "%s%s: %s %s * %d [", BOLDRED, levelstr, timebuf, g_bin_name, getpid());
+    } else if (STORE_LOG_NOTICE == level){
+        ret = snprintf(buf, size, "%s%s: %s %s * %d [", CYAN, levelstr, timebuf, g_bin_name, getpid());
+    } else if (STORE_LOG_TRACE == level){
+        ret = snprintf(buf, size, "%s%s: %s %s * %d [", WHITE, levelstr, timebuf, g_bin_name, getpid());
+    } else {
+        ret = snprintf(buf, size, "%s%s: %s %s * %d [", BOLDWHITE, levelstr, timebuf, g_bin_name, getpid());
+    }
     _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
 
     // suffix part
@@ -223,9 +236,10 @@ user_msg:
 
     // put ending "]\n" to buf
     if(STORE_LOG_MONITOR != level){
-        ret = snprintf(buf, size, "]\n");
+        // (yujitai)add color control code
+        ret = snprintf(buf, size, "]\033[0m\n");
     } else {
-        ret = snprintf(buf, size, "\n");
+        ret = snprintf(buf, size, "]\033[0m\n");
     }
     _ADJUST_LOG_BUF_CURSOR(ret, buf, size);
     if (*(buf - 1) != '\n') {

@@ -93,8 +93,8 @@ class GenericWorker: public Runnable {
     virtual void process_cron_work();
     int64_t get_clients_count();
     void set_clients_count(int64_t count);
-    void set_worker_id(uint32_t id);
-    uint32_t get_worker_id();
+    void set_worker_id(const std::string& id);
+    const std::string& get_worker_id();
   public:
     void process_internal_notify(int msg);
   protected:
@@ -121,7 +121,7 @@ class GenericWorker: public Runnable {
     IOWatcher *pipe_watcher;
     TimerWatcher *cron_timer;
     int64_t online_count;
-    uint32_t worker_id;
+    std::string worker_id;  // worker_id = thread_name + thread_id
     int notify_recv_fd;           // recving end of notify pipe
     int notify_send_fd;           // sending end of notify pipe
     std::vector<Connection*> conns; // connections currently alive

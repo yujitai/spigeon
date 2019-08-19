@@ -32,7 +32,7 @@ GenericDispatcher::~GenericDispatcher() {
 }
 
 int GenericDispatcher::init() {
-    //set up pipe fd
+    // set up pipe fd
     if (options.server_type == G_SERVER_PIPE || options.server_type == G_SERVER_TCP || options.server_type == G_SERVER_UDP) {
         int fds[2];
         if (pipe(fds)) {
@@ -110,7 +110,11 @@ int GenericDispatcher::spawn_worker() {
         log_fatal("failed to create worker thread");
         return DISPATCHER_ERROR;
     }
+    std::stringstream worker_id;
+    worker_id << new_worker->thread_name << "_" << new_worker->thread_id;
+    new_worker->set_worker_id(worker_id.str());
     workers.push_back(new_worker);
+
     return DISPATCHER_OK;
 }
 
@@ -225,7 +229,7 @@ int64_t GenericDispatcher::get_clients_count(std::string &clients_detail){
     temp << "[";
     for (size_t i = 0; i < workers.size(); i++) {
         if (workers[i] != NULL) {
-            uint32_t workerid_temp = workers[i]->get_worker_id();
+            std::string workerid_temp = workers[i]->get_worker_id();
             int64_t  count_temp = workers[i]->get_clients_count();
             current_count += count_temp;
             temp << "," << workerid_temp << ":" << count_temp;
