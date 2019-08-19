@@ -1,7 +1,7 @@
 #ifndef _SERVER_MODULE_H_
 #define _SERVER_MODULE_H_
 #include "util/config_file.h"
-#include "inc/module.h"
+#include "module.h"
 #include <stdint.h>
 #include <string>
 namespace store {

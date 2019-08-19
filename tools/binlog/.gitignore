@@ -1,9 +1,0 @@
-data
-output
-log
-store-binlog-tool
-store-binlog-fix
-*.o
-*.swp
-
-Makefile.test

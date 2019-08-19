@@ -35,21 +35,12 @@ DEP_CONFIGS('newcommon', 'mcpack', '/home/yujitai/dev/zrtc/newcommon/mcpack')
 #The best way is change COMAKE a little bit, so the md5 will be changed too.
 user_sources=GLOB('./src/server/*.cpp') + ' ' \
             + GLOB('./src/client/*.cpp') + ' ' \
-            + GLOB('./src/inc/*.cpp') + ' ' \
-            + GLOB('./src/db/*.cpp') + ' ' \
-            + GLOB('./src/binlog/*.cpp') + ' ' \
-            + GLOB('./src/util/*.cpp') + ' ' \
-            + GLOB('./src/replication/*.cpp') + ' ' \
-            + GLOB('./src/command/*.cpp') + ' ' \
-            + GLOB('./src/command/*.pb.cc')
+            + GLOB('./src/util/*.cpp') 
 
 user_headers=GLOB('./src/server/*.h') + ' ' \
             + GLOB('./src/client/*.h') + ' ' \
-            + GLOB('./src/inc/*.h') + ' ' \
-            + GLOB('./src/db/*.h') + ' ' \
-            + GLOB('./src/binlog/*.h') + ' ' \
             + GLOB('./src/util/*.h') + ' ' \
             + GLOB('./src/*.h')
 
-StaticLibrary('storeframework-partial', Sources(user_sources), HeaderFiles(user_headers))
+StaticLibrary('zframework', Sources(user_sources), HeaderFiles(user_headers))
 

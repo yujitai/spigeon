@@ -1,11 +1,11 @@
 #include <pthread.h>
 #include <sys/time.h>
+
 #include "server/event.h"
-#include "server/db_worker.h"
+#include "server/worker.h"
+#include "server/dispatcher.h"
 #include "util/network.h"
 #include "util/log.h"
-#include "server/dispatcher.h"
-#include "inc/env.h"
 #include "util/store_define.h"
 
 namespace store {
