@@ -5,7 +5,7 @@ CC=gcc
 CXX=g++
 CPPFLAGS=-D_GNU_SOURCE \
   -D__STDC_LIMIT_MACROS \
-  -DFRAMEWORK_VERSION="\"`./version.sh`\""
+  -DVERSION=\"1.9.8.7\"
 CFLAGS=-g \
   -ggdb \
   -pipe \
@@ -33,7 +33,7 @@ DEP_INCPATH=-I../../newcommon/mcpack \
 
 
 #BUILDMAKE UUID
-BUILDMAKE_MD5=3e31920e1357168a821b249691fed9b5  BUILDMAKE
+BUILDMAKE_MD5=601af4a1f9323d9ff832842b39237ccf  BUILDMAKE
 
 
 .PHONY:all
@@ -54,40 +54,40 @@ clean:
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40mclean[0m']"
 	rm -rf libzframework.a
 	rm -rf ./output/lib/libzframework.a
-	rm -rf ./output/include/dispatcher.h
-	rm -rf ./output/include/event.h
-	rm -rf ./output/include/module.h
-	rm -rf ./output/include/server.h
-	rm -rf ./output/include/thread.h
-	rm -rf ./output/include/worker.h
-	rm -rf ./output/include/http_client.h
-	rm -rf ./output/include/config_file.h
-	rm -rf ./output/include/crc32c.h
-	rm -rf ./output/include/def.h
-	rm -rf ./output/include/file.h
-	rm -rf ./output/include/hash.h
-	rm -rf ./output/include/key_lock.h
-	rm -rf ./output/include/list.h
-	rm -rf ./output/include/lock.h
-	rm -rf ./output/include/log.h
-	rm -rf ./output/include/network.h
-	rm -rf ./output/include/nshead.h
-	rm -rf ./output/include/pack.h
-	rm -rf ./output/include/profiler.h
-	rm -rf ./output/include/queue.h
-	rm -rf ./output/include/scoped_ptr.h
-	rm -rf ./output/include/sds.h
-	rm -rf ./output/include/slice.h
-	rm -rf ./output/include/stat.h
-	rm -rf ./output/include/status.h
-	rm -rf ./output/include/store_define.h
-	rm -rf ./output/include/store_error.h
-	rm -rf ./output/include/string.h
-	rm -rf ./output/include/url_snprintf.h
-	rm -rf ./output/include/utils.h
-	rm -rf ./output/include/zmalloc.h
-	rm -rf ./output/include/zmalloc_define.h
-	rm -rf ./output/include/store_framework.h
+	rm -rf ./output/include/zframework/dispatcher.h
+	rm -rf ./output/include/zframework/event.h
+	rm -rf ./output/include/zframework/module.h
+	rm -rf ./output/include/zframework/server.h
+	rm -rf ./output/include/zframework/thread.h
+	rm -rf ./output/include/zframework/worker.h
+	rm -rf ./output/include/zframework/http_client.h
+	rm -rf ./output/include/zframework/config_file.h
+	rm -rf ./output/include/zframework/crc32c.h
+	rm -rf ./output/include/zframework/def.h
+	rm -rf ./output/include/zframework/file.h
+	rm -rf ./output/include/zframework/hash.h
+	rm -rf ./output/include/zframework/key_lock.h
+	rm -rf ./output/include/zframework/list.h
+	rm -rf ./output/include/zframework/lock.h
+	rm -rf ./output/include/zframework/log.h
+	rm -rf ./output/include/zframework/network.h
+	rm -rf ./output/include/zframework/nshead.h
+	rm -rf ./output/include/zframework/pack.h
+	rm -rf ./output/include/zframework/profiler.h
+	rm -rf ./output/include/zframework/queue.h
+	rm -rf ./output/include/zframework/scoped_ptr.h
+	rm -rf ./output/include/zframework/sds.h
+	rm -rf ./output/include/zframework/slice.h
+	rm -rf ./output/include/zframework/stat.h
+	rm -rf ./output/include/zframework/status.h
+	rm -rf ./output/include/zframework/store_define.h
+	rm -rf ./output/include/zframework/store_error.h
+	rm -rf ./output/include/zframework/string.h
+	rm -rf ./output/include/zframework/url_snprintf.h
+	rm -rf ./output/include/zframework/utils.h
+	rm -rf ./output/include/zframework/zmalloc.h
+	rm -rf ./output/include/zframework/zmalloc_define.h
+	rm -rf ./output/include/zframework/zframework.h
 	rm -rf src/server/zframework_dispatcher.o
 	rm -rf src/server/zframework_event.o
 	rm -rf src/server/zframework_server.o
@@ -179,7 +179,7 @@ libzframework.a:src/server/zframework_dispatcher.o \
   ./src/util/utils.h \
   ./src/util/zmalloc.h \
   ./src/util/zmalloc_define.h \
-  ./src/store_framework.h
+  ./src/zframework.h
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40mlibzframework.a[0m']"
 	ar crs libzframework.a src/server/zframework_dispatcher.o \
   src/server/zframework_event.o \
@@ -203,8 +203,8 @@ libzframework.a:src/server/zframework_dispatcher.o \
   src/util/zframework_zmalloc.o
 	mkdir -p ./output/lib
 	cp -f --link libzframework.a ./output/lib
-	mkdir -p ./output/include
-	cp -f --link ./src/server/dispatcher.h ./src/server/event.h ./src/server/module.h ./src/server/server.h ./src/server/thread.h ./src/server/worker.h ./src/client/http_client.h ./src/util/config_file.h ./src/util/crc32c.h ./src/util/def.h ./src/util/file.h ./src/util/hash.h ./src/util/key_lock.h ./src/util/list.h ./src/util/lock.h ./src/util/log.h ./src/util/network.h ./src/util/nshead.h ./src/util/pack.h ./src/util/profiler.h ./src/util/queue.h ./src/util/scoped_ptr.h ./src/util/sds.h ./src/util/slice.h ./src/util/stat.h ./src/util/status.h ./src/util/store_define.h ./src/util/store_error.h ./src/util/string.h ./src/util/url_snprintf.h ./src/util/utils.h ./src/util/zmalloc.h ./src/util/zmalloc_define.h ./src/store_framework.h ./output/include
+	mkdir -p ./output/include/zframework
+	cp -f --link ./src/server/dispatcher.h ./src/server/event.h ./src/server/module.h ./src/server/server.h ./src/server/thread.h ./src/server/worker.h ./src/client/http_client.h ./src/util/config_file.h ./src/util/crc32c.h ./src/util/def.h ./src/util/file.h ./src/util/hash.h ./src/util/key_lock.h ./src/util/list.h ./src/util/lock.h ./src/util/log.h ./src/util/network.h ./src/util/nshead.h ./src/util/pack.h ./src/util/profiler.h ./src/util/queue.h ./src/util/scoped_ptr.h ./src/util/sds.h ./src/util/slice.h ./src/util/stat.h ./src/util/status.h ./src/util/store_define.h ./src/util/store_error.h ./src/util/string.h ./src/util/url_snprintf.h ./src/util/utils.h ./src/util/zmalloc.h ./src/util/zmalloc_define.h ./src/zframework.h ./output/include/zframework
 
 src/server/zframework_dispatcher.o:src/server/dispatcher.cpp \
   src/server/event.h \

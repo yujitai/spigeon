@@ -1,18 +1,24 @@
 /***************************************************************************
  * 
- * Copyright (c) 2013 Baidu.com, Inc. All Rights Reserved
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$ 
  * 
  **************************************************************************/
  
+ 
+ 
 /**
- * @file store_framework.h
- * @author li_zhe(li_zhe@baidu.com)
- * @date 2013/03/08 11:30:22
+ * @file zframework.h
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @date 2019/08/20 15:13:18
+ * @version $Revision$ 
  * @brief 
+ *  
  **/
 
-#ifndef __STORE_FRAMEWORK_H__
-#define __STORE_FRAMEWORK_H__
+
+#ifndef  __ZFRAMEWORK_H_
+#define  __ZFRAMEWORK_H_
 
 #include "server/event.h"
 #include "server/server.h"
@@ -24,5 +30,6 @@
 #include "util/nshead.h"
 #include "util/zmalloc.h"
 
-#endif //__STORE_FRAMEWORK_H__
+#endif  //__ZFRAMEWORK_H_
+
 
