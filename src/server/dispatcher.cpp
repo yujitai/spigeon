@@ -8,7 +8,7 @@
 #include "util/log.h"
 #include "util/store_define.h"
 
-namespace store {
+namespace zf {
 
 // server socket io handler
 void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data);
@@ -239,4 +239,7 @@ int64_t GenericDispatcher::get_clients_count(std::string &clients_detail){
     clients_detail = temp.str().c_str();
     return current_count;
 }
-}
+
+} // namespace zf
+
+

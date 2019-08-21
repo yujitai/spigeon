@@ -1,10 +1,13 @@
 #ifndef _SERVER_MODULE_H_
 #define _SERVER_MODULE_H_
-#include "util/config_file.h"
-#include "module.h"
-#include <stdint.h>
+
 #include <string>
-namespace store {
+#include <stdint.h>
+
+#include "module.h"
+#include "util/config_file.h"
+
+namespace zf {
 
 enum {
     SERVER_MODULE_OK = 0,
@@ -55,6 +58,7 @@ protected:
     GenericServerOptions options;
     GenericDispatcher *dispatcher;
 };
-}
+
+} // namespace zf
 
 #endif

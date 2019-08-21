@@ -4,11 +4,13 @@
 #include <vector>
 #include <string>
 #include <sstream>
+
+#include "server/server.h"
 #include "server/thread.h"
 #include "util/lock.h"
-#include "server/server.h"
 
-namespace store {
+namespace zf {
+
 enum {
     DISPATCHER_OK = 0,
     DISPATCHER_ERROR = 1
@@ -55,6 +57,8 @@ protected:
     Mutex lock;
 };
 
-}
+} // namespace zf
+
 #endif
+
 

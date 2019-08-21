@@ -14,10 +14,12 @@
 #ifndef __STORE_UTIL_FILE_H__
 #define __STORE_UTIL_FILE_H__
 
+#include <stdint.h>
+
 #include <string>
 #include <vector>
-#include <stdint.h>
-namespace store {
+
+namespace zf {
 
 class FileUtil {
 public:
@@ -32,7 +34,7 @@ public:
             std::vector<std::string> *out_file_list);
 }; // end of FileUtil
 
-} // end of namespace
+} // namespace zf
 
 #endif //__STORE_UTIL_FILE_H__
 

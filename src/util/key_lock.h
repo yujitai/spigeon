@@ -22,7 +22,7 @@
 #include "util/slice.h"
 #include "util/store_define.h"
 
-namespace store {
+namespace zf {
 
 class KeyLock {
 private:
@@ -73,7 +73,7 @@ private:
     const Slice& _key;
 };
 
-} // end of namespace
+} // namespace zf
 
 #endif //__STORE_UTIL_KEY_LOCK_H__
 

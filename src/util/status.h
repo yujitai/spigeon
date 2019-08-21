@@ -4,9 +4,10 @@
 #include <string>
 #include <stdio.h>
 #include <stdint.h>
+
 #include "util/slice.h"
 
-namespace store {
+namespace zf {
 
 class Status {
   private:
@@ -162,6 +163,6 @@ inline void Status::operator=(const Status& s) {
     }
 }
 
-}  // namespace store
+}  // namespace zf
 
 #endif  // _STATUS_H_

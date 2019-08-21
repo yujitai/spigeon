@@ -20,7 +20,7 @@
 #include <string.h>
 #include <string>
 
-namespace store {
+namespace zf {
 
 class Slice {
 public:
@@ -124,6 +124,8 @@ inline int Slice::compare(const Slice &b) const {
 	return r;
 }
 
-}  // namespace leveldb
+}  // namespace zf
 
 #endif  // __STORE_SLICE_H_
+
+

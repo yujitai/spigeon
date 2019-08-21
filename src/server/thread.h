@@ -2,16 +2,19 @@
 #define _THREAD_H_
 
 #include <pthread.h>
-#include "util/queue.h"
 #include <string>
-namespace store {
+
+#include "util/queue.h"
+
+namespace zf {
+
 enum {
     THREAD_OK = 0,
     THREAD_ERROR = 1
 };
 
 class Runnable {
-  public:
+public:
     Runnable(std::string tn = "") : thread_name(tn) {};
     virtual ~Runnable() {};
     virtual void run() = 0;
@@ -21,5 +24,9 @@ class Runnable {
 
 int create_thread(Runnable *runnable);
 int join_thread(Runnable *runnable);
-}
+
+} // namespace zf
+
 #endif
+
+

@@ -1,9 +1,10 @@
 #include "util/pack.h"
+
 #include "util/log.h"
 #include "util/slice.h"
 #include "util/zmalloc.h"
 
-namespace store {
+namespace zf {
 
 Pack::Pack() : _pack(NULL), _tmp_buf(NULL) { }
 
@@ -253,4 +254,6 @@ int Pack::get_str_arr(int index, Slice* value) {
     return PACK_OK;
 }
 
-}  // namespace store
+}  // namespace zf
+
+

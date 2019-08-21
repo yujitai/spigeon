@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 
-namespace store {
+namespace zf {
 
 extern int g_log_level;
 extern pthread_key_t g_log_data_thread_key;
@@ -98,6 +98,8 @@ void log_data_push_double(log_data_t* ld, const char* key, double value);
 // inner function
 int log_printf(log_data_t* ld, log_level_t level, const char* fileline, const char* function, const char* levelstr, const char* format, ...) __attribute__ ((format (printf, 6, 7)));
 
-}  // namespace store
+}  // namespace zf
 
 #endif  // __STORE_UTIL_LOG_H_
+
+

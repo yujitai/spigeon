@@ -1,6 +1,8 @@
 #ifndef _CONFIG_FILE_H_
 #define _CONFIG_FILE_H_
-namespace store {
+
+namespace zf {
+
 enum {
   CONFIG_OK = 0,
   CONFIG_ERROR = 1
@@ -30,5 +32,8 @@ int conf_set_num_slot(int argc, char **argv, command_t *cmd, void *conf);
 
 int conf_set_mem_slot(int argc, char **argv, command_t *cmd, void *conf);
 
-}
+} // namespace zf
+
 #endif
+
+

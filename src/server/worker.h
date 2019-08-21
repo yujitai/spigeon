@@ -1,16 +1,17 @@
 #ifndef _WORKER_H_
 #define _WORKER_H_
 
-#include <vector>
 #include <list>
+#include <vector>
+#include <openssl/ssl.h>
+
+#include "util/sds.h"
+#include "util/slice.h"
 #include "server/thread.h"
 #include "server/server.h"
 #include "server/dispatcher.h"
-#include "util/sds.h"
-#include "util/slice.h"
-#include <openssl/ssl.h>
 
-namespace store {
+namespace zf {
 
 enum {
     WORKER_OK = 0,
@@ -127,5 +128,8 @@ class GenericWorker: public Runnable {
     std::vector<Connection*> conns; // connections currently alive
 };
 
-}
+} // namespace zf
+
 #endif
+
+

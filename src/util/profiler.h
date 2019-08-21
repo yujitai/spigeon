@@ -16,7 +16,7 @@
 
 #include <sys/time.h>
 
-namespace store {
+namespace zf {
 
 #define PROF_DEFAULT_TIME 100
 #ifdef ENABLE_PROF
@@ -69,7 +69,7 @@ private:
     bool _kill;
 };
 
-} // end of namespace
+} // end of zf
 
 #endif //__STORE_UTIL_PROFILER_H__
 

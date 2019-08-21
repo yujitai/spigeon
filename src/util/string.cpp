@@ -15,9 +15,10 @@
 #include <string>
 #include <stdarg.h>
 #include <stddef.h>
+
 #include "util/string.h"
 
-namespace store {
+namespace zf {
 
 std::string string_format(const char *msgfmt, ...) {
     std::string str;

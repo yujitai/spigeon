@@ -14,7 +14,9 @@
 #include <stdio.h>
 #include "util/log.h"
 #include "util/network.h"
-namespace store {
+
+namespace zf {
+
 static int create_socket(int domain) {
   int s, on = 1;
   if ((s = socket(domain, SOCK_STREAM, 0)) == -1) {
@@ -233,4 +235,6 @@ int sock_peer_to_str(int fd, char *ip, int *port) {
     return NET_OK;
 }
 
-}
+} // namespace zf
+
+

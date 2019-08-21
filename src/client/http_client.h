@@ -14,15 +14,17 @@
 #ifndef __HTTP_CLIENT_H__
 #define __HTTP_CLIENT_H__
 
-#include <stdint.h>
 #include <string>
+#include <stdint.h>
+
 #include <map>
+
 #include "util/slice.h"
 
 class EvHttpClient;
 class ResponseInfo;
 
-namespace store {
+namespace zf {
 
 typedef std::map<std::string, std::string> header_map_t;
 

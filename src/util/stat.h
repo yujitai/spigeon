@@ -20,7 +20,7 @@
 
 #include "util/lock.h"
 
-namespace store {
+namespace zf {
 
 /**
  * 统计时按线程维度记录数据，查询时可以做sum/max的计算
@@ -53,7 +53,8 @@ void stat_get(const char *key, int64_t *value); // if key not exist, value will 
 void stat_get_sum(const char *key, int64_t *value);
 void stat_get_max(const char *key, int64_t *value);
 
-} // end of namespace
+} // namespace zf
 
 #endif //__STORE_UTIL_STAT_H__
+
 

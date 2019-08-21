@@ -2,7 +2,7 @@
 #include "server/dispatcher.h"
 #include "util/zmalloc.h"
 
-namespace store {
+namespace zf {
 
 static command_t server_cmd_table[] = {
     { "host",
@@ -123,4 +123,7 @@ void GenericServer::stop() {
 int64_t GenericServer::get_clients_count(std::string &clients_detail){
     return dispatcher->get_clients_count(clients_detail);
 }
-}
+
+} // namespace zf
+
+

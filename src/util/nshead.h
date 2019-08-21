@@ -1,6 +1,7 @@
 #ifndef __NSHEAD_H_
 #define __NSHEAD_H_
-namespace store {
+
+namespace zf {
 
 static const unsigned int NSHEAD_MAGICNUM = 0xfb709394;
 struct nshead_t
@@ -14,5 +15,8 @@ struct nshead_t
     unsigned int   body_len;
 }; 
 
-}
+} // namespace zf
+
 #endif
+
+

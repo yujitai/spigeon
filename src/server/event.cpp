@@ -1,12 +1,13 @@
 #include <assert.h>
 #include <ev.h>
+
 #include "server/event.h"
 #include "util/queue.h"
 #include "util/log.h"
 #include "util/store_define.h"
 #include "util/utils.h"
 
-namespace store {
+namespace zf {
 
 /* translate to/from libev mask */
 #define TRANS_TO_EV_MASK(mask)                                          \
@@ -202,30 +203,7 @@ void EventLoop::delete_io_event(IOWatcher *w) {
     ev_io_stop(loop, io);
     delete w;
 }
-        /*
-void generic_custom_cb(struct ev_loop *el, struct ev_async *w, int revents) {
 
-}
-        */
-/*
-class CustomWatcher {
-};
+} // namespace zf
 
 
-// not thread-safe
-CustomWatcher *EventLoop::create_custom_event(const std::string &desc) {
-    return NULL;
-}
-
-void EventLoop::wait_custom_event(CustomWatcher *w,
-                                  custom_cb_t cb, void *priv_data) {
-}
-
-void EventLoop::signal_custom_event(CustomWatcher *w) {
-}
-
-void EventLoop::delete_custom_event(CustomWatcher *w) {
-
-}
-*/
-}

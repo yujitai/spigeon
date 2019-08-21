@@ -21,7 +21,7 @@
 
 #include "util/log.h"
 
-namespace store {
+namespace zf {
 
 int FileUtil::exists(const std::string &path) {
     if (access(path.c_str(),F_OK) == 0) {
@@ -196,5 +196,6 @@ label_exit:
     return ret;
 }
 
-} // namespace store
+} // namespace zf
+
 

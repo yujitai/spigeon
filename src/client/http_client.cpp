@@ -14,11 +14,12 @@
 #include "http_client.h"
 
 #include <evhttpclient.h>
+
 #include "server/event.h"
 #include "util/slice.h"
 #include "util/log.h"
 
-namespace store {
+namespace zf {
 
 HttpClient::HttpClient(EventLoop *el, HttpClientCallback cb, const std::string &host, int timeout_us, int pool_size)
     : _client(NULL), _client_cb(cb)
@@ -91,4 +92,6 @@ void HttpClient::client_callback(ResponseInfo *ri, void *data, void *data2) {
     }
 }
 
-}
+} // namespace zf
+
+

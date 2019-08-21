@@ -1,5 +1,7 @@
 #include "server/thread.h"
-namespace store {
+
+namespace zf {
+
 void *run(void *arg) {
     Runnable *runnable = (Runnable*)arg;
     if (runnable->thread_name != "") {
@@ -36,4 +38,6 @@ int join_thread(Runnable *runnable) {
     }
 }
 
-}
+} // namespace zf
+
+

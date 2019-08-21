@@ -1,5 +1,6 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
+
 #include <cstring>
 
 long long timetoll(const char *p, int *err);
@@ -18,4 +19,5 @@ void getRandomHexChars(char *p, unsigned int len);
 long long ustime(void);
 
 long long mstime(void);
+
 #endif

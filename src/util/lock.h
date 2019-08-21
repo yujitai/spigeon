@@ -19,7 +19,7 @@
 #include "util/store_define.h"
 #include "util/log.h"
 
-namespace store {
+namespace zf {
 
 class CondVar;
 class Mutex {
@@ -81,7 +81,8 @@ private:
     RWLock &_l;
 };
 
-} // end of namespace
+} // namespace zf
 
 #endif //__STORE_UTIL_LOCK_H__
+
 

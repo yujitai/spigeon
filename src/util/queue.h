@@ -2,6 +2,7 @@
 #define _QUEUE_H_
 
 #include <cstddef>
+
 // a single producer and single consumer queue
 template <typename T>
 class LockFreeQueue {
@@ -48,3 +49,5 @@ public:
 };
 
 #endif
+
+

@@ -1,3 +1,5 @@
+#include "util/log.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -10,13 +12,13 @@
 #include <sys/time.h>
 #include <list>
 #include <string.h>
+
 #include "util/url_snprintf.h"
 #include "util/zmalloc.h"
 #include "server/event.h"
 #include "def.h"
-#include "util/log.h"
 
-namespace store {
+namespace zf {
 
 static const size_t FILE_NAME_MAX    = 1024;
 static const size_t BIN_NAME_MAX     = 32;
@@ -414,4 +416,4 @@ int log_join() {
     }
 }
 
-}  // namespace store
+}  // namespace zf

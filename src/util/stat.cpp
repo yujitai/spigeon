@@ -11,14 +11,15 @@
  * @brief 
  **/
 
-#include <pthread.h>
 #include "stat.h"
+
+#include <pthread.h>
 #include <map>
 #include <vector>
 
 #include "util/store_define.h"
 
-namespace store {
+namespace zf {
 
 typedef struct {
     Mutex mutex; // lock before aggregate or update

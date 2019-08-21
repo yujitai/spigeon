@@ -1,8 +1,10 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
+
 #include <stddef.h>
 
-namespace store {
+namespace zf {
+
 enum {
   NET_ERROR = -1,
   NET_OK = 0

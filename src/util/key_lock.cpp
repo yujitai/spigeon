@@ -13,7 +13,7 @@
 
 #include "key_lock.h"
 
-namespace store {
+namespace zf {
 
 KeyLock::KeyLock(uint32_t bucket_power)
     : _bucket_num(1 << bucket_power),
@@ -37,5 +37,6 @@ KeyLock::~KeyLock() {
     }
 }
 
-} // end of namespace
+} // namespace zf
+
 

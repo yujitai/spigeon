@@ -1,14 +1,15 @@
-#include <sys/time.h>
 #include <fcntl.h>
+#include <sys/time.h>
+
 #include "server/worker.h"
 #include "server/event.h"
+#include "util/stat.h"
+#include "util/status.h"
 #include "util/network.h"
 #include "util/zmalloc.h"
-#include "util/stat.h"
 #include "util/scoped_ptr.h"
-#include "util/status.h"
 
-namespace store {
+namespace zf {
 
 static const size_t INITIAL_FD_NUM = 1024;
 
@@ -333,10 +334,10 @@ int GenericWorker::notify(int msg) {
 
 void GenericWorker::process_internal_notify(int msg) {
     switch (msg) {
-        case QUIT:                       // stop
+        case QUIT:          
             stop();
             break;
-        case NEWCONNECTION:                           // new connection
+        case NEWCONNECTION:         
             int* client_fd;
             if (mq_pop((void**)&client_fd)) {
                 new_conn(*client_fd);
@@ -361,4 +362,4 @@ void GenericWorker::process_timeout(Connection *c) {
     }
 }
 
-}
+} // namespace zf

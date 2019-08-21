@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "util/status.h"
 
-namespace store {
+namespace zf {
 
 const char* Status::CopyState(const char* state) {
     uint32_t size;
@@ -98,4 +98,6 @@ std::string Status::toString() const {
     }
 }
 
-}  // namespace store
+}  // namespace zf
+
+

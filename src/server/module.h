@@ -1,7 +1,8 @@
 #ifndef _MODULE_H_
 #define _MODULE_H_
 
-namespace store {
+namespace zf {
+
 class Module {
   public:
     // provides the default configurations
@@ -12,6 +13,6 @@ class Module {
     virtual int validate_conf() = 0;
 };
 
-}
+} // namespace zf
 
 #endif

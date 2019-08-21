@@ -1,15 +1,17 @@
 #include "config_file.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "util/utils.h"
 #include "util/sds.h"
 #include "util/zmalloc.h"
 #include "util/log.h"
 #include "new-config/config.h"
 
+namespace zf {
 
-namespace store {
 #define CONFIGLINE_MAX 1024
 
 command_t *find_command(command_t *cmd_table, const char *name)
@@ -144,4 +146,6 @@ int conf_set_mem_slot(int argc, char **argv, command_t *cmd, void *conf)
     return CONFIG_OK;
 }
 
-}
+} // namespace zf
+
+

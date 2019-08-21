@@ -1,17 +1,19 @@
 #ifndef _EVENT_H_
 #define _EVENT_H_
-#include <pthread.h>
+
 #include <string>
+#include <pthread.h>
+
 #include "util/queue.h"
 
 struct ev_loop;
 
-namespace store {
+namespace zf {
+
 enum {
     EVENT_ERROR = 1,
     EVENT_OK = 0
 };
-
 
 class IOWatcher;
 class TimerWatcher;
@@ -76,6 +78,7 @@ class EventLoop {
     static EventLoop *default_loop;     
 };
 
-}
+} // namespace zf
+
 #endif
 

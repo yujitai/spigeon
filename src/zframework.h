@@ -25,8 +25,9 @@
 #include "server/worker.h"
 #include "server/dispatcher.h"
 #include "client/http_client.h"
-#include "util/stat.h"
 #include "util/log.h"
+#include "util/stat.h"
+#include "util/pack.h"
 #include "util/nshead.h"
 #include "util/zmalloc.h"
 

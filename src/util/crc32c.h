@@ -8,7 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-namespace store {
+namespace zf {
+
 namespace crc32c {
 
 // Return the crc32c of concat(A, data[0,n-1]) where init_crc is the
@@ -39,6 +40,6 @@ inline uint32_t unmask(uint32_t masked_crc) {
 }
 
 }  // namespace crc32c
-}  // namespace store
+}  // namespace zf
 
 #endif  // STORAGE_LEVELDB_UTIL_CRC32C_H_

@@ -2,9 +2,10 @@
 #define __STORE_PACK_H_
 
 #include <stdint.h>
+
 #include "mc_pack.h"
 
-namespace store {
+namespace zf {
 
 class Slice;
 
@@ -62,7 +63,6 @@ private:
     Slice* _tmp_buf;
 };
 
-
-}  // namespace store
+}  // namespace zf
 
 #endif  // __STORE_PACK_H_
