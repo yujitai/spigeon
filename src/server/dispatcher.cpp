@@ -1,10 +1,28 @@
+/***************************************************************************
+ *
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$
+ *
+ **************************************************************************/
+
+
+
+/**
+ * @file dispatcher.cpp
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$
+ * @brief
+ *
+ **/
+
+#include "server/dispatcher.h"
+
 #include <pthread.h>
 #include <sys/time.h>
 
 #include "server/event.h"
 #include "server/worker.h"
-#include "server/dispatcher.h"
-#include "util/network.h"
+#include "server/network.h"
 #include "util/log.h"
 #include "util/store_define.h"
 
@@ -33,7 +51,10 @@ GenericDispatcher::~GenericDispatcher() {
 
 int GenericDispatcher::init() {
     // set up pipe fd
-    if (options.server_type == G_SERVER_PIPE || options.server_type == G_SERVER_TCP || options.server_type == G_SERVER_UDP) {
+    if (options.server_type == G_SERVER_PIPE 
+            || options.server_type == G_SERVER_TCP 
+            || options.server_type == G_SERVER_UDP) 
+    {
         int fds[2];
         if (pipe(fds)) {
             log_fatal("can't create notify pipe");
@@ -46,6 +67,7 @@ int GenericDispatcher::init() {
             return DISPATCHER_ERROR;
         el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
     }
+
     // set up the server tcp socket
     if (options.server_type == G_SERVER_TCP) {
         listen_fd = create_tcp_server(options.port, options.host);
@@ -63,8 +85,17 @@ int GenericDispatcher::init() {
         }
         el->start_io_event(io_watcher, listen_fd, EventLoop::READ);
     }
+
     // set up the server udp socket
     if (options.server_type == G_SERVER_UDP) {
+        int fd = create_udp_server(options.port, options.host);
+        if (fd == NET_ERROR) {
+            log_fatal("Can't create udp server on %s:%d",
+                      options.host, options.port);
+            return DISPATCHER_ERROR;
+        }
+
+        // ...
     }
 
     for (int i = 0; i < options.worker_num; i++) {
@@ -72,6 +103,7 @@ int GenericDispatcher::init() {
             return DISPATCHER_ERROR;
         }
     }
+
     return DISPATCHER_OK;
 }
 
@@ -111,7 +143,7 @@ int GenericDispatcher::spawn_worker() {
         return DISPATCHER_ERROR;
     }
     std::stringstream worker_id;
-    worker_id << new_worker->thread_name << "_" << new_worker->thread_id;
+    worker_id << new_worker->_thread_name << "_" << new_worker->_thread_id;
     new_worker->set_worker_id(worker_id.str());
     workers.push_back(new_worker);
 

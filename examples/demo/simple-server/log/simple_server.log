@@ -1,0 +1,13 @@
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:37 function=EventLoop msg=init event loop][0m
+[37mTRACE: 09-05 16:45:45 simple_server * 16615 [file=src/server/dispatcher.cpp:79 function=init msg=start listen port 7700][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:37 function=EventLoop msg=init event loop][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:59 function=run msg=event loop started][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:37 function=EventLoop msg=init event loop][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:59 function=run msg=event loop started][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:37 function=EventLoop msg=init event loop][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:59 function=run msg=event loop started][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:37 function=EventLoop msg=init event loop][0m
+[36mNOTICE: 09-05 16:45:45 simple_server * 16615 [file=simple_server.cpp:73 function=main msg=init server finished][0m
+[36mNOTICE: 09-05 16:45:45 simple_server * 16615 [file=src/server/dispatcher.cpp:128 function=run msg=dispatcher start][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:59 function=run msg=event loop started][0m
+[1m[37mDEBUG: 09-05 16:45:45 simple_server * 16615 [file=src/server/event.cpp:59 function=run msg=event loop started][0m

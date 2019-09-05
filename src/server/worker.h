@@ -1,15 +1,32 @@
-#ifndef _WORKER_H_
-#define _WORKER_H_
+/***************************************************************************
+ *
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$
+ *
+ **************************************************************************/
+
+
+
+/**
+ * @file worker.h
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$
+ * @brief
+ *
+ **/
+
+#ifndef __WORKER_H_
+#define __WORKER_H_
 
 #include <list>
 #include <vector>
 #include <openssl/ssl.h>
 
-#include "util/sds.h"
-#include "util/slice.h"
 #include "server/thread.h"
 #include "server/server.h"
 #include "server/dispatcher.h"
+#include "util/sds.h"
+#include "util/slice.h"
 
 namespace zf {
 
@@ -22,10 +39,12 @@ enum {
 class EventLoop;
 class IOWatcher;
 class TimerWatcher;
-class DBDispatcher;
 
-class Connection {
-  public:
+/**
+ * @brief Connection
+ *
+ **/
+struct Connection {
     char         ip[20];
     bool         sslConnected;
     int          fd;
@@ -36,7 +55,7 @@ class Connection {
     size_t       bytes_expected;
     size_t       cur_resp_pos;
     SSL          *ssl;
-    sds          querybuf;
+    sds          io_buffer;
     IOWatcher    *watcher;
     TimerWatcher *timer;
     void         *priv_data;
@@ -54,17 +73,15 @@ class Connection {
         current_state   = initial_state;
         bytes_expected  = initial_bytes_expected;
     }
-
     void expect_next(int next_state, size_t next_bytes_expected) {
         bytes_processed += bytes_expected;
         current_state   = next_state;
         bytes_expected  = next_bytes_expected;
     }
-
     void shift_processed(int next_state, size_t next_bytes_expected) {
-        /* shrink the query buffer */
+        // Shrink the io_buffer
         bytes_processed += bytes_expected;
-        querybuf = sdsrange(querybuf, bytes_processed, -1);
+        io_buffer = sdsrange(io_buffer, bytes_processed, -1);
 
         bytes_processed = 0;
         current_state   = next_state;
@@ -73,20 +90,22 @@ class Connection {
 };
 
 class GenericWorker: public Runnable {
-  public:
+ public:
     // notification messages
     enum {
         QUIT = 0,
         NEWCONNECTION = 1
     };
     
-    GenericWorker(const GenericServerOptions &options, std::string thread_name = "");
+    GenericWorker(const GenericServerOptions &options, 
+            const std::string& thread_name);
     virtual ~GenericWorker();
+
     virtual int init();
     void run();
     void mq_push(void *msg);            // push into message queue
     bool mq_pop(void **msg);            // pop from message queue
-    virtual void read_query(int fd);
+    virtual void read_io_buffer(int fd);
     virtual void write_reply(int fd);
     virtual int notify(int msg);
     virtual void process_notify(int msg);
@@ -96,9 +115,9 @@ class GenericWorker: public Runnable {
     void set_clients_count(int64_t count);
     void set_worker_id(const std::string& id);
     const std::string& get_worker_id();
-  public:
+public:
     void process_internal_notify(int msg);
-  protected:
+protected:
     void stop();
     Connection *new_conn(int fd);
     void close_conn(Connection *c);
@@ -108,8 +127,8 @@ class GenericWorker: public Runnable {
     void remove_conn(Connection *c);      // remove but not close the connection
     int add_reply(Connection *c, const Slice& reply);
     int reply_list_size(Connection *c);
-    virtual int process_read_query(Connection *c);
-    virtual int process_query_buffer(Connection *c) = 0;
+    virtual int process_read_io_buffer(Connection *c);
+    virtual int process_io_buffer(Connection *c) = 0;
 
     void disable_events(Connection *c, int events);
     void enable_events(Connection *c, int events);
@@ -117,19 +136,19 @@ class GenericWorker: public Runnable {
 
     const GenericServerOptions options;
 
-    LockFreeQueue<void*> mq;        // new connection queue
+    LockFreeQueue<void*> mq;      // new connection queue
     EventLoop *el;
     IOWatcher *pipe_watcher;
     TimerWatcher *cron_timer;
     int64_t online_count;
-    std::string worker_id;  // worker_id = thread_name + thread_id
-    int notify_recv_fd;           // recving end of notify pipe
-    int notify_send_fd;           // sending end of notify pipe
+    std::string worker_id;          // worker_id = thread_name + thread_id
+    int notify_recv_fd;             // recving end of notify pipe
+    int notify_send_fd;             // sending end of notify pipe
     std::vector<Connection*> conns; // connections currently alive
 };
 
 } // namespace zf
 
-#endif
+#endif // __WORKER_H_
 
 

@@ -1,11 +1,29 @@
+/***************************************************************************
+ *
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$
+ *
+ **************************************************************************/
+
+
+
+/**
+ * @file worker.h
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$
+ * @brief
+ *
+ **/
+
+#include "server/worker.h"
+
 #include <fcntl.h>
 #include <sys/time.h>
 
-#include "server/worker.h"
 #include "server/event.h"
+#include "server/network.h"
 #include "util/stat.h"
 #include "util/status.h"
-#include "util/network.h"
 #include "util/zmalloc.h"
 #include "util/scoped_ptr.h"
 
@@ -14,16 +32,28 @@ namespace zf {
 static const size_t INITIAL_FD_NUM = 1024;
 
 Connection::Connection(int client_fd)
-        : sslConnected(false), fd(client_fd), reply_list_size(0), current_state(0),
-          bytes_processed(0), bytes_expected(1), cur_resp_pos(0),ssl(NULL), watcher(NULL), 
-          timer(NULL), priv_data(NULL), priv_data_destructor(NULL) {
-    querybuf = sdsempty();
+    : sslConnected(false), 
+      fd(client_fd), 
+      reply_list_size(0), 
+      current_state(0),
+      bytes_processed(0), 
+      bytes_expected(1), 
+      cur_resp_pos(0),
+      ssl(NULL), 
+      watcher(NULL), 
+      timer(NULL),
+      priv_data(NULL), 
+      priv_data_destructor(NULL) 
+{
+    io_buffer = sdsempty();
 }
 
 Connection::~Connection() {
-    sdsfree(querybuf);
+    sdsfree(io_buffer);
     std::list<Slice>::iterator it;
-    for (it = reply_list.begin(); it != reply_list.end(); ++it) {
+    for (it = reply_list.begin(); 
+            it != reply_list.end(); ++it)
+    {
         zfree((void*)(*it).data());
     }
     reply_list.clear();
@@ -33,10 +63,16 @@ Connection::~Connection() {
     }
 }
 
-static void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
+static void recv_notify(EventLoop *el, 
+        IOWatcher *w, 
+        int fd, 
+        int revents, 
+        void *data) 
+{
     UNUSED(el);
     UNUSED(w);
     UNUSED(revents);
+
     int msg;
     if (read(fd, &msg, sizeof(int)) != sizeof(int)) {
         log_warning("can't read from noitfy pipe");
@@ -46,36 +82,51 @@ static void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *
     worker->process_internal_notify(msg);
 }
 
-// callback for connection io events 
-void conn_io_cb(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
+/**
+ * Callback for connection io events 
+ **/
+void conn_io_cb(EventLoop *el, 
+        IOWatcher *w, 
+        int fd, 
+        int revents, 
+        void *data) 
+{
     UNUSED(w);
     UNUSED(data);
+
     GenericWorker *worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ) {
-        worker->read_query(fd);
+        worker->read_io_buffer(fd);
     }
     if (revents & EventLoop::WRITE) {
         worker->write_reply(fd);
     } 
 }
 
-// connection timeout callback
-void timeout_cb(EventLoop *el, TimerWatcher *w, void *data) {
+/**
+ * Connection timeout callback
+ **/
+void timeout_cb(EventLoop* el, TimerWatcher* w, void* data) {
     UNUSED(w);
+
     GenericWorker *worker = (GenericWorker*)(el->owner);
     Connection *c = (Connection*)data;
     worker->process_timeout(c);
 }
 
-// callback for cron work
-void cron_cb(EventLoop *el, TimerWatcher *w, void *data) {
+/**
+ * Callback for cron work
+ **/
+void cron_cb(EventLoop* el, TimerWatcher* w, void* data) 
+{
     UNUSED(w);
     UNUSED(el);
+
     GenericWorker *worker = (GenericWorker*)data;
     worker->process_cron_work();
 }
 
-void GenericWorker::read_query(int fd) {
+void GenericWorker::read_io_buffer(int fd) {
     assert(fd >= 0);
     
     if ((unsigned int)fd >= conns.size()) {
@@ -89,33 +140,34 @@ void GenericWorker::read_query(int fd) {
     }
   
     int nread = 0, readlen = c->bytes_expected;
-    size_t qblen = sdslen(c->querybuf);
-    stat_set_max("max_query_buffer_size", sdsAllocSize(c->querybuf));
-    c->querybuf = sdsMakeRoomFor(c->querybuf, readlen);
-    nread = sock_read_data(fd, c->querybuf+qblen, readlen);
+    size_t qblen = sdslen(c->io_buffer);
+    stat_set_max("max_io_buffer_size", sdsAllocSize(c->io_buffer));
+    c->io_buffer = sdsMakeRoomFor(c->io_buffer, readlen);
+    nread = sock_read_data(fd, c->io_buffer+qblen, readlen);
     if (nread == NET_ERROR) {
         log_debug("sock_read_data: return error, close connection");
         close_conn(c);
         return;
     } else if (nread > 0) {
-        sdsIncrLen(c->querybuf, nread);
+        sdsIncrLen(c->io_buffer, nread);
     }
     c->last_interaction = el->now();
 
-    int ret = process_read_query(c);
+    int ret = process_read_io_buffer(c);
     if(WORKER_CONNECTION_REMOVED != ret  && WORKER_OK != ret){
-        log_debug("process_read_query: return error, close connection");
+        log_debug("process_read_io_buffer: return error, close connection");
         close_conn(c);
     }
 }
 
-int GenericWorker::process_read_query(Connection *c) {
-    while (sdslen(c->querybuf) - c->bytes_processed >= c->bytes_expected) {
-        int ret = process_query_buffer(c);
+int GenericWorker::process_read_io_buffer(Connection *c) {
+    while (sdslen(c->io_buffer) - c->bytes_processed >= c->bytes_expected) {
+        int ret = process_io_buffer(c);
         if (ret) {
             return ret;
         }
     }
+
     return WORKER_OK;
 }
 
@@ -147,8 +199,9 @@ void GenericWorker::write_reply(int fd) {
     while (!c->reply_list.empty()) {
         Slice reply = c->reply_list.front();
         int nwritten = sock_write_data(fd,
-                                       reply.data() + c->cur_resp_pos,
-                                       reply.size() - c->cur_resp_pos);
+                reply.data() + c->cur_resp_pos,
+                reply.size() - c->cur_resp_pos);
+
         if (nwritten == NET_ERROR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
@@ -251,8 +304,14 @@ void GenericWorker::set_clients_count(int64_t count){
      online_count = count;
      return;
 }
-GenericWorker::GenericWorker(const GenericServerOptions &o, std::string thread_name)
-        : Runnable(thread_name), options(o), el(NULL), pipe_watcher(NULL), cron_timer(NULL)
+
+GenericWorker::GenericWorker(const GenericServerOptions &o, 
+        const std::string& thread_name)
+    : Runnable(thread_name), 
+      options(o), 
+      el(NULL), 
+      pipe_watcher(NULL), 
+      cron_timer(NULL)
 {
     conns.resize(INITIAL_FD_NUM, NULL);
     el = new EventLoop((void*)this, false);
@@ -363,3 +422,5 @@ void GenericWorker::process_timeout(Connection *c) {
 }
 
 } // namespace zf
+
+

@@ -1,33 +1,37 @@
 /***************************************************************************
  * 
- * Copyright (c) 2013 Baidu.com, Inc. All Rights Reserved
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$ 
  * 
  **************************************************************************/
  
+ 
+ 
 /**
- * @file demo.cpp
- * @author li_zhe(li_zhe@baidu.com)
- * @date 2013/03/08 11:10:14
+ * @file simple_server.h
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$ 
  * @brief 
+ *  
  **/
 
+
 #include <stdio.h>
-#include <store_framework.h>
 
-#include "demo_worker.h"
+#include <zframework.h>
 
-using namespace store;
+#include "simple_worker.h"
 
 GenericServer *g_server = NULL;
 
 GenericWorker *worker_factory(GenericServerOptions &o) {
-    return new DemoWorker(o);
+    return new SimpleWorker(o);
 }
 
 int init_server()
 {
     // init log
-    if (log_init("./log", "demo", STORE_LOG_DEBUG) != 0) {
+    if (log_init("./log", "simple_server", STORE_LOG_DEBUG) != 0) {
         fprintf(stderr, "log init failed!");
         return -1;
     }
@@ -40,7 +44,7 @@ int init_server()
     options.worker_num = 4;
     options.connection_timeout = 30 * 1000 * 1000;  // 当连接空闲过久后，server会主动断开连接
     options.tick = 1000; // server的cronjob的定时周期
-    options.max_query_buffer_size = 10 * 1024 * 1024;
+    options.max_io_buffer_size = 10 * 1024 * 1024;
     options.max_reply_list_size = 1024;
     options.worker_factory_func = worker_factory;
     g_server->init_conf(options);
@@ -72,4 +76,5 @@ int main() {
 
     quit(0);
 }
+
 

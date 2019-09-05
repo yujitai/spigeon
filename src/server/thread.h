@@ -15,11 +15,14 @@ enum {
 
 class Runnable {
 public:
-    Runnable(std::string tn = "") : thread_name(tn) {};
+    Runnable(const std::string& thread_name="") 
+        : _thread_name(thread_name) {}
     virtual ~Runnable() {};
+
     virtual void run() = 0;
-    pthread_t thread_id;
-    std::string thread_name;
+
+    pthread_t _thread_id;
+    std::string _thread_name;
 };
 
 int create_thread(Runnable *runnable);

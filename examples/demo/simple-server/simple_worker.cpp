@@ -1,43 +1,48 @@
 /***************************************************************************
- * 
- * Copyright (c) 2013 Baidu.com, Inc. All Rights Reserved
- * 
+ *
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$
+ *
  **************************************************************************/
- 
+
+
+
 /**
- * @file demo_worker.cpp
- * @author li_zhe(li_zhe@baidu.com)
- * @date 2013/03/08 13:49:54
- * @brief 
+ * @file worker.h
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$
+ * @brief
+ *
  **/
 
-#include "demo_worker.h"
 
-using namespace store;
+#include "simple_worker.h"
 
-DemoWorker::DemoWorker(const GenericServerOptions &o)
-    : GenericWorker(o) { }
-
-DemoWorker::~DemoWorker() {
+SimpleWorker::SimpleWorker(const GenericServerOptions &o)
+    : zf::GenericWorker(o, "simple_worker") 
+{ 
 }
 
-int DemoWorker::process_query_buffer(Connection *c) {
+SimpleWorker::~SimpleWorker() {
+}
+
+int SimpleWorker::process_io_buffer(Connection *c) {
     if (c->current_state == STATE_IDLE) {
         c->reset(STATE_HEAD, sizeof(nshead_t));
     } else if (c->current_state == STATE_HEAD) {
-        nshead_t *hdr = (nshead_t*)c->querybuf;
+        nshead_t *hdr = (nshead_t*)c->io_buffer;
         // check magic number
         if (hdr->magic_num != NSHEAD_MAGICNUM)
             return WORKER_ERROR;
 
-        /* we have a complete header in querybuf
+        /* we have a complete header in io_buffer
            now we expect a body */
         c->expect_next(STATE_BODY, hdr->body_len);
     } else if (c->current_state == STATE_BODY) {
-        nshead_t *hdr = (nshead_t*)c->querybuf;
-        /* now we have a complete request in querybuf */
-        Slice header(c->querybuf, sizeof(nshead_t));
-        Slice body(c->querybuf + sizeof(nshead_t), hdr->body_len);
+        nshead_t *hdr = (nshead_t*)c->io_buffer;
+        /* now we have a complete request in io_buffer */
+        Slice header(c->io_buffer, sizeof(nshead_t));
+        Slice body(c->io_buffer + sizeof(nshead_t), hdr->body_len);
 
         int ret = process_request(c, header, body);
         if (ret != WORKER_OK)
@@ -47,11 +52,13 @@ int DemoWorker::process_query_buffer(Connection *c) {
     } else {
         log_fatal("unexpected state:%d", c->current_state);
     }
+
     return WORKER_OK;
 }
 
-int DemoWorker::process_request(Connection *c,
-                                const Slice &header, const Slice &body) {
+int SimpleWorker::process_request(Connection *c,
+        const Slice &header, const Slice &body) 
+{
     // only for demo. echo reply
     char *buf = (char*)zmalloc(header.size() + body.size());
     memcpy(buf, header.data(), header.size());
@@ -64,4 +71,5 @@ int DemoWorker::process_request(Connection *c,
 
     return WORKER_OK;
 }
+
 

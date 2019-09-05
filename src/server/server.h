@@ -19,11 +19,13 @@ class GenericWorker;
 class GenericServerOptions;
 
 typedef GenericWorker *(*worker_factory_func_t)(GenericServerOptions &o);
+
 typedef enum generic_server_type {
     G_SERVER_TCP = 0,
     G_SERVER_UDP = 1,
     G_SERVER_PIPE = 2,
 } G_SERVER_TYPE;
+
 struct GenericServerOptions {
     // network
     char *host;
@@ -32,7 +34,7 @@ struct GenericServerOptions {
     G_SERVER_TYPE server_type;
     long long connection_timeout;
     long long tick;
-    long long max_query_buffer_size;
+    long long max_io_buffer_size;
     int max_reply_list_size;
     worker_factory_func_t worker_factory_func;
     int ssl_open;
@@ -49,11 +51,11 @@ public:
     int validate_conf();
 
     int init();
-
     void run();
-
     void stop();
+
     int64_t get_clients_count(std::string &clients_detail);
+
 protected:
     GenericServerOptions options;
     GenericDispatcher *dispatcher;

@@ -1,5 +1,22 @@
-#ifndef _DISPATCHER_H_
-#define _DISPATCHER_H_
+/***************************************************************************
+ *
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$
+ *
+ **************************************************************************/
+
+
+
+/**
+ * @file dispatcher.h
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$
+ * @brief
+ *
+ **/
+
+#ifndef __DISPATCHER_H_
+#define __DISPATCHER_H_
 
 #include <vector>
 #include <string>
@@ -59,6 +76,6 @@ protected:
 
 } // namespace zf
 
-#endif
+#endif // __DISPATCHER_H_
 
 

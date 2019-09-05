@@ -29,9 +29,9 @@ static command_t server_cmd_table[] = {
       conf_set_usec_slot,
       offsetof(GenericServerOptions, tick) },
 
-    { "max_query_buffer_size",
+    { "max_io_buffer_size",
       conf_set_mem_slot,
-      offsetof(GenericServerOptions, max_query_buffer_size) },
+      offsetof(GenericServerOptions, max_io_buffer_size) },
 
     { "max_reply_list_size",
       conf_set_num_slot,
@@ -55,7 +55,7 @@ int GenericServer::init_conf() {
                                             G_SERVER_TCP,
                                             60 * 1000 * 1000,   // connection_timeout
                                             1000,               // tick
-                                            10 * 1024 * 1024,   // max_query_buffer_size
+                                            10 * 1024 * 1024,   // max_io_buffer_size
                                             1024,               // max_reply_list_size
                                             NULL,
                                             0,                  //ssl server flag
@@ -84,7 +84,7 @@ int GenericServer::load_conf(const char *filename) {
                 "server_type: %d\n"
                 "connection_timeout: %lld\n"
                 "tick: %lld\n"
-                "max_query_buffer_size: %lld\n"
+                "max_io_buffer_size: %lld\n"
                 "max_reply_list_size: %d\n",
                 options.host,
                 options.port,
@@ -92,7 +92,7 @@ int GenericServer::load_conf(const char *filename) {
                 options.server_type,
                 options.connection_timeout,
                 options.tick,
-                options.max_query_buffer_size,
+                options.max_io_buffer_size,
                 options.max_reply_list_size);
         fprintf(stderr, "\n");
         return SERVER_MODULE_OK;

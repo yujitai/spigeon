@@ -33,7 +33,7 @@ DEP_INCPATH=-I../../newcommon/mcpack \
 
 
 #BUILDMAKE UUID
-BUILDMAKE_MD5=601af4a1f9323d9ff832842b39237ccf  BUILDMAKE
+BUILDMAKE_MD5=17c2046f06bc99b0b99c665b5f8820d6  BUILDMAKE
 
 
 .PHONY:all
@@ -57,6 +57,7 @@ clean:
 	rm -rf ./output/include/zframework/dispatcher.h
 	rm -rf ./output/include/zframework/event.h
 	rm -rf ./output/include/zframework/module.h
+	rm -rf ./output/include/zframework/network.h
 	rm -rf ./output/include/zframework/server.h
 	rm -rf ./output/include/zframework/thread.h
 	rm -rf ./output/include/zframework/worker.h
@@ -70,7 +71,6 @@ clean:
 	rm -rf ./output/include/zframework/list.h
 	rm -rf ./output/include/zframework/lock.h
 	rm -rf ./output/include/zframework/log.h
-	rm -rf ./output/include/zframework/network.h
 	rm -rf ./output/include/zframework/nshead.h
 	rm -rf ./output/include/zframework/pack.h
 	rm -rf ./output/include/zframework/profiler.h
@@ -90,6 +90,7 @@ clean:
 	rm -rf ./output/include/zframework/zframework.h
 	rm -rf src/server/zframework_dispatcher.o
 	rm -rf src/server/zframework_event.o
+	rm -rf src/server/zframework_network.o
 	rm -rf src/server/zframework_server.o
 	rm -rf src/server/zframework_thread.o
 	rm -rf src/server/zframework_worker.o
@@ -99,7 +100,6 @@ clean:
 	rm -rf src/util/zframework_file.o
 	rm -rf src/util/zframework_key_lock.o
 	rm -rf src/util/zframework_log.o
-	rm -rf src/util/zframework_network.o
 	rm -rf src/util/zframework_pack.o
 	rm -rf src/util/zframework_sds.o
 	rm -rf src/util/zframework_stat.o
@@ -128,6 +128,7 @@ love:
 
 libzframework.a:src/server/zframework_dispatcher.o \
   src/server/zframework_event.o \
+  src/server/zframework_network.o \
   src/server/zframework_server.o \
   src/server/zframework_thread.o \
   src/server/zframework_worker.o \
@@ -137,7 +138,6 @@ libzframework.a:src/server/zframework_dispatcher.o \
   src/util/zframework_file.o \
   src/util/zframework_key_lock.o \
   src/util/zframework_log.o \
-  src/util/zframework_network.o \
   src/util/zframework_pack.o \
   src/util/zframework_sds.o \
   src/util/zframework_stat.o \
@@ -149,6 +149,7 @@ libzframework.a:src/server/zframework_dispatcher.o \
   ./src/server/dispatcher.h \
   ./src/server/event.h \
   ./src/server/module.h \
+  ./src/server/network.h \
   ./src/server/server.h \
   ./src/server/thread.h \
   ./src/server/worker.h \
@@ -162,7 +163,6 @@ libzframework.a:src/server/zframework_dispatcher.o \
   ./src/util/list.h \
   ./src/util/lock.h \
   ./src/util/log.h \
-  ./src/util/network.h \
   ./src/util/nshead.h \
   ./src/util/pack.h \
   ./src/util/profiler.h \
@@ -183,6 +183,7 @@ libzframework.a:src/server/zframework_dispatcher.o \
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40mlibzframework.a[0m']"
 	ar crs libzframework.a src/server/zframework_dispatcher.o \
   src/server/zframework_event.o \
+  src/server/zframework_network.o \
   src/server/zframework_server.o \
   src/server/zframework_thread.o \
   src/server/zframework_worker.o \
@@ -192,7 +193,6 @@ libzframework.a:src/server/zframework_dispatcher.o \
   src/util/zframework_file.o \
   src/util/zframework_key_lock.o \
   src/util/zframework_log.o \
-  src/util/zframework_network.o \
   src/util/zframework_pack.o \
   src/util/zframework_sds.o \
   src/util/zframework_stat.o \
@@ -204,24 +204,24 @@ libzframework.a:src/server/zframework_dispatcher.o \
 	mkdir -p ./output/lib
 	cp -f --link libzframework.a ./output/lib
 	mkdir -p ./output/include/zframework
-	cp -f --link ./src/server/dispatcher.h ./src/server/event.h ./src/server/module.h ./src/server/server.h ./src/server/thread.h ./src/server/worker.h ./src/client/http_client.h ./src/util/config_file.h ./src/util/crc32c.h ./src/util/def.h ./src/util/file.h ./src/util/hash.h ./src/util/key_lock.h ./src/util/list.h ./src/util/lock.h ./src/util/log.h ./src/util/network.h ./src/util/nshead.h ./src/util/pack.h ./src/util/profiler.h ./src/util/queue.h ./src/util/scoped_ptr.h ./src/util/sds.h ./src/util/slice.h ./src/util/stat.h ./src/util/status.h ./src/util/store_define.h ./src/util/store_error.h ./src/util/string.h ./src/util/url_snprintf.h ./src/util/utils.h ./src/util/zmalloc.h ./src/util/zmalloc_define.h ./src/zframework.h ./output/include/zframework
+	cp -f --link ./src/server/dispatcher.h ./src/server/event.h ./src/server/module.h ./src/server/network.h ./src/server/server.h ./src/server/thread.h ./src/server/worker.h ./src/client/http_client.h ./src/util/config_file.h ./src/util/crc32c.h ./src/util/def.h ./src/util/file.h ./src/util/hash.h ./src/util/key_lock.h ./src/util/list.h ./src/util/lock.h ./src/util/log.h ./src/util/nshead.h ./src/util/pack.h ./src/util/profiler.h ./src/util/queue.h ./src/util/scoped_ptr.h ./src/util/sds.h ./src/util/slice.h ./src/util/stat.h ./src/util/status.h ./src/util/store_define.h ./src/util/store_error.h ./src/util/string.h ./src/util/url_snprintf.h ./src/util/utils.h ./src/util/zmalloc.h ./src/util/zmalloc_define.h ./src/zframework.h ./output/include/zframework
 
 src/server/zframework_dispatcher.o:src/server/dispatcher.cpp \
-  src/server/event.h \
-  src/util/queue.h \
-  src/server/worker.h \
-  src/server/thread.h \
-  src/server/server.h \
-  src/util/config_file.h \
-  src/server/module.h \
   src/server/dispatcher.h \
+  src/server/server.h \
+  src/server/module.h \
+  src/util/config_file.h \
+  src/server/thread.h \
+  src/util/queue.h \
   src/util/lock.h \
   src/util/store_define.h \
   src/util/log.h \
   src/util/log.h \
+  src/server/event.h \
+  src/server/worker.h \
   src/util/sds.h \
   src/util/slice.h \
-  src/util/network.h
+  src/server/network.h
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40msrc/server/zframework_dispatcher.o[0m']"
 	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/server/zframework_dispatcher.o src/server/dispatcher.cpp
 
@@ -236,10 +236,16 @@ src/server/zframework_event.o:src/server/event.cpp \
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40msrc/server/zframework_event.o[0m']"
 	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/server/zframework_event.o src/server/event.cpp
 
+src/server/zframework_network.o:src/server/network.cpp \
+  src/server/network.h \
+  src/util/log.h
+	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40msrc/server/zframework_network.o[0m']"
+	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/server/zframework_network.o src/server/network.cpp
+
 src/server/zframework_server.o:src/server/server.cpp \
   src/server/server.h \
-  src/util/config_file.h \
   src/server/module.h \
+  src/util/config_file.h \
   src/server/dispatcher.h \
   src/server/thread.h \
   src/util/queue.h \
@@ -262,8 +268,8 @@ src/server/zframework_worker.o:src/server/worker.cpp \
   src/server/thread.h \
   src/util/queue.h \
   src/server/server.h \
-  src/util/config_file.h \
   src/server/module.h \
+  src/util/config_file.h \
   src/server/dispatcher.h \
   src/util/lock.h \
   src/util/store_define.h \
@@ -272,11 +278,11 @@ src/server/zframework_worker.o:src/server/worker.cpp \
   src/util/sds.h \
   src/util/slice.h \
   src/server/event.h \
-  src/util/network.h \
-  src/util/zmalloc.h \
+  src/server/network.h \
   src/util/stat.h \
-  src/util/scoped_ptr.h \
-  src/util/status.h
+  src/util/status.h \
+  src/util/zmalloc.h \
+  src/util/scoped_ptr.h
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40msrc/server/zframework_worker.o[0m']"
 	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/server/zframework_worker.o src/server/worker.cpp
 
@@ -324,20 +330,14 @@ src/util/zframework_key_lock.o:src/util/key_lock.cpp \
 	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/util/zframework_key_lock.o src/util/key_lock.cpp
 
 src/util/zframework_log.o:src/util/log.cpp \
+  src/util/log.h \
   src/util/url_snprintf.h \
   src/util/zmalloc.h \
   src/server/event.h \
   src/util/queue.h \
-  src/util/def.h \
-  src/util/log.h
+  src/util/def.h
 	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40msrc/util/zframework_log.o[0m']"
 	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/util/zframework_log.o src/util/log.cpp
-
-src/util/zframework_network.o:src/util/network.cpp \
-  src/util/log.h \
-  src/util/network.h
-	@echo "[[1;32;40mBUILDMAKE:BUILD[0m][Target:'[1;32;40msrc/util/zframework_network.o[0m']"
-	$(CXX) -c $(INCPATH) $(DEP_INCPATH) $(CPPFLAGS) $(CXXFLAGS)  -o src/util/zframework_network.o src/util/network.cpp
 
 src/util/zframework_pack.o:src/util/pack.cpp \
   src/util/pack.h \
