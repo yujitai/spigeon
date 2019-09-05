@@ -49,17 +49,19 @@ GenericServer::~GenericServer() {
 }
 
 int GenericServer::init_conf() {
-    options = (struct GenericServerOptions){NULL,   // host
-                                            0,      // port
-                                            8,      // worker_num
-                                            G_SERVER_TCP,
-                                            60 * 1000 * 1000,   // connection_timeout
-                                            1000,               // tick
-                                            10 * 1024 * 1024,   // max_io_buffer_size
-                                            1024,               // max_reply_list_size
-                                            NULL,
-                                            0,                  //ssl server flag
-                                            };
+    options = (struct GenericServerOptions) {
+        NULL,               // host
+        0,                  // port
+        8,                  // worker_num
+        G_SERVER_TCP,       // server type
+        60 * 1000 * 1000,   // connection_timeout
+        1000,               // tick
+        10 * 1024 * 1024,   // max_io_buffer_size
+        1024,               // max_reply_list_size
+        NULL,
+        0,                  //ssl server flag
+    };
+
     return SERVER_MODULE_OK;
 }
 
@@ -68,7 +70,8 @@ int GenericServer::init_conf(const GenericServerOptions &o) {
     if (options.host == NULL) {
         options.host = "0.0.0.0";
     }
-    return 0;
+
+    return SERVER_MODULE_OK;
 }
 
 int GenericServer::load_conf(const char *filename) {
@@ -99,7 +102,6 @@ int GenericServer::load_conf(const char *filename) {
     }
 }
 
-
 int GenericServer::validate_conf() {
     return SERVER_MODULE_OK;
 }
@@ -120,7 +122,8 @@ void GenericServer::run() {
 void GenericServer::stop() {
     dispatcher->notify(GenericDispatcher::QUIT);
 }
-int64_t GenericServer::get_clients_count(std::string &clients_detail){
+
+int64_t GenericServer::get_clients_count(std::string& clients_detail) {
     return dispatcher->get_clients_count(clients_detail);
 }
 

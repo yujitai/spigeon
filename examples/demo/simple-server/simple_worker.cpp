@@ -21,9 +21,11 @@
 SimpleWorker::SimpleWorker(const GenericServerOptions &o)
     : zf::GenericWorker(o, "simple_worker") 
 { 
+
 }
 
 SimpleWorker::~SimpleWorker() {
+
 }
 
 int SimpleWorker::process_io_buffer(Connection *c) {

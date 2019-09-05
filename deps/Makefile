@@ -13,8 +13,8 @@ all: $(LIBEV) $(LIBJEMALLOC) $(LIBCONFIG) $(LIBEVHTTPCLIENT) $(LIBPROTOBUF)
 clean:
 	echo "clean"
 	# sometimes make clean not working if configure is not ok
-	#cd libev-4.11 && ./configure && make clean
-	#cd jemalloc && ./configure && make clean
+	cd libev-4.11 && ./configure && make clean
+	cd jemalloc && ./configure && make clean
 	cd new-config && make clean
 	cd evhttpclient && make clean
 

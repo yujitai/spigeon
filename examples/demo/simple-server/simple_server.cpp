@@ -22,14 +22,13 @@
 
 #include "simple_worker.h"
 
-GenericServer *g_server = NULL;
+GenericServer* g_server = NULL;
 
-GenericWorker *worker_factory(GenericServerOptions &o) {
+GenericWorker* worker_factory(GenericServerOptions& o) {
     return new SimpleWorker(o);
 }
 
-int init_server()
-{
+int init_server() {
     // init log
     if (log_init("./log", "simple_server", STORE_LOG_DEBUG) != 0) {
         fprintf(stderr, "log init failed!");
@@ -40,8 +39,9 @@ int init_server()
     g_server = new GenericServer;
     GenericServerOptions options;
     memset(&options, 0, sizeof(options));
-    options.port = 7700;
-    options.worker_num = 4;
+    options.server_type = G_SERVER_TCP;
+    options.port = 8888;
+    options.worker_num = 1;
     options.connection_timeout = 30 * 1000 * 1000;  // 当连接空闲过久后，server会主动断开连接
     options.tick = 1000; // server的cronjob的定时周期
     options.max_io_buffer_size = 10 * 1024 * 1024;
@@ -51,9 +51,7 @@ int init_server()
     if (g_server->init() != 0) {
         return -1;
     }
-    if (g_server->validate_conf() != 0) {
-        return -1;
-    }
+
     return 0;
 }
 

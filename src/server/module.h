@@ -3,16 +3,22 @@
 
 namespace zf {
 
+/**
+ * @brief Module
+ *
+ **/
 class Module {
   public:
-    // provides the default configurations
+    // Provides the default configurations
     virtual int init_conf() = 0;
-    // load configuration file
+    // Load configuration file
     virtual int load_conf(const char *filename) = 0;
-    // validate the configurations
+    // Validate the configurations
     virtual int validate_conf() = 0;
 };
 
 } // namespace zf
 
 #endif
+
+

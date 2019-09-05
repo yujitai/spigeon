@@ -52,7 +52,7 @@ public:
     bool mq_pop(void **msg);
     int dispatch_new_conn(int fd);        // dispatch a new conn
     virtual void process_notify(int msg);
-    virtual int64_t get_clients_count(std::string &clients_detail);
+    virtual int64_t get_clients_count(std::string& clients_detail);
 public:
     void process_internal_notify(int msg);
 protected:
