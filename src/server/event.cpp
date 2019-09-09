@@ -104,8 +104,10 @@ void generic_timer_cb(struct ev_loop *el, struct ev_timer *w, int revents) {
     watcher->cb(watcher->el, watcher, watcher->data);
 }
 
-TimerWatcher *EventLoop::create_timer(timer_cb_t cb, void *priv_data,
-                                      bool repeat) {
+TimerWatcher *EventLoop::create_timer(timer_cb_t cb, 
+        void *priv_data, 
+        bool repeat) 
+{
     TimerWatcher *w = new TimerWatcher(this, cb, priv_data, repeat);
     ev_init(&(w->timer), generic_timer_cb);
     return w;

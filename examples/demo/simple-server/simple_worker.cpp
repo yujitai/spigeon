@@ -32,21 +32,26 @@ int SimpleWorker::process_io_buffer(Connection *c) {
     if (c->current_state == STATE_IDLE) {
         c->reset(STATE_HEAD, sizeof(nshead_t));
     } else if (c->current_state == STATE_HEAD) {
-        nshead_t *hdr = (nshead_t*)c->io_buffer;
+        nshead_t* hdr = (nshead_t*)c->io_buffer;
         // check magic number
         if (hdr->magic_num != NSHEAD_MAGICNUM)
             return WORKER_ERROR;
 
-        /* we have a complete header in io_buffer
-           now we expect a body */
+        /** 
+         *  We have a complete header in io_buffer,
+         *  now we expect a body. 
+         */
         c->expect_next(STATE_BODY, hdr->body_len);
     } else if (c->current_state == STATE_BODY) {
         nshead_t *hdr = (nshead_t*)c->io_buffer;
-        /* now we have a complete request in io_buffer */
+
+        /** 
+         *  Now we have a complete request in io_buffer.
+         */
         Slice header(c->io_buffer, sizeof(nshead_t));
         Slice body(c->io_buffer + sizeof(nshead_t), hdr->body_len);
 
-        int ret = process_request(c, header, body);
+        int ret = this->process_request(c, header, body);
         if (ret != WORKER_OK)
             return ret;
 

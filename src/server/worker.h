@@ -45,10 +45,10 @@ class TimerWatcher;
  *
  **/
 struct Connection {
-    char         ip[20];
+    char         ip[20];            // client ip
+    int          port;              // client port
+    int          fd;                // client fd
     bool         sslConnected;
-    int          fd;
-    int          port;
     int          reply_list_size;
     int          current_state;
     size_t       bytes_processed;
@@ -60,9 +60,9 @@ struct Connection {
     TimerWatcher *timer;
     void         *priv_data;
     void (*priv_data_destructor)(void*);
-    unsigned long begin_interaction;
-    unsigned long last_interaction;
-    unsigned long last_recv_request;
+    uint64_t begin_interaction;
+    uint64_t last_interaction;
+    uint64_t last_recv_request;
     std::list<Slice> reply_list; 
     std::vector<uint64_t> ping_times;
     Connection(int fd);
@@ -73,11 +73,13 @@ struct Connection {
         current_state   = initial_state;
         bytes_expected  = initial_bytes_expected;
     }
+
     void expect_next(int next_state, size_t next_bytes_expected) {
         bytes_processed += bytes_expected;
         current_state   = next_state;
         bytes_expected  = next_bytes_expected;
     }
+
     void shift_processed(int next_state, size_t next_bytes_expected) {
         // Shrink the io_buffer
         bytes_processed += bytes_expected;
@@ -105,7 +107,7 @@ class GenericWorker: public Runnable {
     void run();
     void mq_push(void *msg);            // push into message queue
     bool mq_pop(void **msg);            // pop from message queue
-    virtual void read_io_buffer(int fd);
+    virtual void read_io(int fd);
     virtual void write_reply(int fd);
     virtual int notify(int msg);
     virtual void process_notify(int msg);
@@ -127,7 +129,6 @@ protected:
     void remove_conn(Connection *c);      // remove but not close the connection
     int add_reply(Connection *c, const Slice& reply);
     int reply_list_size(Connection *c);
-    virtual int process_read_io_buffer(Connection *c);
     virtual int process_io_buffer(Connection *c) = 0;
 
     void disable_events(Connection *c, int events);
@@ -137,14 +138,27 @@ protected:
     const GenericServerOptions options;
 
     LockFreeQueue<void*> mq;      // new connection queue
-    EventLoop *el;
-    IOWatcher *pipe_watcher;
-    TimerWatcher *cron_timer;
     int64_t online_count;
-    std::string worker_id;          // worker_id = thread_name + thread_id
-    int notify_recv_fd;             // recving end of notify pipe
-    int notify_send_fd;             // sending end of notify pipe
-    std::vector<Connection*> conns; // connections currently alive
+
+    EventLoop* el;
+    IOWatcher* pipe_watcher;
+    TimerWatcher* cron_timer;
+
+    /**
+     *  worker_id = thread_name + thread_id.
+     */
+    std::string worker_id;
+
+    /**
+     *  Notify pipe fd, used for thread communication. 
+     */
+    int notify_recv_fd;             
+    int notify_send_fd;         
+    /**
+     *  Alive connections, index is fd.
+     *  i.e. conns[fd] = conn;
+     */
+    std::vector<Connection*> conns;
 };
 
 } // namespace zf

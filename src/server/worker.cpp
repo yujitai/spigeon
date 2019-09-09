@@ -20,9 +20,11 @@
 #include <fcntl.h>
 #include <sys/time.h>
 
+#include <iostream>
+using namespace std;
+
 #include "server/event.h"
 #include "server/network.h"
-#include "util/stat.h"
 #include "util/status.h"
 #include "util/zmalloc.h"
 #include "util/scoped_ptr.h"
@@ -96,7 +98,7 @@ void conn_io_cb(EventLoop *el,
 
     GenericWorker *worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ) {
-        worker->read_io_buffer(fd);
+        worker->read_io(fd);
     }
     if (revents & EventLoop::WRITE) {
         worker->write_reply(fd);
@@ -126,56 +128,48 @@ void cron_cb(EventLoop* el, TimerWatcher* w, void* data)
     worker->process_cron_work();
 }
 
-void GenericWorker::read_io_buffer(int fd) {
+void GenericWorker::read_io(int fd) {
     assert(fd >= 0);
     
     if ((unsigned int)fd >= conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
-    Connection *c = conns[fd];
+
+    Connection* c = conns[fd];
     if (c == NULL) {
         log_warning("connection not exists");
         return;
     }
   
-    int nread = 0, readlen = c->bytes_expected;
-    size_t qblen = sdslen(c->io_buffer);
-    stat_set_max("max_io_buffer_size", sdsAllocSize(c->io_buffer));
-    c->io_buffer = sdsMakeRoomFor(c->io_buffer, readlen);
-    nread = sock_read_data(fd, c->io_buffer+qblen, readlen);
-    if (nread == NET_ERROR) {
+    int rlen = c->bytes_expected;
+    size_t iblen = sdslen(c->io_buffer);
+    c->io_buffer = sdsMakeRoomFor(c->io_buffer, rlen);
+    int r = sock_read_data(fd, c->io_buffer + iblen, rlen);
+    if (r == NET_ERROR) {
         log_debug("sock_read_data: return error, close connection");
         close_conn(c);
         return;
-    } else if (nread > 0) {
-        sdsIncrLen(c->io_buffer, nread);
+    } else if (r == NET_PEER_CLOSED) {
+        log_debug("sock_read_data: return 0, peer closed");
+        close_conn(c);
+        return;
+    } else if (r > 0) {
+        sdsIncrLen(c->io_buffer, r);
     }
     c->last_interaction = el->now();
 
-    int ret = process_read_io_buffer(c);
-    if(WORKER_CONNECTION_REMOVED != ret  && WORKER_OK != ret){
-        log_debug("process_read_io_buffer: return error, close connection");
-        close_conn(c);
-    }
-}
-
-int GenericWorker::process_read_io_buffer(Connection *c) {
-    while (sdslen(c->io_buffer) - c->bytes_processed >= c->bytes_expected) {
-        int ret = process_io_buffer(c);
-        if (ret) {
-            return ret;
+    if (sdslen(c->io_buffer) - c->bytes_processed >= c->bytes_expected) {
+        if (WORKER_OK != this->process_io_buffer(c)) {
+            log_debug("read_io: user return error, close connection");
+            close_conn(c);
         }
     }
-
-    return WORKER_OK;
 }
 
 int GenericWorker::add_reply(Connection *c, const Slice& reply) {
     c->reply_list.push_back(reply);
     c->reply_list_size++;
-    stat_set_max("max_reply_size", reply.size());
-    stat_set_max("max_reply_list_size", c->reply_list_size);
     enable_events(c, EventLoop::WRITE);
     return c->reply_list_size;
 }
@@ -236,20 +230,23 @@ void GenericWorker::start_timer(Connection *c) {
     el->start_timer(c->timer, options.tick);
 }
 
-Connection *GenericWorker::new_conn(int fd) {
+Connection* GenericWorker::new_conn(int fd) {
     assert(fd >= 0);
-    log_debug("new connection:%d", fd);
+    log_debug("[new connection] fd[%d]", fd);
+
     sock_setnonblock(fd);
     sock_setnodelay(fd);  
-    Connection *c = new Connection(fd);
+    Connection* c = new Connection(fd);
     sock_peer_to_str(fd, c->ip, &(c->port));
-    c->last_interaction = el->now();
-    c->begin_interaction = c->last_interaction;
+    c->begin_interaction = el->now();
+    c->last_interaction = c->begin_interaction;
     c->last_recv_request = c->last_interaction;
-    /* create io event and timeout for the connection */
+
+    // create io event and timer for the connection.
     c->watcher = el->create_io_event(conn_io_cb, (void*)c);
     c->timer = el->create_timer(timeout_cb, (void*)c, true);
-    /* start io and timeout */
+
+    // start io and timer.
     if (options.ssl_open) {
         enable_events(c, EventLoop::READ | EventLoop::WRITE);
     } else {
@@ -259,17 +256,17 @@ Connection *GenericWorker::new_conn(int fd) {
 
     if ((unsigned int)fd >= conns.size())
         conns.resize(fd*2, NULL);
+
     conns[fd] = c;
-    stat_incr("current_connections");
-    stat_incr("total_connections");
+
     return c;
 }
 
 void GenericWorker::close_conn(Connection *c) {
     log_debug("close connection");
-    int socket_fd = c->fd; 
+    int fd = c->fd; 
     remove_conn(c);
-    close(socket_fd);
+    close(fd);
 }
 
 void GenericWorker::close_all_conns() {
@@ -288,9 +285,10 @@ void GenericWorker::remove_conn(Connection *c) {
     if (c->priv_data_destructor) {
         c->priv_data_destructor(c->priv_data);
     }
-    stat_decr("current_connections");
+    // stat_decr("current_connections");
     conns[c->fd] = NULL;
     after_remove_conn(c);
+
     delete c;
 }
 
@@ -322,7 +320,7 @@ GenericWorker::GenericWorker(const GenericServerOptions &o,
 GenericWorker::~GenericWorker() {
     close_all_conns();
     delete el;
-    stat_destroy();
+    //stat_destroy();
 }
 
 void GenericWorker::set_worker_id(const std::string& id) {
@@ -380,11 +378,12 @@ void GenericWorker::run() {
 }
 
 int GenericWorker::notify(int msg) {
-    struct timeval s1, e1; 
-    gettimeofday(&s1, NULL);
+    struct timeval s, e; 
+    gettimeofday(&s, NULL);
     int written = write(notify_send_fd, &msg, sizeof(int));
-    gettimeofday(&e1, NULL);
-    log_debug("[Cost_Info] [write worker pipe] cost[%lu(us)] msg[%d]", TIME_US_DIFF(s1, e1), msg);
+    gettimeofday(&e, NULL);
+    log_debug("[write worker pipe] cost[%luus] msg_type[%d]", TIME_US_DIFF(s, e), msg);
+
     if (written == sizeof(int))
         return WORKER_OK;
     else

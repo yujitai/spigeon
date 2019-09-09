@@ -24,8 +24,9 @@
 namespace zf {
 
 enum {
-  NET_ERROR = -1,
-  NET_OK = 0
+    NET_ERROR = -1,       // Generic net error
+    NET_PEER_CLOSED = -2, // Peer closed
+    NET_OK = 0
 };
 
 /**

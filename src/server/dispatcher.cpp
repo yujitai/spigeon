@@ -28,14 +28,20 @@
 
 namespace zf {
 
-// server socket io handler
+// Dispatcher pipe message hanler.
 void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data);
+// Tcp server socket io handler.
 void accept_new_conn(EventLoop *el, IOWatcher *w, int fd, int revents, void *data);
+
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
         : options(o),
-          el(NULL), io_watcher(NULL), pipe_watcher(NULL),
-          next_worker(0), listen_fd(0) {
+          el(NULL), 
+          io_watcher(NULL), 
+          pipe_watcher(NULL),
+          next_worker(0), 
+          listen_fd(0) 
+{
     el = new EventLoop((void*)this, false);
 }
 
@@ -46,6 +52,7 @@ GenericDispatcher::~GenericDispatcher() {
             workers[i] = NULL;
         }
     }
+    
     delete el;
 }
 
@@ -68,7 +75,7 @@ int GenericDispatcher::init() {
         el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
     }
 
-    // set up the server tcp socket
+    // set up the tcp server socket.
     if (options.server_type == G_SERVER_TCP) {
         listen_fd = create_tcp_server(options.port, options.host);
         if (listen_fd == NET_ERROR) {
@@ -86,7 +93,7 @@ int GenericDispatcher::init() {
         el->start_io_event(io_watcher, listen_fd, EventLoop::READ);
     }
 
-    // set up the server udp socket
+    // set up the udp server socket.
     if (options.server_type == G_SERVER_UDP) {
         int fd = create_udp_server(options.port, options.host);
         if (fd == NET_ERROR) {
@@ -162,48 +169,54 @@ int GenericDispatcher::join_workers() {
     return DISPATCHER_OK;
 }
 
-void accept_new_conn(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
+void accept_new_conn(EventLoop *el, 
+        IOWatcher* w, 
+        int fd, 
+        int revents, 
+        void* data)  
+{
     UNUSED(el);
     UNUSED(w);
     UNUSED(revents);
     
     struct timeval s, e, s1, e1; 
+    int cfd;
+    int cport;
+    char cip[128];
+    GenericDispatcher* dp = (GenericDispatcher*)data;
     
     gettimeofday(&s, NULL);
-    GenericDispatcher *self = (GenericDispatcher*)data;
-    int cport, cfd;
-    char cip[128];
-    
     cfd = tcp_accept(fd, cip, &cport); 
     if (cfd == NET_ERROR) {
-        log_warning("Can't accept socket");
+        log_warning("[accept socket failed]");
         return;
     }
     
     gettimeofday(&s1, NULL);
-    if (self->dispatch_new_conn(cfd) == DISPATCHER_ERROR) {
-        log_warning("Failed to dispatch new connection");
+    if (dp->dispatch_new_conn(cfd) == DISPATCHER_ERROR) {
+        log_warning("[dispatch new connection failed]");
         return;
     }
+
     gettimeofday(&e1, NULL);
-    log_debug("[Cost_Info] [dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1,e1), cfd);
-    
+    log_debug("[dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1, e1), cfd);
+
     gettimeofday(&e, NULL);
-    log_debug("[Cost_info] [accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s,e), cfd);
+    log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), cfd);
 }
 
 int GenericDispatcher::dispatch_new_conn(int fd) {
-    log_debug("dispatch new connection: %d", fd);
-    // just use a round-robin right now..
+    log_debug("[dispatch new connection] fd[%d]", fd);
+
+    // Just use a round-robin right now.
     GenericWorker *worker = workers[next_worker];
-    next_worker = (next_worker+1)%workers.size();
-    int *nfd = new int;
-    *nfd = fd;
+    next_worker = (next_worker + 1) % workers.size();
+    int* nfd = new int(fd);
     worker->mq_push((void*)nfd);
-    //worker->mq_push((void*)(long)fd);
-    /* notify the worker the arrival of a new connection */
+
+    // Notify worker the arrival of a new connection.
     if (worker->notify(GenericWorker::NEWCONNECTION) != WORKER_OK) {
-        log_warning("Failed to write worker notify pipe");
+        log_warning("[write worker notify pipe failed");
         return DISPATCHER_ERROR;             
     }
        

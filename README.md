@@ -15,6 +15,9 @@
 * v1.0, 2019-01-17, 为满足zrtc的需求, 开始优化和完善 store-framework
 * v1.0, 2019-08-19, 正式更名为 zframework, 开始开发1.0版本
 
+## 构建
+./build.sh
+
 ## 作者
 yujitai<yujitai@zuoyebang.com>
 
