@@ -50,7 +50,7 @@ class GenericWorker: public Runnable {
     void mq_push(void *msg);            // push into message queue
     bool mq_pop(void **msg);            // pop from message queue
     virtual void read_io(int fd);
-    virtual void write_reply(int fd);
+    virtual void write_io(int fd);
     virtual int notify(int msg);
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);

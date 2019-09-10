@@ -64,10 +64,11 @@ int SimpleWorker::process_io_buffer(Connection *c) {
 }
 
 int SimpleWorker::process_request(Connection *c,
-        const Slice &header, const Slice &body) 
+        const Slice& header, 
+        const Slice& body) 
 {
-    // only for demo. echo reply
-    char *buf = (char*)zmalloc(header.size() + body.size());
+    // echo reply
+    char* buf = (char*)zmalloc(header.size() + body.size());
     memcpy(buf, header.data(), header.size());
     memcpy(buf + header.size(), body.data(), body.size());
     Slice reply(buf, header.size() + body.size());

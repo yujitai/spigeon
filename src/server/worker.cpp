@@ -93,12 +93,12 @@ void conn_io_cb(EventLoop *el,
     UNUSED(w);
     UNUSED(data);
 
-    GenericWorker *worker = (GenericWorker*)(el->owner);
+    GenericWorker* worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ) {
         worker->read_io(fd);
     }
     if (revents & EventLoop::WRITE) {
-        worker->write_reply(fd);
+        worker->write_io(fd);
     } 
 }
 
@@ -108,8 +108,8 @@ void conn_io_cb(EventLoop *el,
 void timeout_cb(EventLoop* el, TimerWatcher* w, void* data) {
     UNUSED(w);
 
-    GenericWorker *worker = (GenericWorker*)(el->owner);
-    Connection *c = (Connection*)data;
+    GenericWorker* worker = (GenericWorker*)(el->owner);
+    Connection* c = (Connection*)data;
     worker->process_timeout(c);
 }
 
@@ -169,6 +169,7 @@ int GenericWorker::add_reply(Connection *c, const Slice& reply) {
     c->reply_list.push_back(reply);
     c->reply_list_size++;
     enable_events(c, EventLoop::WRITE);
+
     return c->reply_list_size;
 }
 
@@ -176,7 +177,7 @@ int GenericWorker::reply_list_size(Connection *c) {
     return c->reply_list_size;
 }
 
-void GenericWorker::write_reply(int fd) {
+void GenericWorker::write_io(int fd) {
     assert(fd >= 0);
     if ((unsigned int)fd >= conns.size()) {
         log_warning("invalid fd: %d", fd);
@@ -190,27 +191,28 @@ void GenericWorker::write_reply(int fd) {
 
     while (!c->reply_list.empty()) {
         Slice reply = c->reply_list.front();
-        int nwritten = sock_write_data(fd,
+        int w = sock_write_data(fd,
                 reply.data() + c->cur_resp_pos,
                 reply.size() - c->cur_resp_pos);
 
-        if (nwritten == NET_ERROR) {
+        if (w == NET_ERROR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;
-        } else if( nwritten == 0) {         /* would block */
+        } else if(w == 0) {         /* would block */
             log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->cur_resp_pos), c->fd, c->ip);
             return;
-        } else if ((nwritten + c->cur_resp_pos) == reply.size()) { /* finish */
+        } else if ((w + c->cur_resp_pos) == reply.size()) { /* finish */
             c->reply_list.pop_front();
             c->reply_list_size--;
             c->cur_resp_pos = 0;
             zfree((void*)reply.data());
         } else {
-            c->cur_resp_pos += nwritten;
+            c->cur_resp_pos += w;
         }
     }
     c->last_interaction = el->now();
+
     /* no more replies to write */
     if (c->reply_list.empty())
         disable_events(c, EventLoop::WRITE);
