@@ -20,9 +20,6 @@
 #include <fcntl.h>
 #include <sys/time.h>
 
-#include <iostream>
-using namespace std;
-
 #include "server/event.h"
 #include "server/network.h"
 #include "util/status.h"
@@ -159,6 +156,7 @@ void GenericWorker::read_io(int fd) {
     }
     c->last_interaction = el->now();
 
+    // Upper process.
     if (sdslen(c->io_buffer) - c->bytes_processed >= c->bytes_expected) {
         if (WORKER_OK != this->process_io_buffer(c)) {
             log_debug("read_io: user return error, close connection");
@@ -238,9 +236,7 @@ Connection* GenericWorker::new_conn(int fd) {
     sock_setnodelay(fd);  
     Connection* c = new Connection(fd);
     sock_peer_to_str(fd, c->ip, &(c->port));
-    c->begin_interaction = el->now();
-    c->last_interaction = c->begin_interaction;
-    c->last_recv_request = c->last_interaction;
+    c->last_interaction = el->now();
 
     // create io event and timer for the connection.
     c->watcher = el->create_io_event(conn_io_cb, (void*)c);
@@ -412,10 +408,11 @@ void GenericWorker::process_notify(int msg) {
     log_warning("unknow notify: %d", msg);
 }
 
-void GenericWorker::process_timeout(Connection *c) {
-    if ((el->now()-c->last_interaction) > (unsigned long)options.connection_timeout)
+void GenericWorker::process_timeout(Connection* c) {
+    if ((el->now() - c->last_interaction) > 
+            (uint64_t)options.connection_timeout)
     {
-        log_debug("close fd:%d on timeout", c->fd);
+        log_debug("[time out] close fd[%d]", c->fd);
         close_conn(c);
     }
 }

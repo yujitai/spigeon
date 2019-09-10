@@ -33,7 +33,6 @@ enum {
     DISPATCHER_ERROR = 1
 };
 
-class Config;
 class GenericWorker;
 class EventLoop;
 class IOWatcher;

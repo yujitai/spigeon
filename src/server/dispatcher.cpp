@@ -181,7 +181,7 @@ void accept_new_conn(EventLoop *el,
     
     struct timeval s, e, s1, e1; 
     int cfd;
-    int cport;
+    uint16_t cport;
     char cip[128];
     GenericDispatcher* dp = (GenericDispatcher*)data;
     

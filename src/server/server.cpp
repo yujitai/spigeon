@@ -40,44 +40,48 @@ static command_t server_cmd_table[] = {
     null_command
 };
 
-GenericServer::GenericServer() : dispatcher(NULL) {
+GenericServerOptions::GenericServerOptions() 
+    : host(NULL),
+      port(0),
+      worker_num(8),
+      server_type(G_SERVER_TCP),
+      connection_timeout(60*1000*1000),
+      tick(1000),
+      max_io_buffer_size(10*1024*1024),
+      max_reply_list_size(1024),
+      worker_factory_func(NULL),
+      ssl_open(0)
+{
+}
+
+GenericServer::GenericServer() 
+    : _dispatcher(NULL) 
+{
 }
 
 GenericServer::~GenericServer() {
-    delete dispatcher;
-    dispatcher = NULL;
+    delete _dispatcher;
+    _dispatcher = NULL;
 }
 
 int GenericServer::init_conf() {
-    options = (struct GenericServerOptions) {
-        NULL,               // host
-        0,                  // port
-        8,                  // worker_num
-        G_SERVER_TCP,       // server type
-        60 * 1000 * 1000,   // connection_timeout
-        1000,               // tick
-        10 * 1024 * 1024,   // max_io_buffer_size
-        1024,               // max_reply_list_size
-        NULL,
-        0,                  //ssl server flag
-    };
+    _options = GenericServerOptions();
 
-    return SERVER_MODULE_OK;
+    return SERVER_OK;
 }
 
-int GenericServer::init_conf(const GenericServerOptions &o) {
-    options = o;
-    if (options.host == NULL) {
-        options.host = "0.0.0.0";
-    }
+int GenericServer::init_conf(struct Options& o) {
+    _options = (struct GenericServerOptions&)o;
+    if (_options.host == NULL)
+        _options.host = "0.0.0.0";
 
-    return SERVER_MODULE_OK;
+    return SERVER_OK;
 }
 
-int GenericServer::load_conf(const char *filename) {
-    if (load_conf_file(filename, server_cmd_table, &options) != CONFIG_OK) {
+int GenericServer::load_conf(const char* filename) {
+    if (load_conf_file(filename, server_cmd_table, &_options) != CONFIG_OK) {
         log_fatal("failed to load config file for server module");
-        return SERVER_MODULE_ERROR;
+        return SERVER_ERROR;
     } else {
         fprintf(stderr,
                 "Server Options:\n"
@@ -89,42 +93,44 @@ int GenericServer::load_conf(const char *filename) {
                 "tick: %lld\n"
                 "max_io_buffer_size: %lld\n"
                 "max_reply_list_size: %d\n",
-                options.host,
-                options.port,
-                options.worker_num,
-                options.server_type,
-                options.connection_timeout,
-                options.tick,
-                options.max_io_buffer_size,
-                options.max_reply_list_size);
+                _options.host,
+                _options.port,
+                _options.worker_num,
+                _options.server_type,
+                _options.connection_timeout,
+                _options.tick,
+                _options.max_io_buffer_size,
+                _options.max_reply_list_size);
         fprintf(stderr, "\n");
-        return SERVER_MODULE_OK;
+
+        return SERVER_OK;
     }
 }
 
 int GenericServer::validate_conf() {
-    return SERVER_MODULE_OK;
+    return SERVER_OK;
 }
 
 int GenericServer::init() {
-    dispatcher = new GenericDispatcher(options);
-    if (dispatcher->init() != DISPATCHER_OK) {
+    _dispatcher = new GenericDispatcher(_options);
+    if (_dispatcher->init() != DISPATCHER_OK) {
         log_fatal("failed to create dispatcher");
-        return SERVER_MODULE_ERROR;
+        return SERVER_ERROR;
     }
-    return SERVER_MODULE_OK;
+
+    return SERVER_OK;
 }
   
 void GenericServer::run() {
-    dispatcher->run();
+    _dispatcher->run();
 }
 
 void GenericServer::stop() {
-    dispatcher->notify(GenericDispatcher::QUIT);
+    _dispatcher->notify(GenericDispatcher::QUIT);
 }
 
 int64_t GenericServer::get_clients_count(std::string& clients_detail) {
-    return dispatcher->get_clients_count(clients_detail);
+    return _dispatcher->get_clients_count(clients_detail);
 }
 
 } // namespace zf

@@ -132,7 +132,7 @@ static int generic_accept(int s, struct sockaddr *sa, socklen_t *len) {
     return fd;
 }
 
-int tcp_accept(int s, char *ip, int *port) {
+int tcp_accept(int s, char* ip, uint16_t* port) {
     int fd;
     struct sockaddr_in sa;
     socklen_t salen = sizeof(sa);
@@ -205,7 +205,7 @@ int sock_write_data(int fd, const char* buf, size_t len) {
     return w;
 }
 
-int tcp_connect(const char *addr, int port) {
+int tcp_connect(const char* addr, uint16_t port) {
     int s = create_socket(AF_INET, SOCK_STREAM);
     if (s == NET_ERROR)
         return NET_ERROR;
@@ -232,7 +232,7 @@ int tcp_connect(const char *addr, int port) {
     return s;
 }
 
-int sock_get_name(int fd, char *ip, int *port) {
+int sock_get_name(int fd, char* ip, uint16_t* port) {
     struct sockaddr_in sa;
     socklen_t salen = sizeof(sa);
 
@@ -248,7 +248,7 @@ int sock_get_name(int fd, char *ip, int *port) {
     return NET_OK;
 }
 
-int sock_peer_to_str(int fd, char *ip, int *port) {
+int sock_peer_to_str(int fd, char* ip, uint16_t* port) {
     struct sockaddr_in sa;
     socklen_t salen = sizeof(sa);
 

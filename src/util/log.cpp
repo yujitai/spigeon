@@ -16,9 +16,11 @@
 #include "util/url_snprintf.h"
 #include "util/zmalloc.h"
 #include "server/event.h"
-#include "def.h"
 
 namespace zf {
+
+#define USE_SYS_TIME true
+#define NOT_URLENCODE_LOG true
 
 static const size_t FILE_NAME_MAX    = 1024;
 static const size_t BIN_NAME_MAX     = 32;

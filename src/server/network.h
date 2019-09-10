@@ -19,7 +19,7 @@
 #ifndef  __NETWORK_H_
 #define  __NETWORK_H_
 
-#include <stddef.h>
+#include "common.h"
 
 namespace zf {
 
@@ -43,14 +43,14 @@ int create_tcp_server(int port, const char *bindaddr);
  * Accept a tcp socket
  *
  **/
-int tcp_accept(int s, char *ip, int *port);
+int tcp_accept(int s, char* ip, uint16_t* port);
 int tcp_connect(const char* host, int port);
 int sock_setnonblock(int s);
 int sock_setnodelay(int s);
-int sock_read_data(int fd, char *data, size_t len);
-int sock_write_data(int fd, const char *data, size_t len);
-int sock_get_name(int fd, char *ip, int *port);
-int sock_peer_to_str(int fd, char *ip, int *port);
+int sock_read_data(int fd, char* data, size_t len);
+int sock_write_data(int fd, const char* data, size_t len);
+int sock_get_name(int fd, char* ip, uint16_t* port);
+int sock_peer_to_str(int fd, char* ip, uint16_t* port);
 
 } // namespace zf
 
