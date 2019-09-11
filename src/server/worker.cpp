@@ -31,24 +31,23 @@ namespace zf {
 static const size_t INITIAL_FD_NUM = 1024;
 
 Connection::Connection(int client_fd)
-    : sslConnected(false), 
-      fd(client_fd), 
-      reply_list_size(0), 
+    : fd(client_fd), 
       current_state(0),
+      reply_list_size(0), 
       bytes_processed(0), 
       bytes_expected(1), 
       cur_resp_pos(0),
-      ssl(NULL), 
-      watcher(NULL), 
-      timer(NULL),
       priv_data(NULL), 
-      priv_data_destructor(NULL) 
+      priv_data_destructor(NULL),
+      watcher(NULL), 
+      timer(NULL)
 {
     io_buffer = sdsempty();
 }
 
 Connection::~Connection() {
     sdsfree(io_buffer);
+
     std::list<Slice>::iterator it;
     for (it = reply_list.begin(); 
             it != reply_list.end(); ++it)
@@ -56,10 +55,6 @@ Connection::~Connection() {
         zfree((void*)(*it).data());
     }
     reply_list.clear();
-    if (ssl) {
-        SSL_shutdown (ssl);
-        SSL_free(ssl);
-    }
 }
 
 static void recv_notify(EventLoop *el, 

@@ -36,7 +36,7 @@ int init_server() {
     }
 
     // init server
-    g_server = new GenericServer;
+    g_server = new GenericServer("simple_server");
     GenericServerOptions options;
     memset(&options, 0, sizeof(options));
     options.server_type = G_SERVER_TCP;

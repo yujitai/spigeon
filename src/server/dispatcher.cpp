@@ -28,11 +28,60 @@
 
 namespace zf {
 
-// Dispatcher pipe message hanler.
-void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data);
-// Tcp server socket io handler.
-void accept_new_conn(EventLoop *el, IOWatcher *w, int fd, int revents, void *data);
+/**
+ * @brief Dispatcher pipe message hanler
+ **/
+void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
+    UNUSED(el);
+    UNUSED(w);
+    UNUSED(revents);
+    int msg;
+    if (read(fd, &msg, sizeof(int)) != sizeof(int)) {
+        log_warning("can't read from notify pipe");
+        return;
+    }
+    GenericDispatcher *dispatcher = (GenericDispatcher*)data;
+    dispatcher->process_internal_notify(msg);
+}
 
+/**
+ * @brief Tcp server socket io handler
+ */
+void accept_new_conn(EventLoop *el, 
+        IOWatcher* w, 
+        int fd, 
+        int revents, 
+        void* data)  
+{
+    UNUSED(el);
+    UNUSED(w);
+    UNUSED(revents);
+    
+    struct timeval s, e, s1, e1; 
+    int cfd;
+    uint16_t cport;
+    char cip[128];
+    GenericDispatcher* dp = (GenericDispatcher*)data;
+    
+    gettimeofday(&s, NULL);
+    cfd = tcp_accept(fd, cip, &cport); 
+    if (cfd == NET_ERROR) {
+        log_warning("[accept socket failed]");
+        return;
+    }
+    
+    gettimeofday(&s1, NULL);
+    if (dp->dispatch_new_conn(cfd) == DISPATCHER_ERROR) {
+        log_warning("[dispatch new connection failed]");
+        return;
+    }
+
+    gettimeofday(&e1, NULL);
+    log_debug("[dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1, e1), cfd);
+
+    gettimeofday(&e, NULL);
+    log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), cfd);
+}
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
         : options(o),
@@ -118,14 +167,18 @@ void GenericDispatcher::stop() {
     // stop pipe watcher
     if (pipe_watcher)
         el->delete_io_event(pipe_watcher);
+
     // stop event loop
     if (io_watcher)
         el->delete_io_event(io_watcher);
+
     el->stop();
     log_notice("event loop stopped");
+
     // close socket
     close(listen_fd);
     log_notice("close listening socket");
+
     // tell workers to quit
     join_workers();
     log_notice("joined workers");
@@ -166,43 +219,8 @@ int GenericDispatcher::join_workers() {
             }
         }
     }
+
     return DISPATCHER_OK;
-}
-
-void accept_new_conn(EventLoop *el, 
-        IOWatcher* w, 
-        int fd, 
-        int revents, 
-        void* data)  
-{
-    UNUSED(el);
-    UNUSED(w);
-    UNUSED(revents);
-    
-    struct timeval s, e, s1, e1; 
-    int cfd;
-    uint16_t cport;
-    char cip[128];
-    GenericDispatcher* dp = (GenericDispatcher*)data;
-    
-    gettimeofday(&s, NULL);
-    cfd = tcp_accept(fd, cip, &cport); 
-    if (cfd == NET_ERROR) {
-        log_warning("[accept socket failed]");
-        return;
-    }
-    
-    gettimeofday(&s1, NULL);
-    if (dp->dispatch_new_conn(cfd) == DISPATCHER_ERROR) {
-        log_warning("[dispatch new connection failed]");
-        return;
-    }
-
-    gettimeofday(&e1, NULL);
-    log_debug("[dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1, e1), cfd);
-
-    gettimeofday(&e, NULL);
-    log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), cfd);
 }
 
 int GenericDispatcher::dispatch_new_conn(int fd) {
@@ -221,19 +239,6 @@ int GenericDispatcher::dispatch_new_conn(int fd) {
     }
        
     return DISPATCHER_OK;
-}
-
-void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
-    UNUSED(el);
-    UNUSED(w);
-    UNUSED(revents);
-    int msg;
-    if (read(fd, &msg, sizeof(int)) != sizeof(int)) {
-        log_warning("can't read from notify pipe");
-        return;
-    }
-    GenericDispatcher *dispatcher = (GenericDispatcher*)data;
-    dispatcher->process_internal_notify(msg);
 }
 
 void GenericDispatcher::process_internal_notify(int msg) {

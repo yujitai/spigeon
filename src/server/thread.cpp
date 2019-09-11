@@ -2,12 +2,10 @@
 
 namespace zf {
 
-void *run(void *arg) {
+void* run(void* arg) {
     Runnable *runnable = (Runnable*)arg;
-    if (runnable->_thread_name != "") {
-      // prctl(PR_SET_NAME, runnable->thread_name.c_str());
+    if (runnable->_thread_name != "") 
       pthread_setname_np(pthread_self(), runnable->_thread_name.c_str());
-    }
     runnable->run();
     pthread_exit(NULL);
 }

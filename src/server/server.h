@@ -22,6 +22,7 @@
 
 #include <string>
 
+#include "server/thread.h"
 #include "server/iconfig.h"
 #include "util/config_file.h"
 
@@ -61,9 +62,11 @@ public:
     int ssl_open;
 };
 
-class GenericServer : public IConfig {
+class GenericServer : public Runnable, 
+                      public IConfig 
+{
 public:
-    GenericServer();
+    GenericServer(const std::string& thread_name);
     virtual ~GenericServer(); 
 
     // Implementation of IConfig
@@ -73,7 +76,7 @@ public:
     int validate_conf() override;
 
     int init();
-    void run();
+    virtual void run() override;
     void stop();
 
     int64_t get_clients_count(std::string& clients_detail);

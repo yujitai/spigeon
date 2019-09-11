@@ -54,8 +54,9 @@ GenericServerOptions::GenericServerOptions()
 {
 }
 
-GenericServer::GenericServer() 
-    : _dispatcher(NULL) 
+GenericServer::GenericServer(const std::string& thread_name) 
+    : Runnable(thread_name),
+      _dispatcher(NULL) 
 {
 }
 

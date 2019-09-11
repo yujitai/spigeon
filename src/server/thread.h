@@ -15,7 +15,7 @@ enum {
 
 class Runnable {
 public:
-    Runnable(const std::string& thread_name="") 
+    Runnable(const std::string& thread_name = "") 
         : _thread_name(thread_name) {}
     virtual ~Runnable() {};
 

@@ -47,15 +47,14 @@ public:
     void expect_next(int next_state, size_t next_bytes_expected);
     void shift_processed(int next_state, size_t next_bytes_expected);
 
-    bool sslConnected;
     char ip[20];            
     uint16_t port;              
     int fd;             
     int current_state;
     int reply_list_size;
-    // data length that the user has processed.
+    // data total length that user has processed.
     size_t bytes_processed;
-    // data length that the user wants to receive.  
+    // data length that user wants to receive.  
     size_t bytes_expected;
     // current write pos.
     size_t cur_resp_pos;
@@ -64,11 +63,9 @@ public:
     void* priv_data;
     void (*priv_data_destructor)(void*);
     sds io_buffer;
-    SSL* ssl;
     IOWatcher* watcher;
     TimerWatcher* timer;
     std::list<Slice> reply_list;
-    std::vector<uint64_t> ping_times;
 };
 
 } // namespace zf
