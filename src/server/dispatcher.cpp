@@ -17,6 +17,16 @@
 
 #include "server/dispatcher.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <netdb.h>
+#include <errno.h>
+
 #include <pthread.h>
 #include <sys/time.h>
 
@@ -47,7 +57,7 @@ void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
 /**
  * @brief Tcp server socket io handler
  */
-void accept_new_conn(EventLoop *el, 
+void accept_tcp_conn(EventLoop *el, 
         IOWatcher* w, 
         int fd, 
         int revents, 
@@ -71,7 +81,7 @@ void accept_new_conn(EventLoop *el,
     }
     
     gettimeofday(&s1, NULL);
-    if (dp->dispatch_new_conn(cfd) == DISPATCHER_ERROR) {
+    if (dp->dispatch_new_conn(cfd, PROTOCOL_TCP) == DISPATCHER_ERROR) {
         log_warning("[dispatch new connection failed]");
         return;
     }
@@ -81,6 +91,46 @@ void accept_new_conn(EventLoop *el,
 
     gettimeofday(&e, NULL);
     log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), cfd);
+}
+
+/**
+ * @brief Udp server socket io handler
+ */
+void accept_udp_conn(EventLoop *el, 
+        IOWatcher* w, 
+        int fd, 
+        int revents, 
+        void* data)  
+{
+    UNUSED(el);
+    UNUSED(w);
+    UNUSED(revents);
+    
+    GenericDispatcher* dp = (GenericDispatcher*)data;
+
+    struct sockaddr_in ca;
+    memset(&ca, 0, sizeof(struct sockaddr_in));
+    socklen_t calen = sizeof(ca);
+    char buf[1024] = {0};
+
+    size_t r = ::recvfrom(fd, buf, 1024, 0, (struct sockaddr*)&ca, &calen);
+    if (r) {
+        char ip[20];
+        uint16_t port;
+        cout << "udp recv" << r << endl;
+        cout << "ip=" << ip << inet_ntoa(ca.sin_addr) << endl;
+        cout << "port=" << ntohs(ca.sin_port) << endl;
+    }
+
+    int new_fd = create_udp_server(8888, NULL);
+    cout << "new udp fd =" << new_fd << endl;
+
+    if (connect(new_fd, (struct sockaddr*)&ca, sizeof(struct sockaddr)) < 0) {
+        perror("connect");
+        return;
+    } 
+
+    dp->dispatch_new_conn(new_fd, PROTOCOL_UDP);
 }
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
@@ -134,9 +184,9 @@ int GenericDispatcher::init() {
         }
         log_trace("start listen port %d", options.port);
 
-        io_watcher = el->create_io_event(accept_new_conn, (void*)this);
+        io_watcher = el->create_io_event(accept_tcp_conn, (void*)this);
         if (io_watcher == NULL) {
-            log_fatal("Can't create io event for accept_new_conn");
+            log_fatal("Can't create io event for accept_tcp_conn");
             return DISPATCHER_ERROR;
         }
         el->start_io_event(io_watcher, listen_fd, EventLoop::READ);
@@ -145,13 +195,19 @@ int GenericDispatcher::init() {
     // set up the udp server socket.
     if (options.server_type == G_SERVER_UDP) {
         int fd = create_udp_server(options.port, options.host);
+        cout << "udp fd = "  << fd << endl;
         if (fd == NET_ERROR) {
             log_fatal("Can't create udp server on %s:%d",
                       options.host, options.port);
             return DISPATCHER_ERROR;
         }
 
-        // ...
+        io_watcher = el->create_io_event(accept_udp_conn, (void*)this);
+        if (io_watcher == NULL) {
+            log_fatal("Can't create io event for accept_tcp_conn");
+            return DISPATCHER_ERROR;
+        }
+        el->start_io_event(io_watcher, fd, EventLoop::READ);
     }
 
     for (int i = 0; i < options.worker_num; i++) {
@@ -223,7 +279,7 @@ int GenericDispatcher::join_workers() {
     return DISPATCHER_OK;
 }
 
-int GenericDispatcher::dispatch_new_conn(int fd) {
+int GenericDispatcher::dispatch_new_conn(int fd, int protocol) {
     log_debug("[dispatch new connection] fd[%d]", fd);
 
     // Just use a round-robin right now.
@@ -233,9 +289,24 @@ int GenericDispatcher::dispatch_new_conn(int fd) {
     worker->mq_push((void*)nfd);
 
     // Notify worker the arrival of a new connection.
-    if (worker->notify(GenericWorker::NEWCONNECTION) != WORKER_OK) {
-        log_warning("[write worker notify pipe failed");
-        return DISPATCHER_ERROR;             
+    switch (protocol) {
+        case PROTOCOL_TCP: {
+            if (worker->notify(GenericWorker::TCPCONNECTION) != WORKER_OK) {
+                log_warning("[write worker notify pipe failed");
+                return DISPATCHER_ERROR;             
+            }
+            break;
+        }
+        case PROTOCOL_UDP: {
+            if (worker->notify(GenericWorker::UDPCONNECTION) != WORKER_OK) {
+                log_warning("[write worker notify pipe failed");
+                return DISPATCHER_ERROR;             
+            }
+            break;
+        }
+        default:
+            log_warning("[unknown protocol]");
+            break;
     }
        
     return DISPATCHER_OK;

@@ -8,26 +8,30 @@
  
  
 /**
- * @file common.h
+ * @file udp_connection.h
  * @author yujitai(yujitai@zuoyebang.com)
  * @version $Revision$ 
- * @brief common header file and define.
+ * @brief 
  *  
  **/
 
 
-#ifndef  __COMMON_H_
-#define  __COMMON_H_
+#ifndef  __UDP_CONNECTION_H_
+#define  __UDP_CONNECTION_H_
 
-// size_t
-#include <stddef.h>
+namespace zf {
 
-// uint16_t
-#include <stdint.h>
+/**
+ * UDPConnection
+ */
+class UDPConnection : public Connection {
+public:
+    UDPConnection();
+    virtual ~UDPConnection() override;
+};
 
-#include <iostream>
-using namespace std;
+} // namespace zf
 
-#endif  //__COMMON_H_
+#endif  //__UDP_CONNECTION_H_
 
 

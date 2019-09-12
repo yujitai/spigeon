@@ -71,19 +71,26 @@ static int socket_listen(int s, struct sockaddr *sa, socklen_t len) {
     return NET_OK;
 }
 
-int create_udp_server(int port, const char* bind_addr) {
+int create_udp_server(int port, const char* ip) {
     int s;
     struct sockaddr_in sa;
 
     if ((s = create_socket(AF_INET, SOCK_DGRAM)) == NET_ERROR)
         return NET_ERROR;
 
-    memset(&sa,0,sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
     sa.sin_port = htons(port);
     sa.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind_addr && inet_aton(bind_addr, &sa.sin_addr) == 0) {
-        log_warning("invalid bind address");
+    socklen_t slen = sizeof(sa);
+    if (ip && inet_aton(ip, &sa.sin_addr) == 0) {
+        log_warning("invalid ip address");
+        close(s);
+        return NET_ERROR;
+    }
+
+    if (bind(s, (sockaddr*)&sa, slen) == -1) {
+        log_warning("bind: %s", strerror(errno));
         close(s);
         return NET_ERROR;
     }
@@ -136,7 +143,7 @@ int tcp_accept(int s, char* ip, uint16_t* port) {
     int fd;
     struct sockaddr_in sa;
     socklen_t salen = sizeof(sa);
-    if ((fd = generic_accept(s,(struct sockaddr*)&sa,&salen)) == NET_ERROR)
+    if ((fd = generic_accept(s, (struct sockaddr*)&sa, &salen)) == NET_ERROR)
         return NET_ERROR;
 
     if (ip) strcpy(ip,inet_ntoa(sa.sin_addr));

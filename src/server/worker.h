@@ -38,7 +38,8 @@ class GenericWorker: public Runnable {
     // notification messages
     enum {
         QUIT = 0,
-        NEWCONNECTION = 1
+        TCPCONNECTION = 1,
+        UDPCONNECTION = 2
     };
     
     GenericWorker(const GenericServerOptions &options, 
@@ -51,6 +52,8 @@ class GenericWorker: public Runnable {
     bool mq_pop(void **msg);            // pop from message queue
     virtual void read_io(int fd);
     virtual void write_io(int fd);
+    virtual void udp_read_io(int fd);
+    virtual void udp_write_io(int fd);
     virtual int notify(int msg);
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
@@ -63,7 +66,8 @@ public:
     void process_internal_notify(int msg);
 protected:
     void stop();
-    Connection *new_conn(int fd);
+    Connection* new_tcp_conn(int fd);
+    Connection* new_udp_conn(int fd);
     void close_conn(Connection *c);
     virtual void before_remove_conn(Connection *c) { UNUSED(c); }
     virtual void after_remove_conn(Connection *c) { UNUSED(c); }

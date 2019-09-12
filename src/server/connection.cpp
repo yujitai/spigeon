@@ -17,7 +17,36 @@
 
 #include "server/connection.h"
 
+#include "util/zmalloc.h"
+
 namespace zf {
+
+Connection::Connection(int client_fd)
+    : fd(client_fd), 
+      current_state(0),
+      reply_list_size(0), 
+      bytes_processed(0), 
+      bytes_expected(1), 
+      cur_resp_pos(0),
+      priv_data(NULL), 
+      priv_data_destructor(NULL),
+      watcher(NULL), 
+      timer(NULL)
+{
+    io_buffer = sdsempty();
+}
+
+Connection::~Connection() {
+    sdsfree(io_buffer);
+
+    std::list<Slice>::iterator it;
+    for (it = reply_list.begin(); 
+            it != reply_list.end(); ++it)
+    {
+        zfree((void*)(*it).data());
+    }
+    reply_list.clear();
+}
 
 void Connection::reset(int initial_state, size_t initial_bytes_expected) {
     bytes_processed = 0;

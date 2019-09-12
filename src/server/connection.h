@@ -40,8 +40,8 @@ class TimerWatcher;
  **/
 class Connection {
 public:
-   Connection(int fd);
-    ~Connection();
+    Connection(int fd);
+    virtual ~Connection();
 
     void reset(int initial_state, size_t initial_bytes_expected);
     void expect_next(int next_state, size_t next_bytes_expected);
