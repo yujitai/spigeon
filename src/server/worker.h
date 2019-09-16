@@ -21,7 +21,8 @@
 #include "server/thread.h"
 #include "server/server.h"
 #include "server/dispatcher.h"
-#include "server/connection.h"
+#include "server/tcp_connection.h"
+#include "server/udp_connection.h"
 
 namespace zf {
 
@@ -42,18 +43,23 @@ class GenericWorker: public Runnable {
         UDPCONNECTION = 2
     };
     
-    GenericWorker(const GenericServerOptions &options, 
+    GenericWorker(const GenericServerOptions& options, 
             const std::string& thread_name);
     virtual ~GenericWorker();
 
     virtual int init();
     void run();
-    void mq_push(void *msg);            // push into message queue
-    bool mq_pop(void **msg);            // pop from message queue
-    virtual void read_io(int fd);
-    virtual void write_io(int fd);
+    void mq_push(void *msg);            
+    bool mq_pop(void **msg);    
+    
+    // process tcp io event
+    virtual void tcp_read_io(int fd);
+    virtual void tcp_write_io(int fd);
+
+    // process udp io event
     virtual void udp_read_io(int fd);
     virtual void udp_write_io(int fd);
+
     virtual int notify(int msg);
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
@@ -72,8 +78,8 @@ protected:
     virtual void before_remove_conn(Connection *c) { UNUSED(c); }
     virtual void after_remove_conn(Connection *c) { UNUSED(c); }
     void close_all_conns();
-    void remove_conn(Connection *c);      // remove but not close the connection
-    int add_reply(Connection *c, const Slice& reply);
+    void remove_conn(Connection* c);      // remove but not close the connection
+    int add_reply(Connection* c, const Slice& reply);
     int reply_list_size(Connection *c);
     virtual int process_io_buffer(Connection *c) = 0;
 

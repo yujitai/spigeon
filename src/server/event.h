@@ -64,10 +64,10 @@ public:
     void signal_custom_event(CustomWatcher *w);
     void delete_custom_event(CustomWatcher *w);
 
-    /* Global current time */
+    // Global current time
     static unsigned long current_time();
 
-    /* reference to owner of the EventLoop */
+    // reference to owner of the EventLoop
     void *owner;
 
     inline struct ev_loop* getLoop() {
@@ -77,8 +77,11 @@ public:
 private:
     friend class HttpClient;
     struct ev_loop *loop;
-    /* Reference to the default loop, not thread safe,
-       only used for current_time()  */
+
+    /** 
+     * Reference to the default loop, not thread safe,
+     * only used for current_time()  
+     */
     static EventLoop *default_loop;     
 };
 

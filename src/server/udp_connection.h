@@ -19,6 +19,9 @@
 #ifndef  __UDP_CONNECTION_H_
 #define  __UDP_CONNECTION_H_
 
+#include "server/common.h"
+#include "server/connection.h"
+
 namespace zf {
 
 /**
@@ -26,7 +29,7 @@ namespace zf {
  */
 class UDPConnection : public Connection {
 public:
-    UDPConnection();
+    UDPConnection(int fd);
     virtual ~UDPConnection() override;
 };
 

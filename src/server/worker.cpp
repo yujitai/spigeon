@@ -52,7 +52,7 @@ static void recv_notify(EventLoop *el,
 /**
  * @brief Callback for connection io events 
  */
-void conn_io_cb(EventLoop *el, 
+void tcp_conn_io_cb(EventLoop *el, 
         IOWatcher *w, 
         int fd, 
         int revents, 
@@ -63,14 +63,14 @@ void conn_io_cb(EventLoop *el,
 
     GenericWorker* worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ) {
-        worker->read_io(fd);
+        worker->tcp_read_io(fd);
     }
     if (revents & EventLoop::WRITE) {
-        worker->write_io(fd);
+        worker->tcp_write_io(fd);
     } 
 }
 
-void conn_udp_io_cb(EventLoop *el, 
+void udp_conn_io_cb(EventLoop *el, 
         IOWatcher *w, 
         int fd, 
         int revents, 
@@ -111,7 +111,7 @@ void cron_cb(EventLoop* el, TimerWatcher* w, void* data)
     worker->process_cron_work();
 }
 
-void GenericWorker::read_io(int fd) {
+void GenericWorker::tcp_read_io(int fd) {
     assert(fd >= 0);
     
     if ((unsigned int)fd >= conns.size()) {
@@ -119,16 +119,16 @@ void GenericWorker::read_io(int fd) {
         return;
     }
 
-    Connection* c = conns[fd];
+    TCPConnection* c = (TCPConnection*)conns[fd];
     if (c == NULL) {
         log_warning("connection not exists");
         return;
     }
   
-    int rlen = c->bytes_expected;
-    size_t iblen = sdslen(c->io_buffer);
-    c->io_buffer = sdsMakeRoomFor(c->io_buffer, rlen);
-    int r = sock_read_data(fd, c->io_buffer + iblen, rlen);
+    int rlen = c->_bytes_expected;
+    size_t iblen = sdslen(c->_io_buffer);
+    c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
+    int r = sock_read_data(fd, c->_io_buffer + iblen, rlen);
     if (r == NET_ERROR) {
         log_debug("sock_read_data: return error, close connection");
         close_conn(c);
@@ -138,12 +138,12 @@ void GenericWorker::read_io(int fd) {
         close_conn(c);
         return;
     } else if (r > 0) {
-        sdsIncrLen(c->io_buffer, r);
+        sdsIncrLen(c->_io_buffer, r);
     }
-    c->last_interaction = el->now();
+    c->_last_interaction = el->now();
 
     // Upper process.
-    if (sdslen(c->io_buffer) - c->bytes_processed >= c->bytes_expected) {
+    if (sdslen(c->_io_buffer) - c->_bytes_processed >= c->_bytes_expected) {
         if (WORKER_OK != this->process_io_buffer(c)) {
             log_debug("read_io: user return error, close connection");
             close_conn(c);
@@ -159,16 +159,17 @@ void GenericWorker::udp_read_io(int fd) {
         return;
     }
 
-    Connection* c = conns[fd];
+    UDPConnection* c = (UDPConnection*)conns[fd];
     if (c == NULL) {
         log_warning("connection not exists");
         return;
     }
+#if 0
 
-    int rlen = c->bytes_expected;
-    size_t iblen = sdslen(c->io_buffer);
-    c->io_buffer = sdsMakeRoomFor(c->io_buffer, rlen);
-    int r = sock_read_data(fd, c->io_buffer + iblen, rlen);
+    int rlen = c->_bytes_expected;
+    size_t iblen = sdslen(c->_io_buffer);
+    c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
+    int r = sock_read_data(fd, c->_io_buffer + iblen, rlen);
     if (r == NET_ERROR) {
         log_debug("sock_read_data: return error, close connection");
         close_conn(c);
@@ -178,69 +179,72 @@ void GenericWorker::udp_read_io(int fd) {
         close_conn(c);
         return;
     } else if (r > 0) {
-        cout << "fuck udp read -> " << c->io_buffer + iblen << endl;
-        sdsIncrLen(c->io_buffer, r);
+        cout << "fuck udp read -> " << c->_io_buffer + iblen << endl;
+        sdsIncrLen(c->_io_buffer, r);
     }
-    c->last_interaction = el->now();
-#if 0
+    c->_last_interaction = el->now();
     // Upper process.
-    if (WORKER_OK != this->process_io_buffer(c)) {
+    if (WORKER_OK != this->process__io_buffer(c)) {
         log_debug("read_io: user return error, close connection");
         close_conn(c);
     }
 #endif
 }
 
-int GenericWorker::add_reply(Connection *c, const Slice& reply) {
-    c->reply_list.push_back(reply);
-    c->reply_list_size++;
-    enable_events(c, EventLoop::WRITE);
-
-    return c->reply_list_size;
+int GenericWorker::add_reply(Connection* c, const Slice& reply) {
+    if (dynamic_cast<TCPConnection*>(c)) {
+        TCPConnection* tc = dynamic_cast<TCPConnection*>(c);
+        tc->_reply_list.push_back(reply);
+        tc->_reply_list_size++;
+        enable_events(tc, EventLoop::WRITE);
+        return tc->_reply_list_size;
+    } else if (dynamic_cast<UDPConnection*>(c)) {
+        UDPConnection* uc = dynamic_cast<UDPConnection*>(c);
+    }
 }
 
 int GenericWorker::reply_list_size(Connection *c) {
-    return c->reply_list_size;
+    //return c->_reply_list_size;
 }
 
-void GenericWorker::write_io(int fd) {
+void GenericWorker::tcp_write_io(int fd) {
     assert(fd >= 0);
     if ((unsigned int)fd >= conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
-    Connection *c = conns[fd];
+    TCPConnection* c = (TCPConnection*)conns[fd];
     if (c == NULL) {
         log_warning("connection not exists");
         return;
     }
 
-    while (!c->reply_list.empty()) {
-        Slice reply = c->reply_list.front();
+    while (! c->_reply_list.empty()) {
+        Slice reply = c->_reply_list.front();
         int w = sock_write_data(fd,
-                reply.data() + c->cur_resp_pos,
-                reply.size() - c->cur_resp_pos);
+                reply.data() + c->_bytes_written,
+                reply.size() - c->_bytes_written);
 
         if (w == NET_ERROR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;
         } else if(w == 0) {         /* would block */
-            log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->cur_resp_pos), c->fd, c->ip);
+            log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->_bytes_written), c->_fd, c->_ip);
             return;
-        } else if ((w + c->cur_resp_pos) == reply.size()) { /* finish */
-            c->reply_list.pop_front();
-            c->reply_list_size--;
-            c->cur_resp_pos = 0;
+        } else if ((w + c->_bytes_written) == reply.size()) { /* finish */
+            c->_reply_list.pop_front();
+            c->_reply_list_size--;
+            c->_bytes_written = 0;
             zfree((void*)reply.data());
         } else {
-            c->cur_resp_pos += w;
+            c->_bytes_written += w;
         }
     }
-    c->last_interaction = el->now();
+    c->_last_interaction = el->now();
 
     /* no more replies to write */
-    if (c->reply_list.empty())
+    if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
 }
 
@@ -250,52 +254,53 @@ void GenericWorker::udp_write_io(int fd) {
         log_warning("invalid fd: %d", fd);
         return;
     }
-    Connection *c = conns[fd];
+    UDPConnection* c = (UDPConnection*)conns[fd]; 
     if (c == NULL) {
         log_warning("connection not exists");
         return;
     }
-
-    while (!c->reply_list.empty()) {
-        Slice reply = c->reply_list.front();
+#if 0
+    while (! c->_reply_list.empty()) {
+        Slice reply = c->_reply_list.front();
         int w = sock_write_data(fd,
-                reply.data() + c->cur_resp_pos,
-                reply.size() - c->cur_resp_pos);
+                reply.data() + c->_bytes_written,
+                reply.size() - c->_bytes_written);
 
         if (w == NET_ERROR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;
         } else if(w == 0) {         /* would block */
-            log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->cur_resp_pos), c->fd, c->ip);
+            log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->_bytes_written), c->_fd, c->_ip);
             return;
-        } else if ((w + c->cur_resp_pos) == reply.size()) { /* finish */
-            c->reply_list.pop_front();
-            c->reply_list_size--;
-            c->cur_resp_pos = 0;
+        } else if ((w + c->_bytes_written) == reply.size()) { /* finish */
+            c->_reply_list.pop_front();
+            c->_reply_list_size--;
+            c->_bytes_written = 0;
             zfree((void*)reply.data());
         } else {
-            c->cur_resp_pos += w;
+            c->_bytes_written += w;
         }
     }
-    c->last_interaction = el->now();
+    c->_last_interaction = el->now();
 
     /* no more replies to write */
-    if (c->reply_list.empty())
+    if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
+#endif
 }
 
 
 void GenericWorker::disable_events(Connection *c, int events) {
-    el->stop_io_event(c->watcher, c->fd, events);
+    el->stop_io_event(c->_watcher, c->_fd, events);
 }
 
 void GenericWorker::enable_events(Connection *c, int events) {
-    el->start_io_event(c->watcher, c->fd, events);
+    el->start_io_event(c->_watcher, c->_fd, events);
 }
 
 void GenericWorker::start_timer(Connection *c) {
-    el->start_timer(c->timer, options.tick);
+    el->start_timer(c->_timer, options.tick);
 }
 
 Connection* GenericWorker::new_tcp_conn(int fd) {
@@ -304,13 +309,13 @@ Connection* GenericWorker::new_tcp_conn(int fd) {
 
     sock_setnonblock(fd);
     sock_setnodelay(fd);  
-    Connection* c = new Connection(fd);
-    sock_peer_to_str(fd, c->ip, &(c->port));
-    c->last_interaction = el->now();
+    Connection* c = new TCPConnection(fd);
+    sock_peer_to_str(fd, c->_ip, &(c->_port));
+    c->_last_interaction = el->now();
 
     // create io event and timer for the connection.
-    c->watcher = el->create_io_event(conn_io_cb, (void*)c);
-    c->timer = el->create_timer(timeout_cb, (void*)c, true);
+    c->_watcher = el->create_io_event(tcp_conn_io_cb, (void*)c);
+    c->_timer = el->create_timer(timeout_cb, (void*)c, true);
 
     // start io and timer.
     if (options.ssl_open) {
@@ -333,12 +338,12 @@ Connection* GenericWorker::new_udp_conn(int fd) {
     log_debug("[new udp connection] fd[%d]", fd);
 
     sock_setnonblock(fd);
-    Connection* c = new Connection(fd);
-    c->last_interaction = el->now();
+    Connection* c = new UDPConnection(fd);
+    c->_last_interaction = el->now();
 
     // create io event and timer for the connection.
-    c->watcher = el->create_io_event(conn_udp_io_cb, (void*)c);
-    c->timer = el->create_timer(timeout_cb, (void*)c, true);
+    c->_watcher = el->create_io_event(udp_conn_io_cb, (void*)c);
+    c->_timer = el->create_timer(timeout_cb, (void*)c, true);
 
     // start io and timer.
     if (options.ssl_open) {
@@ -358,7 +363,7 @@ Connection* GenericWorker::new_udp_conn(int fd) {
 
 void GenericWorker::close_conn(Connection *c) {
     log_debug("close connection");
-    int fd = c->fd; 
+    int fd = c->_fd; 
     remove_conn(c);
     close(fd);
 }
@@ -372,15 +377,16 @@ void GenericWorker::close_all_conns() {
 }
 
 void GenericWorker::remove_conn(Connection *c) {
-    c->last_interaction = el->now();
+    c->_last_interaction = el->now();
     before_remove_conn(c);
-    el->delete_io_event(c->watcher);  
-    el->delete_timer(c->timer);
+    el->delete_io_event(c->_watcher);  
+    el->delete_timer(c->_timer);
+    /*
     if (c->priv_data_destructor) {
         c->priv_data_destructor(c->priv_data);
     }
-    // stat_decr("current_connections");
-    conns[c->fd] = NULL;
+    */
+    conns[c->_fd] = NULL;
     after_remove_conn(c);
 
     delete c;
@@ -514,10 +520,10 @@ void GenericWorker::process_notify(int msg) {
 }
 
 void GenericWorker::process_timeout(Connection* c) {
-    if ((el->now() - c->last_interaction) > 
+    if ((el->now() - c->_last_interaction) > 
             (uint64_t)options.connection_timeout)
     {
-        log_debug("[time out] close fd[%d]", c->fd);
+        log_debug("[time out] close fd[%d]", c->_fd);
         close_conn(c);
     }
 }

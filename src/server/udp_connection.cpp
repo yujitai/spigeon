@@ -8,27 +8,26 @@
  
  
 /**
- * @file common.h
+ * @file udp_connection.cpp
  * @author yujitai(yujitai@zuoyebang.com)
  * @version $Revision$ 
- * @brief common header file and define.
+ * @brief 
  *  
  **/
 
+#include "server/udp_connection.h"
 
-#ifndef  __COMMON_H_
-#define  __COMMON_H_
+namespace zf {
 
-// size_t
-#include <stddef.h>
+UDPConnection::UDPConnection(int fd)
+    : Connection(fd)
+{
+}
 
-// uint16_t
-#include <stdint.h>
+UDPConnection::~UDPConnection() {
+}
 
-// cout 
-#include <iostream>
-using namespace std;
 
-#endif  //__COMMON_H_
+} // namespace zf
 
 
