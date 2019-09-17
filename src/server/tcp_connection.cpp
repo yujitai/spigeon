@@ -24,17 +24,13 @@ namespace zf {
 TCPConnection::TCPConnection(int fd) 
     : Connection(fd),
       _receive_state(0),
-      _reply_list_size(0), 
       _bytes_processed(0), 
       _bytes_expected(1), 
       _bytes_written(0)
 {
-    _io_buffer = sdsempty();
 }
 
 TCPConnection::~TCPConnection() {
-    sdsfree(_io_buffer);
-
     std::list<Slice>::iterator it;
     for (it = _reply_list.begin(); 
         it != _reply_list.end(); ++it) 

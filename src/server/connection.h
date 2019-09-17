@@ -22,8 +22,10 @@
 #include "server/common.h"
 
 #include <openssl/ssl.h>
+#include <list>
 
-#include <vector>
+#include "util/sds.h"
+#include "util/slice.h"
 
 namespace zf {
 
@@ -50,6 +52,11 @@ public:
 
     IOWatcher* _watcher;
     TimerWatcher* _timer;
+
+    // simple dynamic string
+    sds _io_buffer;
+    int _reply_list_size;
+    std::list<Slice> _reply_list;
 };
 
 } // namespace zf

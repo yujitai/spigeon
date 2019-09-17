@@ -28,16 +28,8 @@ public:
     SimpleWorker(const zf::GenericServerOptions &options);
     ~SimpleWorker();
 
-    int process_request(zf::Connection *c,
-            const zf::Slice &header, 
-            const zf::Slice &body);
 protected:
-    enum state_t {
-        STATE_IDLE = 0,
-        STATE_HEAD = 1,
-        STATE_BODY = 2,
-    };
-
+    // user must impl this method
     int process_io_buffer(zf::Connection *c);
 };
 

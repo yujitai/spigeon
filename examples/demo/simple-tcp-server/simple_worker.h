@@ -25,20 +25,22 @@ using namespace zf;
 
 class SimpleWorker: public zf::GenericWorker {
 public:
-    SimpleWorker(const zf::GenericServerOptions &options);
+    SimpleWorker(const zf::GenericServerOptions& options);
     ~SimpleWorker();
 
-    int process_request(zf::Connection *c,
-            const zf::Slice &header, 
-            const zf::Slice &body);
+    int process_request(zf::Connection* c,
+            const zf::Slice& header, 
+            const zf::Slice& body);
 protected:
+    // user provide the data process method.
     enum state_t {
         STATE_IDLE = 0,
         STATE_HEAD = 1,
         STATE_BODY = 2,
     };
 
-    int process_io_buffer(zf::Connection *c);
+    // user must impl the interface.
+    int process_io_buffer(zf::Connection* c) override;
 };
 
 #endif  // __SIMPLE_WORKER_H_

@@ -19,11 +19,7 @@
 #ifndef  __TCP_CONNECTION_H_
 #define  __TCP_CONNECTION_H_
 
-#include <list>
-
 #include "server/connection.h"
-#include "util/sds.h"
-#include "util/slice.h"
 
 namespace zf {
 
@@ -50,12 +46,6 @@ public:
 
     // current write position.
     size_t _bytes_written;
-
-    // simple dynamic string.
-    sds _io_buffer;   
-
-    int _reply_list_size;
-    std::list<Slice> _reply_list;
 };
 
 } // namespace zf

@@ -39,8 +39,7 @@ int init_server() {
     g_server = new GenericServer("simple_server");
     GenericServerOptions options;
     memset(&options, 0, sizeof(options));
-    //options.server_type = G_SERVER_TCP;
-    options.server_type = G_SERVER_UDP;
+    options.server_type = G_SERVER_TCP;
     options.port = 8888;
     options.worker_num = 1;
     options.connection_timeout = 30 * 1000 * 1000;  // 当连接空闲过久后，server会主动断开连接

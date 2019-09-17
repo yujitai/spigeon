@@ -18,7 +18,7 @@
 
 #include "simple_worker.h"
 
-SimpleWorker::SimpleWorker(const GenericServerOptions &o)
+SimpleWorker::SimpleWorker(const GenericServerOptions& o)
     : zf::GenericWorker(o, "simple_worker") 
 { 
 
@@ -28,11 +28,13 @@ SimpleWorker::~SimpleWorker() {
 
 }
 
-int SimpleWorker::process_io_buffer(Connection *c) {
-    if (c->current_state == STATE_IDLE) {
+int SimpleWorker::process_io_buffer(Connection* conn) {
+    TCPConnection* c = (TCPConnection*)conn;
+
+    if (c->_receive_state == STATE_IDLE) {
         c->reset(STATE_HEAD, sizeof(nshead_t));
-    } else if (c->current_state == STATE_HEAD) {
-        nshead_t* hdr = (nshead_t*)c->io_buffer;
+    } else if (c->_receive_state == STATE_HEAD) {
+        nshead_t* hdr = (nshead_t*)c->_io_buffer;
         // check magic number
         if (hdr->magic_num != NSHEAD_MAGICNUM)
             return WORKER_ERROR;
@@ -42,28 +44,28 @@ int SimpleWorker::process_io_buffer(Connection *c) {
          *  now we expect a body. 
          */
         c->expect_next(STATE_BODY, hdr->body_len);
-    } else if (c->current_state == STATE_BODY) {
-        nshead_t *hdr = (nshead_t*)c->io_buffer;
+    } else if (c->_receive_state == STATE_BODY) {
+        nshead_t *hdr = (nshead_t*)c->_io_buffer;
 
         /** 
          *  Now we have a complete request in io_buffer.
          */
-        Slice header(c->io_buffer, sizeof(nshead_t));
-        Slice body(c->io_buffer + sizeof(nshead_t), hdr->body_len);
+        Slice header(c->_io_buffer, sizeof(nshead_t));
+        Slice body(c->_io_buffer + sizeof(nshead_t), hdr->body_len);
 
         int ret = this->process_request(c, header, body);
         if (ret != WORKER_OK)
             return ret;
 
-        c->shift_processed(STATE_HEAD, sizeof(nshead_t));
+        c->shrink_processed(STATE_HEAD, sizeof(nshead_t));
     } else {
-        log_fatal("unexpected state:%d", c->current_state);
+        log_fatal("unexpected state:%d", c->_receive_state);
     }
 
     return WORKER_OK;
 }
 
-int SimpleWorker::process_request(Connection *c,
+int SimpleWorker::process_request(Connection* c,
         const Slice& header, 
         const Slice& body) 
 {

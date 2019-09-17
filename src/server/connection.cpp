@@ -24,11 +24,14 @@ Connection::Connection(int fd)
       _priv_data(NULL), 
       _priv_data_destructor(NULL),
       _watcher(NULL), 
-      _timer(NULL)
+      _timer(NULL),
+      _reply_list_size(0)
 {
+    _io_buffer = sdsempty();
 }
 
 Connection::~Connection() {
+    sdsfree(_io_buffer);
 }
 
 } // namespace zf

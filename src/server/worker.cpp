@@ -164,31 +164,15 @@ void GenericWorker::udp_read_io(int fd) {
         log_warning("connection not exists");
         return;
     }
-#if 0
 
-    int rlen = c->_bytes_expected;
-    size_t iblen = sdslen(c->_io_buffer);
-    c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
-    int r = sock_read_data(fd, c->_io_buffer + iblen, rlen);
-    if (r == NET_ERROR) {
-        log_debug("sock_read_data: return error, close connection");
-        close_conn(c);
-        return;
-    } else if (r == NET_PEER_CLOSED) {
-        log_debug("sock_read_data: return 0, peer closed");
-        close_conn(c);
-        return;
-    } else if (r > 0) {
-        cout << "fuck udp read -> " << c->_io_buffer + iblen << endl;
+    c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, 1024);
+    int r = sock_read_data(fd, c->_io_buffer, 1024);
+    if (r > 0) {
         sdsIncrLen(c->_io_buffer, r);
     }
-    c->_last_interaction = el->now();
-    // Upper process.
-    if (WORKER_OK != this->process__io_buffer(c)) {
-        log_debug("read_io: user return error, close connection");
-        close_conn(c);
-    }
-#endif
+    c->_last_interaction - el->now();
+
+    this->process_io_buffer(c);
 }
 
 int GenericWorker::add_reply(Connection* c, const Slice& reply) {
@@ -200,10 +184,14 @@ int GenericWorker::add_reply(Connection* c, const Slice& reply) {
         return tc->_reply_list_size;
     } else if (dynamic_cast<UDPConnection*>(c)) {
         UDPConnection* uc = dynamic_cast<UDPConnection*>(c);
+        uc->_reply_list.push_back(reply);
+        uc->_reply_list_size++;
+        enable_events(uc, EventLoop::WRITE);
+        return uc->_reply_list_size;
     }
 }
 
-int GenericWorker::reply_list_size(Connection *c) {
+int GenericWorker::reply_list_size(Connection* c) {
     //return c->_reply_list_size;
 }
 
@@ -259,35 +247,21 @@ void GenericWorker::udp_write_io(int fd) {
         log_warning("connection not exists");
         return;
     }
-#if 0
+
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
-        int w = sock_write_data(fd,
-                reply.data() + c->_bytes_written,
-                reply.size() - c->_bytes_written);
-
-        if (w == NET_ERROR) {
-            log_debug("sock_write_data: return error, close connection");
-            close_conn(c);
-            return;
-        } else if(w == 0) {         /* would block */
-            log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->_bytes_written), c->_fd, c->_ip);
-            return;
-        } else if ((w + c->_bytes_written) == reply.size()) { /* finish */
+        int w = sock_write_data(fd, reply.data(), reply.size());
+        if (w == reply.size()) {
             c->_reply_list.pop_front();
             c->_reply_list_size--;
-            c->_bytes_written = 0;
             zfree((void*)reply.data());
-        } else {
-            c->_bytes_written += w;
-        }
+        } 
     }
     c->_last_interaction = el->now();
 
     /* no more replies to write */
     if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
-#endif
 }
 
 

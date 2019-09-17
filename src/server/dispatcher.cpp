@@ -283,7 +283,7 @@ int GenericDispatcher::dispatch_new_conn(int fd, int protocol) {
     log_debug("[dispatch new connection] fd[%d]", fd);
 
     // Just use a round-robin right now.
-    GenericWorker *worker = workers[next_worker];
+    GenericWorker* worker = workers[next_worker];
     next_worker = (next_worker + 1) % workers.size();
     int* nfd = new int(fd);
     worker->mq_push((void*)nfd);
