@@ -8,27 +8,30 @@
  
  
 /**
- * @file common.h
+ * @file udp_socket.h
  * @author yujitai(yujitai@zuoyebang.com)
  * @version $Revision$ 
- * @brief common header file and define.
+ * @brief 
  *  
  **/
 
 
-#ifndef  __COMMON_H_
-#define  __COMMON_H_
+#ifndef  __UDP_SOCKET_H_
+#define  __UDP_SOCKET_H_
 
-// size_t
-#include <stddef.h>
+#include "server/socket.h"
 
-// uint16_t
-#include <stdint.h>
+namespace zf {
 
-// cout 
-#include <iostream>
-using namespace std;
+class UDPSocket : public Socket {
+public:
+    UDPSocket(int domain, int type);
+private:
+    SOCKET _s;
+};
 
-#endif  //__COMMON_H_
+} // namespace zf 
+
+#endif  //__UDP_SOCKET_H_
 
 

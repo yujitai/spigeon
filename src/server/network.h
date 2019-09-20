@@ -19,7 +19,9 @@
 #ifndef  __NETWORK_H_
 #define  __NETWORK_H_
 
-#include "common.h"
+#include "common_include.h"
+
+#include "server/socket.h"
 
 namespace zf {
 

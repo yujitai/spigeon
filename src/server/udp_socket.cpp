@@ -8,35 +8,22 @@
  
  
 /**
- * @file udp_connection.h
+ * @file udp_socket.cpp
  * @author yujitai(yujitai@zuoyebang.com)
  * @version $Revision$ 
  * @brief 
  *  
  **/
 
-
-#ifndef  __UDP_CONNECTION_H_
-#define  __UDP_CONNECTION_H_
-
-#include "server/connection.h"
+#include "server/udp_socket.h"
 
 namespace zf {
 
-/**
- * UDPConnection
- * 暂时不支持mcpack协议
- */
-class UDPConnection : public Connection {
-public:
-    UDPConnection(int fd);
-    virtual ~UDPConnection() override;
-
+UDPSocket::UDPSocket(int domain, int type) {
     
-};
+}
+
 
 } // namespace zf
-
-#endif  //__UDP_CONNECTION_H_
 
 

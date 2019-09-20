@@ -192,7 +192,7 @@ int GenericWorker::add_reply(Connection* c, const Slice& reply) {
 }
 
 int GenericWorker::reply_list_size(Connection* c) {
-    //return c->_reply_list_size;
+    // return c->_reply_list_size;
 }
 
 void GenericWorker::tcp_write_io(int fd) {

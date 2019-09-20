@@ -18,7 +18,7 @@
 #ifndef __SERVER_H_
 #define __SERVER_H_
 
-#include "server/common.h"
+#include "server/common_include.h"
 
 #include <string>
 

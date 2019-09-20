@@ -8,7 +8,7 @@
  
  
 /**
- * @file udp_connection.h
+ * @file ipv6_address.h
  * @author yujitai(yujitai@zuoyebang.com)
  * @version $Revision$ 
  * @brief 
@@ -16,27 +16,23 @@
  **/
 
 
-#ifndef  __UDP_CONNECTION_H_
-#define  __UDP_CONNECTION_H_
+#ifndef  __IPV6_ADDRESS_H_
+#define  __IPV6_ADDRESS_H_
 
-#include "server/connection.h"
+#include "server/socket_address.h"
 
 namespace zf {
 
 /**
- * UDPConnection
- * 暂时不支持mcpack协议
- */
-class UDPConnection : public Connection {
+ *  TODO:暂时不支持ipv6
+ **/
+class Ipv6Address : public SocketAddress {
 public:
-    UDPConnection(int fd);
-    virtual ~UDPConnection() override;
 
-    
 };
 
 } // namespace zf
 
-#endif  //__UDP_CONNECTION_H_
+#endif  //__IPV6_ADDRESS_H_
 
 

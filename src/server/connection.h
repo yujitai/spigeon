@@ -19,7 +19,7 @@
 #ifndef  __CONNECTION_H_
 #define  __CONNECTION_H_
 
-#include "server/common.h"
+#include "server/common_include.h"
 
 #include <openssl/ssl.h>
 #include <list>

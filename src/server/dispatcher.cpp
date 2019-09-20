@@ -156,6 +156,7 @@ GenericDispatcher::~GenericDispatcher() {
 }
 
 int GenericDispatcher::init() {
+    // TODO:switch case.
     // set up pipe fd
     if (options.server_type == G_SERVER_PIPE 
             || options.server_type == G_SERVER_TCP 
