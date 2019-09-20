@@ -19,9 +19,8 @@
 #ifndef  __NETWORK_H_
 #define  __NETWORK_H_
 
-#include "common_include.h"
-
-#include "server/socket.h"
+#include "server/tcp_socket.h"
+#include "server/ipv4_address.h"
 
 namespace zf {
 
@@ -35,17 +34,20 @@ enum {
  * Return the udp sockfd or NET_ERROR
  *
  **/
-int create_udp_server(int port, const char *bindaddr);
+int create_udp_server(const std::string& ip, uint16_t port);
+
 /** 
  * Return the tcp listening fd or NET_ERROR 
  *
  **/
-int create_tcp_server(int port, const char *bindaddr);
+Socket* create_tcp_server(const std::string& ip, uint16_t port);
+
 /**
  * Accept a tcp socket
  *
  **/
 int tcp_accept(int s, char* ip, uint16_t* port);
+#if 0
 int tcp_connect(const char* host, int port);
 int sock_setnonblock(int s);
 int sock_setnodelay(int s);
@@ -53,6 +55,7 @@ int sock_read_data(int fd, char* data, size_t len);
 int sock_write_data(int fd, const char* data, size_t len);
 int sock_get_name(int fd, char* ip, uint16_t* port);
 int sock_peer_to_str(int fd, char* ip, uint16_t* port);
+#endif
 
 } // namespace zf
 

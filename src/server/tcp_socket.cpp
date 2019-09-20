@@ -24,19 +24,18 @@ namespace zf {
 TCPSocket::TCPSocket() 
     : _s(-1) 
 {
-
 }
 
 TCPSocket::~TCPSocket() {
-
 }
 
 int TCPSocket::create(int family, int type) {
     // create async noblocking socket.
-    if (_s = ::socket(family, type | SOCK_NONBLOCK, 0) == -1) {
+    if ((_s = ::socket(family, type | SOCK_NONBLOCK, 0)) == -1) {
         log_warning("create socket: %s", strerror(errno));
         return NET_ERROR;
     }
+    log_debug("sockfd[%d]", _s);
 
     // set socket opt.
     int on = 1;
@@ -46,8 +45,8 @@ int TCPSocket::create(int family, int type) {
     return NET_OK;
 }
 
-int TCPSocket::bind(SocketAddress& bind_addr) {
-    if (::bind(_s, (struct sockaddr*)bind_addr, (socklen_t)bind_addr)) {
+int TCPSocket::bind(SocketAddress* sa) {
+    if (::bind(_s, (struct sockaddr*)(*sa), (socklen_t)(*sa)) == -1) {
         log_warning("bind: %s", strerror(errno));
         close(_s);
         return NET_ERROR;
@@ -66,10 +65,10 @@ int TCPSocket::listen(int backlog) {
     return NET_OK;
 }
 
-SOCKET TCPSocket::accept(SocketAddress* out_addr) {
+SOCKET TCPSocket::accept(SocketAddress* sa) {
     while(1) {
-        socklen_t sa_len = sizeof(struct sockaddr);
-        SOCKET a_s = ::accept(_s, (struct sockaddr*)(*out_addr), &sa_len);
+        socklen_t salen = sizeof(struct sockaddr);
+        SOCKET a_s = ::accept(_s, (struct sockaddr*)(*sa), &salen);
         if (a_s == -1) {
             if (errno == EINTR)
                 continue;
@@ -83,7 +82,7 @@ SOCKET TCPSocket::accept(SocketAddress* out_addr) {
     }
 }
 
-int TCPSocket::connect(SocketAddress& addr) {
+int TCPSocket::connect(SocketAddress* sa) {
 
 }
 
@@ -151,6 +150,7 @@ int TCPSocket::get_option(Option opt, int* value) {
 }
 
 int TCPSocket::set_option(Option opt, int value) {
+   log_debug("[setsockopt] opt[%d]", opt);
    int slevel, sopt;
    if (translate_option(opt, &slevel, &sopt) == -1) {
        log_warning("translate socket option failed");
@@ -179,6 +179,10 @@ int TCPSocket::translate_option(Option opt, int* slevel, int* sopt) {
     }
 
     return NET_OK;
+}
+
+SOCKET TCPSocket::fd() {
+    return _s; 
 }
 
 } // namespace zf

@@ -35,9 +35,9 @@ public:
     operator struct sockaddr*() override;
     operator socklen_t() override;
     int family() override;
-    const std::string& ip() override;
+    const std::string ip() override;
     uint16_t port() override;
-private:
+//private:
     std::string _ip;
     uint16_t _port;
     struct sockaddr_in _addr;

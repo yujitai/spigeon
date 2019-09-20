@@ -41,10 +41,10 @@ public:
 
     // Create a async socket
     virtual int create(int family, int type) = 0;
-    virtual int bind(SocketAddress& bind_addr) = 0;
+    virtual int bind(SocketAddress* sa) = 0;
     virtual int listen(int backlog);
-    virtual int accept(SocketAddress* out_addr);
-    virtual int connect(SocketAddress& addr);
+    virtual int accept(SocketAddress* sa);
+    virtual int connect(SocketAddress* sa);
     virtual int write(const char* buf, size_t len) = 0;
     virtual int read(char* buf, size_t len) = 0;
     virtual SocketAddress* get_local_address() const = 0; 
@@ -59,6 +59,8 @@ public:
     };
     virtual int get_option(Option opt, int* value) = 0;
     virtual int set_option(Option opt, int value) = 0;
+
+    virtual SOCKET fd() = 0;
 
 protected:
     Socket() {}

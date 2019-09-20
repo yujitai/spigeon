@@ -53,7 +53,7 @@ public:
     virtual operator socklen_t() = 0;
 
     virtual int family() = 0;
-    virtual const std::string& ip() = 0;
+    virtual const std::string ip() = 0;
     virtual uint16_t port() = 0;
 };
 

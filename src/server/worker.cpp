@@ -63,10 +63,10 @@ void tcp_conn_io_cb(EventLoop *el,
 
     GenericWorker* worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ) {
-        worker->tcp_read_io(fd);
+        //worker->tcp_read_io(fd);
     }
     if (revents & EventLoop::WRITE) {
-        worker->tcp_write_io(fd);
+        //worker->tcp_write_io(fd);
     } 
 }
 
@@ -81,10 +81,10 @@ void udp_conn_io_cb(EventLoop *el,
 
     GenericWorker* worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ) {
-        worker->udp_read_io(fd);
+        //worker->udp_read_io(fd);
     }
     if (revents & EventLoop::WRITE) {
-        worker->udp_write_io(fd);
+        //worker->udp_write_io(fd);
     } 
 }
 
@@ -110,7 +110,7 @@ void cron_cb(EventLoop* el, TimerWatcher* w, void* data)
     GenericWorker *worker = (GenericWorker*)data;
     worker->process_cron_work();
 }
-
+/*
 void GenericWorker::tcp_read_io(int fd) {
     assert(fd >= 0);
     
@@ -174,6 +174,7 @@ void GenericWorker::udp_read_io(int fd) {
 
     this->process_io_buffer(c);
 }
+*/
 
 int GenericWorker::add_reply(Connection* c, const Slice& reply) {
     if (dynamic_cast<TCPConnection*>(c)) {
@@ -195,6 +196,7 @@ int GenericWorker::reply_list_size(Connection* c) {
     // return c->_reply_list_size;
 }
 
+#if 0
 void GenericWorker::tcp_write_io(int fd) {
     assert(fd >= 0);
     if ((unsigned int)fd >= conns.size()) {
@@ -263,6 +265,7 @@ void GenericWorker::udp_write_io(int fd) {
     if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
 }
+#endif
 
 
 void GenericWorker::disable_events(Connection *c, int events) {
@@ -277,6 +280,7 @@ void GenericWorker::start_timer(Connection *c) {
     el->start_timer(c->_timer, options.tick);
 }
 
+/*
 Connection* GenericWorker::new_tcp_conn(int fd) {
     assert(fd >= 0);
     log_debug("[new connection] fd[%d]", fd);
@@ -311,7 +315,7 @@ Connection* GenericWorker::new_udp_conn(int fd) {
     assert(fd >= 0);
     log_debug("[new udp connection] fd[%d]", fd);
 
-    sock_setnonblock(fd);
+    //sock_setnonblock(fd);
     Connection* c = new UDPConnection(fd);
     c->_last_interaction = el->now();
 
@@ -334,6 +338,7 @@ Connection* GenericWorker::new_udp_conn(int fd) {
 
     return c;
 }
+*/
 
 void GenericWorker::close_conn(Connection *c) {
     log_debug("close connection");
@@ -473,13 +478,13 @@ void GenericWorker::process_internal_notify(int msg) {
             break;
         case TCPCONNECTION:         
             if (mq_pop((void**)&cfd)) {
-                new_tcp_conn(*cfd);
+                //new_tcp_conn(*cfd);
                 delete cfd;
             }
             break;
         case UDPCONNECTION:
             if (mq_pop((void**)&cfd)) {
-                new_udp_conn(*cfd);
+                //new_udp_conn(*cfd);
                 delete cfd;
             }
             break;

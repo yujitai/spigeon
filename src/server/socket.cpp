@@ -23,11 +23,11 @@ int Socket::listen(int backlog) {
     return -1;
 }
 
-SOCKET Socket::accept(SocketAddress* out_addr) {
+SOCKET Socket::accept(SocketAddress* sa) {
     return -1;
 }
 
-int Socket::connect(SocketAddress& out_addr) {
+int Socket::connect(SocketAddress* sa) {
     return -1;
 }
 

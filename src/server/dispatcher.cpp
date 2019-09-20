@@ -67,6 +67,7 @@ void accept_tcp_conn(EventLoop *el,
     UNUSED(w);
     UNUSED(revents);
     
+    cout << "fuck" << endl;
     struct timeval s, e, s1, e1; 
     int cfd;
     uint16_t cport;
@@ -96,6 +97,7 @@ void accept_tcp_conn(EventLoop *el,
 /**
  * @brief Udp server socket io handler
  */
+#if 0
 void accept_udp_conn(EventLoop *el, 
         IOWatcher* w, 
         int fd, 
@@ -122,7 +124,7 @@ void accept_udp_conn(EventLoop *el,
         cout << "port=" << ntohs(ca.sin_port) << endl;
     }
 
-    int new_fd = create_udp_server(8888, NULL);
+    int new_fd = create_udp_server(NULL, 8888);
     cout << "new udp fd =" << new_fd << endl;
 
     if (connect(new_fd, (struct sockaddr*)&ca, sizeof(struct sockaddr)) < 0) {
@@ -132,6 +134,7 @@ void accept_udp_conn(EventLoop *el,
 
     dp->dispatch_new_conn(new_fd, PROTOCOL_UDP);
 }
+#endif
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
         : options(o),
@@ -177,29 +180,31 @@ int GenericDispatcher::init() {
 
     // set up the tcp server socket.
     if (options.server_type == G_SERVER_TCP) {
-        listen_fd = create_tcp_server(options.port, options.host);
-        if (listen_fd == NET_ERROR) {
+        Socket* socket = create_tcp_server(options.ip, options.port);
+        if (!socket) {
             log_fatal("Can't create tcp server on %s:%d",
-                      options.host, options.port);
+                      options.ip, options.port);
             return DISPATCHER_ERROR;
         }
         log_trace("start listen port %d", options.port);
 
+        cout << "fd=" << socket->fd() << endl;
         io_watcher = el->create_io_event(accept_tcp_conn, (void*)this);
         if (io_watcher == NULL) {
             log_fatal("Can't create io event for accept_tcp_conn");
             return DISPATCHER_ERROR;
         }
-        el->start_io_event(io_watcher, listen_fd, EventLoop::READ);
+        el->start_io_event(io_watcher, socket->fd(), EventLoop::READ);
     }
 
+#if 0
     // set up the udp server socket.
     if (options.server_type == G_SERVER_UDP) {
-        int fd = create_udp_server(options.port, options.host);
+        int fd = create_udp_server(options.host, options.port);
         cout << "udp fd = "  << fd << endl;
         if (fd == NET_ERROR) {
             log_fatal("Can't create udp server on %s:%d",
-                      options.host, options.port);
+                      options.host.c_str(), options.port);
             return DISPATCHER_ERROR;
         }
 
@@ -210,7 +215,7 @@ int GenericDispatcher::init() {
         }
         el->start_io_event(io_watcher, fd, EventLoop::READ);
     }
-
+#endif
     for (int i = 0; i < options.worker_num; i++) {
         if (spawn_worker() == DISPATCHER_ERROR) {
             return DISPATCHER_ERROR;

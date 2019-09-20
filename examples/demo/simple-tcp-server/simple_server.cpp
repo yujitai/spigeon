@@ -35,11 +35,12 @@ int init_server() {
         return -1;
     }
 
-    // init server
+    // config server
     g_server = new GenericServer("simple_server");
     GenericServerOptions options;
     memset(&options, 0, sizeof(options));
     options.server_type = G_SERVER_TCP;
+    options.ip = "192.168.32.44";
     options.port = 8888;
     options.worker_num = 1;
     options.connection_timeout = 30 * 1000 * 1000;  // 当连接空闲过久后，server会主动断开连接
@@ -48,6 +49,8 @@ int init_server() {
     options.max_reply_list_size = 1024;
     options.worker_factory_func = worker_factory;
     g_server->init_conf(options);
+
+    // init server
     if (g_server->init() != 0) {
         return -1;
     }

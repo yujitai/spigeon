@@ -17,40 +17,7 @@
 
 #include "server/network.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-#include <netdb.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
-
-#include "util/log.h"
-
 namespace zf {
-
-static int create_socket(int domain, int type) {
-    int s; 
-    int on = 1;
-    if ((s = socket(domain, type, 0)) == -1) {
-        log_warning("creating socket: %s", strerror(errno));
-        return NET_ERROR;
-    }
-
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
-        log_warning("setsockopt SO_REUSEADDR: %s", strerror(errno));
-        return NET_ERROR;
-    }
-
-    return s;
-}
 
 static int socket_listen(int s, struct sockaddr *sa, socklen_t len) {
     if (bind(s,sa,len) == -1) {
@@ -70,7 +37,7 @@ static int socket_listen(int s, struct sockaddr *sa, socklen_t len) {
 
     return NET_OK;
 }
-
+#if 0
 int create_udp_server(int port, const char* ip) {
     int s;
     struct sockaddr_in sa;
@@ -97,28 +64,19 @@ int create_udp_server(int port, const char* ip) {
 
     return s;
 }
+#endif
 
-int create_tcp_server(int port, const char* bind_addr) {
-    int s;
-    struct sockaddr_in sa;
+Socket* create_tcp_server(const std::string& ip, uint16_t port) {
+    Socket* socket = new TCPSocket();
+    SocketAddress* sa = new Ipv4Address(ip, port);
+    log_debug("[server address] ip[%s] port[%d] addrlen[%d]", 
+            sa->ip().c_str(), sa->port(), (socklen_t)(*sa));
 
-    if ((s = create_socket(AF_INET, SOCK_STREAM)) == NET_ERROR)
-        return NET_ERROR;
+    socket->create(AF_INET, SOCK_STREAM);
+    socket->bind(sa);
+    socket->listen(1024);
 
-    memset(&sa,0,sizeof(sa));
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons(port);
-    sa.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind_addr && inet_aton(bind_addr, &sa.sin_addr) == 0) {
-        log_warning("invalid bind address");
-        close(s);
-        return NET_ERROR;
-    }
-
-    if (socket_listen(s,(struct sockaddr*)&sa,sizeof(sa)) == NET_ERROR)
-        return NET_ERROR;
-
-    return s;
+    return socket;
 }
 
 static int generic_accept(int s, struct sockaddr *sa, socklen_t *len) {
@@ -152,6 +110,7 @@ int tcp_accept(int s, char* ip, uint16_t* port) {
     return fd;
 }
 
+#if 0
 int sock_setnonblock(int fd) {
     int flags;
 
@@ -211,7 +170,8 @@ int sock_write_data(int fd, const char* buf, size_t len) {
 
     return w;
 }
-
+#endif
+#if 0
 int tcp_connect(const char* addr, uint16_t port) {
     int s = create_socket(AF_INET, SOCK_STREAM);
     if (s == NET_ERROR)
@@ -238,6 +198,7 @@ int tcp_connect(const char* addr, uint16_t port) {
 
     return s;
 }
+#endif
 
 int sock_get_name(int fd, char* ip, uint16_t* port) {
     struct sockaddr_in sa;

@@ -1,3 +1,20 @@
+/***************************************************************************
+ *
+ * Copyright (c) 2019 Zuoyebang.com, Inc. All Rights Reserved
+ * $Id$
+ *
+ **************************************************************************/
+
+
+
+/**
+ * @file server.cpp
+ * @author yujitai(yujitai@zuoyebang.com)
+ * @version $Revision$
+ * @brief
+ *
+ **/
+
 #include "server/server.h"
 #include "server/dispatcher.h"
 #include "util/zmalloc.h"
@@ -5,9 +22,9 @@
 namespace zf {
 
 static command_t server_cmd_table[] = {
-    { "host",
+    { "ip",
       conf_set_str_slot,
-      offsetof(GenericServerOptions, host) },
+      offsetof(GenericServerOptions, ip) },
 
     { "port",
       conf_set_num_slot,
@@ -41,7 +58,7 @@ static command_t server_cmd_table[] = {
 };
 
 GenericServerOptions::GenericServerOptions() 
-    : host(NULL),
+    : ip(NULL),
       port(0),
       worker_num(8),
       server_type(G_SERVER_TCP),
@@ -73,8 +90,8 @@ int GenericServer::init_conf() {
 
 int GenericServer::init_conf(struct Options& o) {
     _options = (struct GenericServerOptions&)o;
-    if (_options.host == NULL)
-        _options.host = "0.0.0.0";
+    if (_options.ip == NULL)
+        _options.ip = "0.0.0.0";
 
     return SERVER_OK;
 }
@@ -86,7 +103,7 @@ int GenericServer::load_conf(const char* filename) {
     } else {
         fprintf(stderr,
                 "Server Options:\n"
-                "host: %s\n"
+                "ip: %s\n"
                 "port: %d\n"
                 "worker_num: %d\n"
                 "server_type: %d\n"
@@ -94,7 +111,7 @@ int GenericServer::load_conf(const char* filename) {
                 "tick: %lld\n"
                 "max_io_buffer_size: %lld\n"
                 "max_reply_list_size: %d\n",
-                _options.host,
+                _options.ip,
                 _options.port,
                 _options.worker_num,
                 _options.server_type,

@@ -46,7 +46,7 @@ int Ipv4Address::family() {
     return _addr.sin_family;
 }
 
-const std::string& Ipv4Address::ip() {
+const std::string Ipv4Address::ip() {
     // return _ip;
     return inet_ntoa(_addr.sin_addr);
 }

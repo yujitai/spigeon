@@ -50,7 +50,7 @@ public:
     // default constructor
     GenericServerOptions();
 
-    char* host;
+    char* ip;
     uint16_t port;
     int worker_num;
     SERVER_TYPE server_type;

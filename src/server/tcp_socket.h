@@ -30,10 +30,10 @@ public:
 
     // Socket implementation.
     int create(int family, int type) override;
-    int bind(SocketAddress& bind_addr) override;
+    int bind(SocketAddress* sa) override;
     int listen(int backlog) override;
-    int accept(SocketAddress* out_addr) override;
-    int connect(SocketAddress& addr) override;
+    int accept(SocketAddress* sa) override;
+    int connect(SocketAddress* sa) override;
     int write(const char* buf, size_t len) override;
     int read(char* buf, size_t len) override;
     SocketAddress* get_local_address() const override;
@@ -42,6 +42,8 @@ public:
     int set_option(Option opt, int value) override;
 
     int translate_option(Option opt, int* slevel, int* sopt);
+
+    SOCKET fd() override;
 private:
     SOCKET _s;
     SocketAddress* _local_addr;
