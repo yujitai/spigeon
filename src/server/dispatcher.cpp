@@ -32,7 +32,7 @@
 
 #include "server/event.h"
 #include "server/worker.h"
-#include "server/network.h"
+#include "server/network_manager.h"
 #include "util/log.h"
 #include "util/store_define.h"
 
@@ -67,31 +67,32 @@ void accept_tcp_conn(EventLoop *el,
     UNUSED(w);
     UNUSED(revents);
     
-    cout << "fuck" << endl;
     struct timeval s, e, s1, e1; 
-    int cfd;
-    uint16_t cport;
-    char cip[128];
+    int new_fd;
+    Ipv4Address addr;
     GenericDispatcher* dp = (GenericDispatcher*)data;
-    
+
+    NetworkMgr* network_manager = dp->network_manager();
+    if (!network_manager) 
+        return;
     gettimeofday(&s, NULL);
-    cfd = tcp_accept(fd, cip, &cport); 
-    if (cfd == NET_ERROR) {
+    new_fd = network_manager->tcp_accept(fd, addr); 
+    if (new_fd == NetworkMgr::NET_ERROR) {
         log_warning("[accept socket failed]");
         return;
     }
     
     gettimeofday(&s1, NULL);
-    if (dp->dispatch_new_conn(cfd, PROTOCOL_TCP) == DISPATCHER_ERROR) {
+    if (dp->dispatch_new_conn(new_fd, PROTOCOL_TCP) == DISPATCHER_ERROR) {
         log_warning("[dispatch new connection failed]");
         return;
     }
 
     gettimeofday(&e1, NULL);
-    log_debug("[dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1, e1), cfd);
+    log_debug("[dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1, e1), new_fd);
 
     gettimeofday(&e, NULL);
-    log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), cfd);
+    log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), new_fd);
 }
 
 /**
@@ -138,13 +139,14 @@ void accept_udp_conn(EventLoop *el,
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
         : options(o),
-          el(NULL), 
+          _el(NULL), 
           io_watcher(NULL), 
           pipe_watcher(NULL),
           next_worker(0), 
           listen_fd(0) 
 {
-    el = new EventLoop((void*)this, false);
+    _el = new EventLoop((void*)this, false);
+    _network_mgr = new NetworkMgr(_el);
 }
 
 GenericDispatcher::~GenericDispatcher() {
@@ -155,7 +157,7 @@ GenericDispatcher::~GenericDispatcher() {
         }
     }
     
-    delete el;
+    delete _el;
 }
 
 int GenericDispatcher::init() {
@@ -172,29 +174,27 @@ int GenericDispatcher::init() {
         }
         notify_recv_fd = fds[0];
         notify_send_fd = fds[1];
-        pipe_watcher = el->create_io_event(recv_notify, (void*)this);
+        pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
         if (pipe_watcher == NULL)
             return DISPATCHER_ERROR;
-        el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
+        _el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
     }
 
     // set up the tcp server socket.
     if (options.server_type == G_SERVER_TCP) {
-        Socket* socket = create_tcp_server(options.ip, options.port);
-        if (!socket) {
-            log_fatal("Can't create tcp server on %s:%d",
-                      options.ip, options.port);
+        SOCKET fd = _network_mgr->create_tcp_server(options.ip, options.port);
+        if (fd == NetworkMgr::NET_ERROR) {
+            log_fatal("Create tcp server failed on %s:%d", options.ip, options.port);
             return DISPATCHER_ERROR;
         }
         log_trace("start listen port %d", options.port);
 
-        cout << "fd=" << socket->fd() << endl;
-        io_watcher = el->create_io_event(accept_tcp_conn, (void*)this);
+        io_watcher = _el->create_io_event(accept_tcp_conn, (void*)this);
         if (io_watcher == NULL) {
             log_fatal("Can't create io event for accept_tcp_conn");
             return DISPATCHER_ERROR;
         }
-        el->start_io_event(io_watcher, socket->fd(), EventLoop::READ);
+        _el->start_io_event(io_watcher, fd, EventLoop::READ);
     }
 
 #if 0
@@ -228,13 +228,13 @@ int GenericDispatcher::init() {
 void GenericDispatcher::stop() {
     // stop pipe watcher
     if (pipe_watcher)
-        el->delete_io_event(pipe_watcher);
+        _el->delete_io_event(pipe_watcher);
 
     // stop event loop
     if (io_watcher)
-        el->delete_io_event(io_watcher);
+        _el->delete_io_event(io_watcher);
 
-    el->stop();
+    _el->stop();
     log_notice("event loop stopped");
 
     // close socket
@@ -248,7 +248,7 @@ void GenericDispatcher::stop() {
 
 void GenericDispatcher::run() {
     log_notice("dispatcher start");
-    el->run();
+    _el->run();
 }
 
 // spawn a new worker and push it into the GenericDispatcher::workers
@@ -258,8 +258,9 @@ int GenericDispatcher::spawn_worker() {
         return DISPATCHER_ERROR;
     }
 
-    GenericWorker *new_worker = options.worker_factory_func(options);
+    GenericWorker* new_worker = options.worker_factory_func(options);
     new_worker->init();
+    new_worker->set_network(_network_mgr);
     if (create_thread(new_worker) == THREAD_ERROR) {
         log_fatal("failed to create worker thread");
         return DISPATCHER_ERROR;
@@ -320,7 +321,7 @@ int GenericDispatcher::dispatch_new_conn(int fd, int protocol) {
 
 void GenericDispatcher::process_internal_notify(int msg) {
     switch (msg) {
-        case QUIT:                       // stop
+        case QUIT:  
             stop();
             break;
         default:
@@ -365,6 +366,10 @@ int64_t GenericDispatcher::get_clients_count(std::string& clients_detail) {
     temp << "]";
     clients_detail = temp.str().c_str();
     return current_count;
+}
+
+NetworkMgr* GenericDispatcher::network_manager() const {
+    return _network_mgr;
 }
 
 } // namespace zf

@@ -27,6 +27,11 @@
 
 namespace zf {
 
+class EventLoop;
+class IOWatcher;
+class NetworkMgr;
+class GenericWorker;
+
 enum {
     DISPATCHER_OK = 0,
     DISPATCHER_ERROR = 1
@@ -36,10 +41,6 @@ enum {
     PROTOCOL_TCP = 0,
     PROTOCOL_UDP = 1
 };
-
-class GenericWorker;
-class EventLoop;
-class IOWatcher;
 
 class GenericDispatcher {
 public:
@@ -58,6 +59,7 @@ public:
     int dispatch_new_conn(int fd, int protocol);
     virtual void process_notify(int msg);
     virtual int64_t get_clients_count(std::string& clients_detail);
+    NetworkMgr* network_manager() const;
 public:
     void process_internal_notify(int msg);
 
@@ -71,9 +73,12 @@ protected:
     int listen_fd;
     int notify_recv_fd;
     int notify_send_fd;
-    EventLoop* el;
+    // owned by dispatcher.
+    EventLoop* _el;
     IOWatcher* io_watcher;
     IOWatcher* pipe_watcher;
+    // owned by dispatcher.
+    NetworkMgr* _network_mgr;
     LockFreeQueue<void*> mq;
     std::vector<GenericWorker*> workers;
     std::vector<GenericWorker*>::size_type next_worker;

@@ -26,13 +26,14 @@ namespace zf {
 class TCPSocket : public Socket {
 public:
     TCPSocket();
+    TCPSocket(SOCKET s);
     ~TCPSocket();
 
     // Socket implementation.
     int create(int family, int type) override;
     int bind(SocketAddress* sa) override;
     int listen(int backlog) override;
-    int accept(SocketAddress* sa) override;
+    int accept(SocketAddress& sa) override;
     int connect(SocketAddress* sa) override;
     int write(const char* buf, size_t len) override;
     int read(char* buf, size_t len) override;
@@ -42,6 +43,7 @@ public:
     int set_option(Option opt, int value) override;
 
     int translate_option(Option opt, int* slevel, int* sopt);
+    int set_noblock();
 
     SOCKET fd() override;
 private:

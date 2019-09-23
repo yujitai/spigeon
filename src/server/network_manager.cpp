@@ -8,35 +8,27 @@
  
  
 /**
- * @file network.cpp
+ * @file network_manager.cpp
  * @author yujitai(yujitai@zuoyebang.com)
  * @version $Revision$ 
  * @brief 
  *  
  **/
 
-#include "server/network.h"
+#include "server/network_manager.h"
 
 namespace zf {
 
-static int socket_listen(int s, struct sockaddr *sa, socklen_t len) {
-    if (bind(s,sa,len) == -1) {
-        log_warning("bind: %s", strerror(errno));
-        close(s);
-        return NET_ERROR;
-    }
+NetworkMgr::NetworkMgr(EventLoop* el)
+    : _el(el)
+{
 
-    /* Use a backlog of 512 entries. We pass 511 to the listen() call because
-     * the kernel does: backlogsize = roundup_pow_of_two(backlogsize + 1);
-     * which will thus give us a backlog of 512 entries */
-    if (listen(s, 4095) == -1) {
-        log_warning("listen: %s", strerror(errno));
-        close(s);
-        return NET_ERROR;
-    }
-
-    return NET_OK;
 }
+
+NetworkMgr::~NetworkMgr() {
+
+}
+
 #if 0
 int create_udp_server(int port, const char* ip) {
     int s;
@@ -66,7 +58,7 @@ int create_udp_server(int port, const char* ip) {
 }
 #endif
 
-Socket* create_tcp_server(const std::string& ip, uint16_t port) {
+SOCKET NetworkMgr::create_tcp_server(const std::string& ip, uint16_t port) {
     Socket* socket = new TCPSocket();
     SocketAddress* sa = new Ipv4Address(ip, port);
     log_debug("[server address] ip[%s] port[%d] addrlen[%d]", 
@@ -76,102 +68,43 @@ Socket* create_tcp_server(const std::string& ip, uint16_t port) {
     socket->bind(sa);
     socket->listen(1024);
 
-    return socket;
-}
-
-static int generic_accept(int s, struct sockaddr *sa, socklen_t *len) {
-    int fd;
-    while(1) {
-        fd = accept(s, sa, len);
-        if (fd == -1) {
-            if (errno == EINTR)
-                continue;
-            else {
-                log_warning("accept: %s", strerror(errno));
-                return NET_ERROR;
-            }
-        }
-        break;
-    }
+    int fd = socket->fd();
+    if ((uint32_t)fd >= _sockets.size())
+        _sockets.resize(fd * 2, NULL);
+    _sockets[fd] = socket;
 
     return fd;
 }
 
-int tcp_accept(int s, char* ip, uint16_t* port) {
-    int fd;
-    struct sockaddr_in sa;
-    socklen_t salen = sizeof(sa);
-    if ((fd = generic_accept(s, (struct sockaddr*)&sa, &salen)) == NET_ERROR)
-        return NET_ERROR;
+SOCKET NetworkMgr::tcp_accept(int fd, SocketAddress& sa) {
+    Socket* socket = _sockets[fd];
 
-    if (ip) strcpy(ip,inet_ntoa(sa.sin_addr));
-    if (port) *port = ntohs(sa.sin_port);
+    SOCKET s = socket->accept(sa);
+    log_debug("accept: client addr: ip[%s] port[%d]", sa.ip().c_str(), sa.port());
+    wrap_socket(s);
 
-    return fd;
+    return s; 
 }
 
-#if 0
-int sock_setnonblock(int fd) {
-    int flags;
+bool NetworkMgr::wrap_socket(SOCKET s) {
+    Socket* socket = new TCPSocket(s);
 
-    /** 
-     * Set the socket nonblocking.
-     * Note that fcntl(2) for F_GETFL and F_SETFL can't be
-     * interrupted by a signal. 
-     */
-    if ((flags = fcntl(fd, F_GETFL)) == -1) {
-        log_warning("fcntl(F_GETFL): %s", strerror(errno));
-        return NET_ERROR;
-    }
-    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-        log_warning("fcntl(F_SETFL, O_NONBLOCK): %s", strerror(errno));
-        return NET_ERROR;
-    }
-    return NET_OK;
+    int on = 1;
+    socket->set_option(Socket::OPT_NODELAY, on);
+    socket->set_noblock();
+
+    if ((uint32_t)s >= _sockets.size())
+        _sockets.resize(s*2, NULL);
+    _sockets[s] = socket;
+
+    return true;
+}   
+
+std::vector<Socket*>& NetworkMgr::get_sockets() {
+    return _sockets;
 }
 
-int sock_setnodelay(int fd) {
-    int yes = 1;
-    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == -1) {
-        log_warning("setsockopt TCP_NODELAY: %s", strerror(errno));
-        return NET_ERROR;
-    }
-
-    return NET_OK;
-}
-
-int sock_read_data(int fd, char* buf, size_t len) {
-    int r = read(fd, buf, len);
-    if (r == -1) {
-        if (errno == EAGAIN)
-            r = 0;
-        else {
-            log_debug("read: %s", strerror(errno));
-            return NET_ERROR;
-        }
-    } else if (r == 0) {
-        log_debug("read: peer closed");
-        return NET_PEER_CLOSED;
-    }
-
-    return r;
-}
-
-int sock_write_data(int fd, const char* buf, size_t len) {
-    int w = write(fd, buf, len);
-    if (w == -1) {
-        if (errno == EAGAIN)
-            w = 0;
-        else {
-            log_debug("write: %s", strerror(errno));
-            return NET_ERROR;
-        }
-    }
-
-    return w;
-}
-#endif
-#if 0
+/*
 int tcp_connect(const char* addr, uint16_t port) {
     int s = create_socket(AF_INET, SOCK_STREAM);
     if (s == NET_ERROR)
@@ -198,7 +131,6 @@ int tcp_connect(const char* addr, uint16_t port) {
 
     return s;
 }
-#endif
 
 int sock_get_name(int fd, char* ip, uint16_t* port) {
     struct sockaddr_in sa;
@@ -231,6 +163,7 @@ int sock_peer_to_str(int fd, char* ip, uint16_t* port) {
 
     return NET_OK;
 }
+*/
 
 } // namespace zf
 

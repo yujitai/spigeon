@@ -43,7 +43,7 @@ public:
     virtual int create(int family, int type) = 0;
     virtual int bind(SocketAddress* sa) = 0;
     virtual int listen(int backlog);
-    virtual int accept(SocketAddress* sa);
+    virtual int accept(SocketAddress& sa);
     virtual int connect(SocketAddress* sa);
     virtual int write(const char* buf, size_t len) = 0;
     virtual int read(char* buf, size_t len) = 0;
@@ -59,6 +59,7 @@ public:
     };
     virtual int get_option(Option opt, int* value) = 0;
     virtual int set_option(Option opt, int value) = 0;
+    virtual int set_noblock() = 0;
 
     virtual SOCKET fd() = 0;
 

@@ -21,7 +21,6 @@
 #include <sys/time.h>
 
 #include "server/event.h"
-#include "server/network.h"
 #include "util/status.h"
 #include "util/zmalloc.h"
 #include "util/scoped_ptr.h"
@@ -50,26 +49,28 @@ static void recv_notify(EventLoop *el,
 }
 
 /**
- * @brief Callback for connection io events 
+ * Callback for TCPConnection io events 
  */
-void tcp_conn_io_cb(EventLoop *el, 
-        IOWatcher *w, 
+void tcp_conn_io_cb(EventLoop* el, 
+        IOWatcher* w, 
         int fd, 
         int revents, 
-        void *data) 
+        void* data) 
 {
     UNUSED(w);
     UNUSED(data);
 
     GenericWorker* worker = (GenericWorker*)(el->owner);
-    if (revents & EventLoop::READ) {
-        //worker->tcp_read_io(fd);
-    }
-    if (revents & EventLoop::WRITE) {
-        //worker->tcp_write_io(fd);
-    } 
+    if (revents & EventLoop::READ)
+        worker->tcp_read_io(fd);
+
+    if (revents & EventLoop::WRITE) 
+        worker->tcp_write_io(fd);
 }
 
+/**
+ * Callback for UDPConnection io events 
+ */
 void udp_conn_io_cb(EventLoop *el, 
         IOWatcher *w, 
         int fd, 
@@ -110,7 +111,30 @@ void cron_cb(EventLoop* el, TimerWatcher* w, void* data)
     GenericWorker *worker = (GenericWorker*)data;
     worker->process_cron_work();
 }
-/*
+
+GenericWorker::GenericWorker(const GenericServerOptions &o, 
+        const std::string& thread_name)
+    : Runnable(thread_name), 
+      options(o), 
+      _el(NULL), 
+      pipe_watcher(NULL), 
+      cron_timer(NULL)
+{
+    conns.resize(INITIAL_FD_NUM, NULL);
+    _el = new EventLoop((void*)this, false);
+    online_count = 0;
+    worker_id = "";
+}
+
+GenericWorker::~GenericWorker() {
+    close_all_conns();
+    delete _el;
+}
+
+void GenericWorker::set_network(NetworkMgr* network_manager) {
+    _network_manager = network_manager;
+}
+
 void GenericWorker::tcp_read_io(int fd) {
     assert(fd >= 0);
     
@@ -119,8 +143,13 @@ void GenericWorker::tcp_read_io(int fd) {
         return;
     }
 
+    auto& sockets = _network_manager->get_sockets();
+    Socket* socket = sockets[fd]; 
+    if (!socket)
+        return;
+
     TCPConnection* c = (TCPConnection*)conns[fd];
-    if (c == NULL) {
+    if (!c) {
         log_warning("connection not exists");
         return;
     }
@@ -128,19 +157,19 @@ void GenericWorker::tcp_read_io(int fd) {
     int rlen = c->_bytes_expected;
     size_t iblen = sdslen(c->_io_buffer);
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
-    int r = sock_read_data(fd, c->_io_buffer + iblen, rlen);
-    if (r == NET_ERROR) {
-        log_debug("sock_read_data: return error, close connection");
+    int r = socket->read(c->_io_buffer + iblen, rlen);
+    if (r == NetworkMgr::NET_ERROR) {
+        log_debug("socket read: return error, close connection");
         close_conn(c);
         return;
-    } else if (r == NET_PEER_CLOSED) {
-        log_debug("sock_read_data: return 0, peer closed");
+    } else if (r == NetworkMgr::NET_PEER_CLOSED) {
+        log_debug("socket read: return 0, peer closed");
         close_conn(c);
         return;
     } else if (r > 0) {
         sdsIncrLen(c->_io_buffer, r);
     }
-    c->_last_interaction = el->now();
+    c->_last_interaction = _el->now();
 
     // Upper process.
     if (sdslen(c->_io_buffer) - c->_bytes_processed >= c->_bytes_expected) {
@@ -151,6 +180,7 @@ void GenericWorker::tcp_read_io(int fd) {
     }
 }
 
+/*
 void GenericWorker::udp_read_io(int fd) {
     assert(fd >= 0);
     
@@ -196,13 +226,18 @@ int GenericWorker::reply_list_size(Connection* c) {
     // return c->_reply_list_size;
 }
 
-#if 0
 void GenericWorker::tcp_write_io(int fd) {
     assert(fd >= 0);
     if ((unsigned int)fd >= conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
+
+    auto& sockets = _network_manager->get_sockets();
+    Socket* socket = sockets[fd]; 
+    if (!socket)
+        return;
+
     TCPConnection* c = (TCPConnection*)conns[fd];
     if (c == NULL) {
         log_warning("connection not exists");
@@ -211,11 +246,10 @@ void GenericWorker::tcp_write_io(int fd) {
 
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
-        int w = sock_write_data(fd,
-                reply.data() + c->_bytes_written,
+        int w = socket->write(reply.data() + c->_bytes_written,
                 reply.size() - c->_bytes_written);
 
-        if (w == NET_ERROR) {
+        if (w == NetworkMgr::NET_ERROR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;
@@ -231,13 +265,14 @@ void GenericWorker::tcp_write_io(int fd) {
             c->_bytes_written += w;
         }
     }
-    c->_last_interaction = el->now();
+    c->_last_interaction = _el->now();
 
     /* no more replies to write */
     if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
 }
 
+#if 0
 void GenericWorker::udp_write_io(int fd) {
     assert(fd >= 0);
     if ((unsigned int)fd >= conns.size()) {
@@ -267,33 +302,30 @@ void GenericWorker::udp_write_io(int fd) {
 }
 #endif
 
-
 void GenericWorker::disable_events(Connection *c, int events) {
-    el->stop_io_event(c->_watcher, c->_fd, events);
+    _el->stop_io_event(c->_watcher, c->_fd, events);
 }
 
 void GenericWorker::enable_events(Connection *c, int events) {
-    el->start_io_event(c->_watcher, c->_fd, events);
+    _el->start_io_event(c->_watcher, c->_fd, events);
 }
 
 void GenericWorker::start_timer(Connection *c) {
-    el->start_timer(c->_timer, options.tick);
+    _el->start_timer(c->_timer, options.tick);
 }
 
-/*
-Connection* GenericWorker::new_tcp_conn(int fd) {
-    assert(fd >= 0);
-    log_debug("[new connection] fd[%d]", fd);
+Connection* GenericWorker::new_tcp_conn(SOCKET s) {
+    assert(s >= 0);
+    log_debug("[new connection] fd[%d]", s);
 
-    sock_setnonblock(fd);
-    sock_setnodelay(fd);  
-    Connection* c = new TCPConnection(fd);
-    sock_peer_to_str(fd, c->_ip, &(c->_port));
-    c->_last_interaction = el->now();
+    Connection* c = new TCPConnection(s);
+
+    // sock_peer_to_str(s, c->_ip, &(c->_port));
+    c->_last_interaction = _el->now();
 
     // create io event and timer for the connection.
-    c->_watcher = el->create_io_event(tcp_conn_io_cb, (void*)c);
-    c->_timer = el->create_timer(timeout_cb, (void*)c, true);
+    c->_watcher = _el->create_io_event(tcp_conn_io_cb, (void*)c);
+    c->_timer = _el->create_timer(timeout_cb, (void*)c, true);
 
     // start io and timer.
     if (options.ssl_open) {
@@ -303,14 +335,14 @@ Connection* GenericWorker::new_tcp_conn(int fd) {
     }
     start_timer(c);
 
-    if ((unsigned int)fd >= conns.size())
-        conns.resize(fd*2, NULL);
-
-    conns[fd] = c;
+    if ((unsigned int)s >= conns.size())
+        conns.resize(s*2, NULL);
+    conns[s] = c;
 
     return c;
 }
 
+/*
 Connection* GenericWorker::new_udp_conn(int fd) {
     assert(fd >= 0);
     log_debug("[new udp connection] fd[%d]", fd);
@@ -356,10 +388,10 @@ void GenericWorker::close_all_conns() {
 }
 
 void GenericWorker::remove_conn(Connection *c) {
-    c->_last_interaction = el->now();
+    c->_last_interaction = _el->now();
     before_remove_conn(c);
-    el->delete_io_event(c->_watcher);  
-    el->delete_timer(c->_timer);
+    _el->delete_io_event(c->_watcher);  
+    _el->delete_timer(c->_timer);
     /*
     if (c->priv_data_destructor) {
         c->priv_data_destructor(c->priv_data);
@@ -382,26 +414,6 @@ void GenericWorker::set_clients_count(int64_t count){
      return;
 }
 
-GenericWorker::GenericWorker(const GenericServerOptions &o, 
-        const std::string& thread_name)
-    : Runnable(thread_name), 
-      options(o), 
-      el(NULL), 
-      pipe_watcher(NULL), 
-      cron_timer(NULL)
-{
-    conns.resize(INITIAL_FD_NUM, NULL);
-    el = new EventLoop((void*)this, false);
-    online_count = 0;
-    worker_id = "";
-}
-
-GenericWorker::~GenericWorker() {
-    close_all_conns();
-    delete el;
-    //stat_destroy();
-}
-
 void GenericWorker::set_worker_id(const std::string& id) {
     worker_id = id;
     return;
@@ -421,23 +433,23 @@ int GenericWorker::init() {
     notify_send_fd = fds[1];
 
     // Listen for notifications from dispatcher thread
-    pipe_watcher = el->create_io_event(recv_notify, (void*)this);
+    pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
     if (pipe_watcher == NULL)
         return WORKER_ERROR;
-    el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
+    _el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
     // start cron timer
-    cron_timer = el->create_timer(cron_cb, (void*)this, true);
-    el->start_timer(cron_timer, options.tick);
+    cron_timer = _el->create_timer(cron_cb, (void*)this, true);
+    _el->start_timer(cron_timer, options.tick);
 
     return WORKER_OK;
 }
 
 void GenericWorker::stop() {
-    el->delete_timer(cron_timer);    
-    el->delete_io_event(pipe_watcher);
+    _el->delete_timer(cron_timer);    
+    _el->delete_io_event(pipe_watcher);
     close(notify_recv_fd);
     close(notify_send_fd);
-    el->stop();
+    _el->stop();
     for (size_t i = 0; i < conns.size(); i++) {
         if (conns[i] != NULL)
             close_conn(conns[i]);
@@ -453,7 +465,7 @@ bool GenericWorker::mq_pop(void **msg) {
 }
 
 void GenericWorker::run() {
-    el->run();
+    _el->run();
 }
 
 int GenericWorker::notify(int msg) {
@@ -470,22 +482,21 @@ int GenericWorker::notify(int msg) {
 }
 
 void GenericWorker::process_internal_notify(int msg) {
-    int* cfd;
-
+    SOCKET* s;
     switch (msg) {
         case QUIT:          
             stop();
             break;
         case TCPCONNECTION:         
-            if (mq_pop((void**)&cfd)) {
-                //new_tcp_conn(*cfd);
-                delete cfd;
+            if (mq_pop((void**)&s)) {
+                new_tcp_conn(*s);
+                delete s;
             }
             break;
         case UDPCONNECTION:
-            if (mq_pop((void**)&cfd)) {
-                //new_udp_conn(*cfd);
-                delete cfd;
+            if (mq_pop((void**)&s)) {
+                //new_udp_conn(*s);
+                delete s;
             }
             break;
         default:
@@ -499,7 +510,7 @@ void GenericWorker::process_notify(int msg) {
 }
 
 void GenericWorker::process_timeout(Connection* c) {
-    if ((el->now() - c->_last_interaction) > 
+    if ((_el->now() - c->_last_interaction) > 
             (uint64_t)options.connection_timeout)
     {
         log_debug("[time out] close fd[%d]", c->_fd);

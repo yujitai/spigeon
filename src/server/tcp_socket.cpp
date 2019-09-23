@@ -26,6 +26,11 @@ TCPSocket::TCPSocket()
 {
 }
 
+TCPSocket::TCPSocket(SOCKET s) 
+    : _s(s) 
+{
+}
+
 TCPSocket::~TCPSocket() {
 }
 
@@ -41,6 +46,7 @@ int TCPSocket::create(int family, int type) {
     int on = 1;
     set_option(Socket::OPT_REUSEADDR, on);
     set_option(Socket::OPT_NODELAY, on);
+    set_noblock();
 
     return NET_OK;
 }
@@ -65,10 +71,10 @@ int TCPSocket::listen(int backlog) {
     return NET_OK;
 }
 
-SOCKET TCPSocket::accept(SocketAddress* sa) {
+SOCKET TCPSocket::accept(SocketAddress& sa) {
     while(1) {
         socklen_t salen = sizeof(struct sockaddr);
-        SOCKET a_s = ::accept(_s, (struct sockaddr*)(*sa), &salen);
+        SOCKET a_s = ::accept(_s, (struct sockaddr*)sa, &salen);
         if (a_s == -1) {
             if (errno == EINTR)
                 continue;
@@ -77,7 +83,7 @@ SOCKET TCPSocket::accept(SocketAddress* sa) {
                 return NET_ERROR;
             }
         }
-
+        log_debug("accept: new_fd[%d]", a_s);
         return a_s;
     }
 }
@@ -88,6 +94,7 @@ int TCPSocket::connect(SocketAddress* sa) {
 
 int TCPSocket::write(const char* buf, size_t len) {
     int w = ::write(_s, buf, len);
+    cout << "write:" << w << endl;
     if (w == -1) {
         if (errno == EAGAIN)
             w = 0;
@@ -102,6 +109,7 @@ int TCPSocket::write(const char* buf, size_t len) {
 
 int TCPSocket::read(char* buf, size_t len) {
     int r = ::read(_s, buf, len);
+    cout << "read:" << r << endl;
     if (r == -1) {
         if (errno == EAGAIN)
             r = 0;
@@ -183,6 +191,26 @@ int TCPSocket::translate_option(Option opt, int* slevel, int* sopt) {
 
 SOCKET TCPSocket::fd() {
     return _s; 
+}
+
+int TCPSocket::set_noblock() {
+    int flags;
+    /** 
+     * Set the socket nonblocking.
+     * Note that fcntl(2) for F_GETFL and F_SETFL can't be
+     * interrupted by a signal. 
+     */
+    if ((flags = fcntl(_s, F_GETFL)) == -1) {
+        log_warning("fcntl(F_GETFL): %s", strerror(errno));
+        return NET_ERROR;
+    }
+    if (fcntl(_s, F_SETFL, flags | O_NONBLOCK) == -1) {
+        log_warning("fcntl(F_SETFL, O_NONBLOCK): %s", strerror(errno));
+        return NET_ERROR;
+    }
+    log_debug("[set noblocking] fd[%d]", _s);
+
+    return NET_OK;
 }
 
 } // namespace zf

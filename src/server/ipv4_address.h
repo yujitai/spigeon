@@ -28,7 +28,18 @@ namespace zf {
  **/
 class Ipv4Address : public SocketAddress {
 public:
+    /** 
+     * Construct without ip and port,
+     * used on the 'accept' situation.
+     **/
+    Ipv4Address();
+
+    // Consturct with ip and port.
     Ipv4Address(const std::string& ip, uint16_t port);
+
+    // Copy consturct
+    Ipv4Address(const Ipv4Address& from);
+
     ~Ipv4Address();
 
     // SocketAddress implementation

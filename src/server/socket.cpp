@@ -23,7 +23,7 @@ int Socket::listen(int backlog) {
     return -1;
 }
 
-SOCKET Socket::accept(SocketAddress* sa) {
+SOCKET Socket::accept(SocketAddress& sa) {
     return -1;
 }
 

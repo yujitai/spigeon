@@ -23,6 +23,7 @@
 #include "server/dispatcher.h"
 #include "server/tcp_connection.h"
 #include "server/udp_connection.h"
+#include "server/network_manager.h"
 
 namespace zf {
 
@@ -42,9 +43,10 @@ class GenericWorker: public Runnable {
         TCPCONNECTION = 1,
         UDPCONNECTION = 2
     };
-    
+
     GenericWorker(const GenericServerOptions& options, 
             const std::string& thread_name);
+
     virtual ~GenericWorker();
 
     virtual int init();
@@ -52,11 +54,11 @@ class GenericWorker: public Runnable {
     void mq_push(void *msg);            
     bool mq_pop(void **msg);    
     
-#if 0
     // process tcp io event
     virtual void tcp_read_io(int fd);
     virtual void tcp_write_io(int fd);
 
+#if 0
     // process udp io event
     virtual void udp_read_io(int fd);
     virtual void udp_write_io(int fd);
@@ -69,14 +71,13 @@ class GenericWorker: public Runnable {
     void set_clients_count(int64_t count);
     void set_worker_id(const std::string& id);
     const std::string& get_worker_id();
+    void set_network(NetworkMgr* network_manager);
 public:
     void process_internal_notify(int msg);
 protected:
     void stop();
-    /*
-    Connection* new_tcp_conn(int fd);
-    Connection* new_udp_conn(int fd);
-    */
+    Connection* new_tcp_conn(SOCKET s);
+    //Connection* new_udp_conn(int fd);
     void close_conn(Connection *c);
     virtual void before_remove_conn(Connection *c) { UNUSED(c); }
     virtual void after_remove_conn(Connection *c) { UNUSED(c); }
@@ -91,11 +92,11 @@ protected:
     void start_timer(Connection *c);
 
     const GenericServerOptions options;
-
     LockFreeQueue<void*> mq;      // new connection queue
     int64_t online_count;
 
-    EventLoop* el;
+    // owned by worker
+    EventLoop* _el;
     IOWatcher* pipe_watcher;
     TimerWatcher* cron_timer;
 
@@ -114,6 +115,9 @@ protected:
      *  i.e. conns[fd] = conn;
      */
     std::vector<Connection*> conns;
+    
+    // owned by dispatcher
+    NetworkMgr* _network_manager;
 };
 
 } // namespace zf
