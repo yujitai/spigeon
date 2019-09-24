@@ -41,7 +41,7 @@ public:
 
     // Create a async socket
     virtual int create(int family, int type) = 0;
-    virtual int bind(SocketAddress* sa) = 0;
+    virtual int bind(SocketAddress& sa) = 0;
     virtual int listen(int backlog);
     virtual int accept(SocketAddress& sa);
     virtual int connect(SocketAddress* sa);

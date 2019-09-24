@@ -17,66 +17,50 @@
 
 #include "server/network_manager.h"
 
+#include "server/server.h"
+
 namespace zf {
 
-NetworkMgr::NetworkMgr(EventLoop* el)
+NetworkManager::NetworkManager(EventLoop* el)
     : _el(el)
 {
 
 }
 
-NetworkMgr::~NetworkMgr() {
+NetworkManager::~NetworkManager() {
 
 }
 
-#if 0
-int create_udp_server(int port, const char* ip) {
-    int s;
-    struct sockaddr_in sa;
+SOCKET NetworkManager::create_server(uint8_t type, const std::string& ip, uint16_t port) {
+    // TODO:addr storage.
+    Ipv4Address addr(ip, port);
+    Socket* socket = nullptr;
 
-    if ((s = create_socket(AF_INET, SOCK_DGRAM)) == NET_ERROR)
-        return NET_ERROR;
-
-    memset(&sa, 0, sizeof(sa));
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons(port);
-    sa.sin_addr.s_addr = htonl(INADDR_ANY);
-    socklen_t slen = sizeof(sa);
-    if (ip && inet_aton(ip, &sa.sin_addr) == 0) {
-        log_warning("invalid ip address");
-        close(s);
-        return NET_ERROR;
+    if (G_SERVER_TCP == type) {
+        socket = new TCPSocket();
+        socket->create(AF_INET, SOCK_STREAM);
+        socket->bind(addr);
+        socket->listen(1024);
+    } 
+    
+    if (G_SERVER_UDP == type) {
+        //socket = new UDPSocket();
+        //socket->create(AF_INET, SOCK_DGRAM);
+        //socket->bind(addr);
     }
 
-    if (bind(s, (sockaddr*)&sa, slen) == -1) {
-        log_warning("bind: %s", strerror(errno));
-        close(s);
-        return NET_ERROR;
-    }
+    log_debug("[server address] type[%d] ip[%s] port[%d] addrlen[%d]", 
+            type, addr.ip().c_str(), addr.port(), (socklen_t)addr);
 
-    return s;
-}
-#endif
-
-SOCKET NetworkMgr::create_tcp_server(const std::string& ip, uint16_t port) {
-    Socket* socket = new TCPSocket();
-    SocketAddress* sa = new Ipv4Address(ip, port);
-    log_debug("[server address] ip[%s] port[%d] addrlen[%d]", 
-            sa->ip().c_str(), sa->port(), (socklen_t)(*sa));
-
-    socket->create(AF_INET, SOCK_STREAM);
-    socket->bind(sa);
-    socket->listen(1024);
-
-    int fd = socket->fd();
-    if ((uint32_t)fd >= _sockets.size())
+    SOCKET fd = socket->fd();
+    if (fd >= _sockets.size())
         _sockets.resize(fd * 2, NULL);
     _sockets[fd] = socket;
 
     return fd;
 }
 
-SOCKET NetworkMgr::tcp_accept(int fd, SocketAddress& sa) {
+SOCKET NetworkManager::tcp_accept(int fd, SocketAddress& sa) {
     Socket* socket = _sockets[fd];
 
     SOCKET s = socket->accept(sa);
@@ -86,7 +70,7 @@ SOCKET NetworkMgr::tcp_accept(int fd, SocketAddress& sa) {
     return s; 
 }
 
-bool NetworkMgr::wrap_socket(SOCKET s) {
+bool NetworkManager::wrap_socket(SOCKET s) {
     Socket* socket = new TCPSocket(s);
 
     int on = 1;
@@ -100,12 +84,12 @@ bool NetworkMgr::wrap_socket(SOCKET s) {
     return true;
 }   
 
-std::vector<Socket*>& NetworkMgr::get_sockets() {
+std::vector<Socket*>& NetworkManager::get_sockets() {
     return _sockets;
 }
 
 /*
-int tcp_connect(const char* addr, uint16_t port) {
+SOCKET NetworkManager::tcp_connect(const char* addr, uint16_t port) {
     int s = create_socket(AF_INET, SOCK_STREAM);
     if (s == NET_ERROR)
         return NET_ERROR;

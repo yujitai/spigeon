@@ -25,7 +25,7 @@ namespace zf {
 
 class UDPSocket : public Socket {
 public:
-    UDPSocket(int domain, int type);
+    UDPSocket(int family, int type);
 private:
     SOCKET _s;
 };

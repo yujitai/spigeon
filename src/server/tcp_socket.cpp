@@ -51,8 +51,8 @@ int TCPSocket::create(int family, int type) {
     return NET_OK;
 }
 
-int TCPSocket::bind(SocketAddress* sa) {
-    if (::bind(_s, (struct sockaddr*)(*sa), (socklen_t)(*sa)) == -1) {
+int TCPSocket::bind(SocketAddress& sa) {
+    if (::bind(_s, (struct sockaddr*)sa, (socklen_t)sa) == -1) {
         log_warning("bind: %s", strerror(errno));
         close(_s);
         return NET_ERROR;

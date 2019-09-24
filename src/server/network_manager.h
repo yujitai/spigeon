@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "server/udp_socket.h"
 #include "server/tcp_socket.h"
 #include "server/ipv4_address.h"
 
@@ -31,10 +32,10 @@ class TCPSocket;
 class EventLoop;
 
 /**
- * NetworkMgr
+ * NetworkManager
  * Sockets Manager.
  **/
-class NetworkMgr {
+class NetworkManager {
 public:
     enum {
         NET_ERROR = -1,       // Generic net error
@@ -42,26 +43,21 @@ public:
         NET_OK = 0
     };
 
-    NetworkMgr(EventLoop* el);
-    ~NetworkMgr();
-
-    /**
-     * Return the udp sockfd or NET_ERROR
-     **/
-    SOCKET create_udp_server(const std::string& ip, uint16_t port);
+    NetworkManager(EventLoop* el);
+    ~NetworkManager();
 
     /** 
-     * Return the tcp listening fd or NET_ERROR 
+     * Create a concrete server.
      **/
-    SOCKET create_tcp_server(const std::string& ip, uint16_t port);
+    SOCKET create_server(uint8_t type, const std::string& ip, uint16_t port);
 
     /**
-     * Accept a tcp socket
+     * Accept a tcp socket.
      **/
     SOCKET tcp_accept(SOCKET s, SocketAddress& sa);
     
     /**
-     * Wrap a udp/tcp socket
+     * Wrap a udp/tcp socket.
      **/
     bool wrap_socket(SOCKET s);
 
@@ -69,15 +65,12 @@ public:
 
 #if 0
     int tcp_connect(const char* host, int port);
-    int sock_setnonblock(int s);
-    int sock_setnodelay(int s);
-    int sock_read_data(int fd, char* data, size_t len);
-    int sock_write_data(int fd, const char* data, size_t len);
     int sock_get_name(int fd, char* ip, uint16_t* port);
     int sock_peer_to_str(int fd, char* ip, uint16_t* port);
 #endif
 
 private:
+    // owned by dispatcher.
     EventLoop* _el;
 
     // index is fd.

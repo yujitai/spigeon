@@ -131,7 +131,7 @@ GenericWorker::~GenericWorker() {
     delete _el;
 }
 
-void GenericWorker::set_network(NetworkMgr* network_manager) {
+void GenericWorker::set_network(NetworkManager* network_manager) {
     _network_manager = network_manager;
 }
 
@@ -158,11 +158,11 @@ void GenericWorker::tcp_read_io(int fd) {
     size_t iblen = sdslen(c->_io_buffer);
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
     int r = socket->read(c->_io_buffer + iblen, rlen);
-    if (r == NetworkMgr::NET_ERROR) {
+    if (r == NetworkManager::NET_ERROR) {
         log_debug("socket read: return error, close connection");
         close_conn(c);
         return;
-    } else if (r == NetworkMgr::NET_PEER_CLOSED) {
+    } else if (r == NetworkManager::NET_PEER_CLOSED) {
         log_debug("socket read: return 0, peer closed");
         close_conn(c);
         return;
@@ -249,7 +249,7 @@ void GenericWorker::tcp_write_io(int fd) {
         int w = socket->write(reply.data() + c->_bytes_written,
                 reply.size() - c->_bytes_written);
 
-        if (w == NetworkMgr::NET_ERROR) {
+        if (w == NetworkManager::NET_ERROR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;

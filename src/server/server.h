@@ -28,21 +28,20 @@
 
 namespace zf {
 
-enum {
-    SERVER_OK = 0,
-    SERVER_ERROR = 1
-};
-
 class GenericServerOptions;
 class GenericDispatcher;
 class GenericWorker;
 
 typedef GenericWorker* (*worker_factory_func_t) (GenericServerOptions& o);
 
+enum {
+    SERVER_OK = 0,
+    SERVER_ERROR = 1
+};
+
 enum SERVER_TYPE {
     G_SERVER_TCP = 0,
     G_SERVER_UDP = 1,
-    G_SERVER_PIPE = 2,
 };
 
 class GenericServerOptions : public Options {
@@ -62,14 +61,17 @@ public:
     int ssl_open;
 };
 
+/**
+ * Generic server.
+ **/
 class GenericServer : public Runnable, 
                       public IConfig 
 {
 public:
     GenericServer(const std::string& thread_name);
     virtual ~GenericServer(); 
-
-    // Implementation of IConfig
+    
+    // IConfig Implementation
     int init_conf() override;
     int init_conf(struct Options& o) override;
     int load_conf(const char* filename) override;

@@ -71,7 +71,7 @@ class GenericWorker: public Runnable {
     void set_clients_count(int64_t count);
     void set_worker_id(const std::string& id);
     const std::string& get_worker_id();
-    void set_network(NetworkMgr* network_manager);
+    void set_network(NetworkManager* network_manager);
 public:
     void process_internal_notify(int msg);
 protected:
@@ -117,7 +117,7 @@ protected:
     std::vector<Connection*> conns;
     
     // owned by dispatcher
-    NetworkMgr* _network_manager;
+    NetworkManager* _network_manager;
 };
 
 } // namespace zf

@@ -29,8 +29,8 @@ namespace zf {
 
 class EventLoop;
 class IOWatcher;
-class NetworkMgr;
 class GenericWorker;
+class NetworkManager;
 
 enum {
     DISPATCHER_OK = 0,
@@ -42,6 +42,8 @@ enum {
     PROTOCOL_UDP = 1
 };
 
+typedef void (*accept_cb_t)(EventLoop*, IOWatcher*, int, int, void*);
+
 class GenericDispatcher {
 public:
     enum {
@@ -51,7 +53,12 @@ public:
     GenericDispatcher(GenericServerOptions& options);
     virtual ~GenericDispatcher();
 
-    virtual int init();
+    virtual int initialize();
+    int create_pipe();
+    int create_server(uint8_t type, 
+            char* ip, uint16_t port, 
+            accept_cb_t accept_cb);
+
     void run();
     int notify(int msg);
     void mq_push(void* msg);
@@ -59,26 +66,27 @@ public:
     int dispatch_new_conn(int fd, int protocol);
     virtual void process_notify(int msg);
     virtual int64_t get_clients_count(std::string& clients_detail);
-    NetworkMgr* network_manager() const;
+    NetworkManager* network_manager() const;
 public:
     void process_internal_notify(int msg);
-
 protected:
     void stop();
+    /**
+     * Spawn a new worker and push it into GenericDispatcher::workers.
+     **/
     virtual int spawn_worker();
     virtual int join_workers();
 
     GenericServerOptions& options;
 
-    int listen_fd;
-    int notify_recv_fd;
-    int notify_send_fd;
+    int _notify_recv_fd;
+    int _notify_send_fd;
     // owned by dispatcher.
     EventLoop* _el;
-    IOWatcher* io_watcher;
-    IOWatcher* pipe_watcher;
+    IOWatcher* _io_watcher;
+    IOWatcher* _pipe_watcher;
     // owned by dispatcher.
-    NetworkMgr* _network_mgr;
+    NetworkManager* _network_manager;
     LockFreeQueue<void*> mq;
     std::vector<GenericWorker*> workers;
     std::vector<GenericWorker*>::size_type next_worker;

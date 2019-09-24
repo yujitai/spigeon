@@ -31,7 +31,7 @@ public:
 
     // Socket implementation.
     int create(int family, int type) override;
-    int bind(SocketAddress* sa) override;
+    int bind(SocketAddress& sa) override;
     int listen(int backlog) override;
     int accept(SocketAddress& sa) override;
     int connect(SocketAddress* sa) override;
