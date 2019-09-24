@@ -31,7 +31,7 @@ NetworkManager::~NetworkManager() {
 
 }
 
-SOCKET NetworkManager::create_server(uint8_t type, const std::string& ip, uint16_t port) {
+Socket* NetworkManager::create_server(uint8_t type, const std::string& ip, uint16_t port) {
     // TODO:addr storage.
     Ipv4Address addr(ip, port);
     Socket* socket = nullptr;
@@ -57,20 +57,23 @@ SOCKET NetworkManager::create_server(uint8_t type, const std::string& ip, uint16
         _sockets.resize(fd * 2, NULL);
     _sockets[fd] = socket;
 
-    return fd;
+    return socket;
 }
 
-SOCKET NetworkManager::tcp_accept(int fd, SocketAddress& sa) {
-    Socket* socket = _sockets[fd];
+Socket* NetworkManager::generic_accept(SOCKET listen_fd, SocketAddress& sa) {
+    Socket* socket = _sockets[listen_fd];
 
     SOCKET s = socket->accept(sa);
-    log_debug("accept: client addr: ip[%s] port[%d]", sa.ip().c_str(), sa.port());
-    wrap_socket(s);
+    if (INVALID_SOCKET == s) {
+        log_fatal("[generic accept: invalid socket]");
+        return nullptr;
+    }
 
-    return s; 
+    log_debug("generic accept: client info: ip[%s] port[%d]", sa.ip().c_str(), sa.port());
+    return wrap_socket(s);
 }
 
-bool NetworkManager::wrap_socket(SOCKET s) {
+Socket* NetworkManager::wrap_socket(SOCKET s) {
     Socket* socket = new TCPSocket(s);
 
     int on = 1;
@@ -80,8 +83,8 @@ bool NetworkManager::wrap_socket(SOCKET s) {
     if ((uint32_t)s >= _sockets.size())
         _sockets.resize(s*2, NULL);
     _sockets[s] = socket;
-
-    return true;
+    
+    return socket;
 }   
 
 std::vector<Socket*>& NetworkManager::get_sockets() {

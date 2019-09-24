@@ -28,7 +28,7 @@ namespace zf {
  */
 class TCPConnection : public Connection {
 public:
-    TCPConnection(int fd);
+    TCPConnection(Socket* s);
     virtual ~TCPConnection() override;
 
     void reset(int initial_state, size_t initial_bytes_expected);

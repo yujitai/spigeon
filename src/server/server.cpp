@@ -129,7 +129,7 @@ int GenericServer::validate_conf() {
     return SERVER_OK;
 }
 
-int GenericServer::init() {
+int GenericServer::initialize() {
     _dispatcher = new GenericDispatcher(_options);
     if (_dispatcher->initialize() != DISPATCHER_OK) {
         log_fatal("failed to create dispatcher");

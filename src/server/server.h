@@ -77,7 +77,7 @@ public:
     int load_conf(const char* filename) override;
     int validate_conf() override;
 
-    int init();
+    int initialize();
     virtual void run() override;
     void stop();
 

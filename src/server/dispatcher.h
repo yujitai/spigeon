@@ -27,6 +27,7 @@
 
 namespace zf {
 
+class Socket;
 class EventLoop;
 class IOWatcher;
 class GenericWorker;
@@ -37,13 +38,11 @@ enum {
     DISPATCHER_ERROR = 1
 };
 
-enum {
-    PROTOCOL_TCP = 0,
-    PROTOCOL_UDP = 1
-};
-
 typedef void (*accept_cb_t)(EventLoop*, IOWatcher*, int, int, void*);
 
+/**
+ * Generic dispatcher
+ **/
 class GenericDispatcher {
 public:
     enum {
@@ -53,44 +52,45 @@ public:
     GenericDispatcher(GenericServerOptions& options);
     virtual ~GenericDispatcher();
 
+    /**
+     * Create pipe and server
+     * Spawn workers
+     **/
     virtual int initialize();
-    int create_pipe();
-    int create_server(uint8_t type, 
-            char* ip, uint16_t port, 
-            accept_cb_t accept_cb);
 
     void run();
     int notify(int msg);
     void mq_push(void* msg);
     bool mq_pop(void** msg);
-    int dispatch_new_conn(int fd, int protocol);
+    int dispatch_new_conn(Socket* s);
     virtual void process_notify(int msg);
     virtual int64_t get_clients_count(std::string& clients_detail);
     NetworkManager* network_manager() const;
-public:
     void process_internal_notify(int msg);
 protected:
     void stop();
     /**
-     * Spawn a new worker and push it into GenericDispatcher::workers.
+     * Spawn a new worker and push it into 
+     * GenericDispatcher::workers
      **/
     virtual int spawn_worker();
     virtual int join_workers();
 
-    GenericServerOptions& options;
-
+    GenericServerOptions& _options;
     int _notify_recv_fd;
     int _notify_send_fd;
-    // owned by dispatcher.
     EventLoop* _el;
     IOWatcher* _io_watcher;
     IOWatcher* _pipe_watcher;
-    // owned by dispatcher.
     NetworkManager* _network_manager;
-    LockFreeQueue<void*> mq;
-    std::vector<GenericWorker*> workers;
-    std::vector<GenericWorker*>::size_type next_worker;
-    Mutex lock;
+    LockFreeQueue<void*> _mq;
+    std::vector<GenericWorker*> _workers;
+    std::vector<GenericWorker*>::size_type _next_worker;
+private:
+    int create_pipe();
+    int create_server(uint8_t type, 
+            char* ip, uint16_t port, 
+            accept_cb_t accept_cb);
 };
 
 } // namespace zf

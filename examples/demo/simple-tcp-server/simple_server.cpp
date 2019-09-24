@@ -51,7 +51,7 @@ int init_server() {
     g_server->init_conf(options);
 
     // init server
-    if (g_server->init() != 0) {
+    if (g_server->initialize() != 0) {
         return -1;
     }
 

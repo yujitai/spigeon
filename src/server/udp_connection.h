@@ -23,13 +23,15 @@
 
 namespace zf {
 
+class Socket;
+
 /**
  * UDPConnection
  * 暂时不支持mcpack协议
  */
 class UDPConnection : public Connection {
 public:
-    UDPConnection(int fd);
+    UDPConnection(Socket* s);
     virtual ~UDPConnection() override;
 
     

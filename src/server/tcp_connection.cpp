@@ -21,8 +21,8 @@
 
 namespace zf {
 
-TCPConnection::TCPConnection(int fd) 
-    : Connection(fd),
+TCPConnection::TCPConnection(Socket* s) 
+    : Connection(s),
       _receive_state(0),
       _bytes_processed(0), 
       _bytes_expected(1), 

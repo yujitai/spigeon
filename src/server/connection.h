@@ -20,6 +20,7 @@
 #define  __CONNECTION_H_
 
 #include "server/common_include.h"
+#include "server/socket.h"
 
 #include <openssl/ssl.h>
 #include <list>
@@ -37,12 +38,13 @@ class TimerWatcher;
  */
 class Connection {
 public:
-    Connection(int fd);
+    Connection(Socket* s);
     virtual ~Connection();
+
+    SOCKET fd();
 
     char _ip[20];            
     uint16_t _port;              
-    int _fd;             
 
     // used to handle timeout.
     uint64_t _last_interaction;   
@@ -57,6 +59,8 @@ public:
     sds _io_buffer;
     int _reply_list_size;
     std::list<Slice> _reply_list;
+
+    Socket* _s;
 };
 
 } // namespace zf

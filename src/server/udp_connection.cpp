@@ -19,8 +19,8 @@
 
 namespace zf {
 
-UDPConnection::UDPConnection(int fd)
-    : Connection(fd)
+UDPConnection::UDPConnection(Socket* s)
+    : Connection(s)
 {
 }
 

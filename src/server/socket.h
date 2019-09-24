@@ -25,25 +25,26 @@
 
 namespace zf { 
 
+enum {
+    SOCKET_OK = 0,
+    SOCKET_ERROR = -1,       
+    SOCKET_PEER_CLOSED = -2
+};
+
 /**
- * General interface for the socket implementations of various newworks.
- * The methods match those of normal UNIX sockets very closely.
+ * General interface for the socket implementations of 
+ * various networks. The methods match those of normal 
+ * UNIX sockets very closely.
  **/
 class Socket {
 public:
-    enum {
-        NET_ERROR = -1,       // Generic net error
-        NET_PEER_CLOSED = -2, // Peer closed
-        NET_OK = 0
-    };
-
     virtual ~Socket() {}
 
     // Create a async socket
     virtual int create(int family, int type) = 0;
     virtual int bind(SocketAddress& sa) = 0;
     virtual int listen(int backlog);
-    virtual int accept(SocketAddress& sa);
+    virtual SOCKET accept(SocketAddress& sa);
     virtual int connect(SocketAddress* sa);
     virtual int write(const char* buf, size_t len) = 0;
     virtual int read(char* buf, size_t len) = 0;

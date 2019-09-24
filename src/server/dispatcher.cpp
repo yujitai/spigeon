@@ -17,17 +17,6 @@
 
 #include "server/dispatcher.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-#include <netdb.h>
-#include <errno.h>
-
-#include <pthread.h>
 #include <sys/time.h>
 
 #include "server/event.h"
@@ -55,12 +44,12 @@ void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
 }
 
 /**
- * @brief Tcp server socket io handler
+ * TCP server socket io handler
  * TODO:后续把这些回调写成仿函数
- */
+ **/
 void accept_tcp_conn(EventLoop* el, 
         IOWatcher* w, 
-        int fd, 
+        int listen_fd, 
         int revents, 
         void* data)  
 {
@@ -68,32 +57,25 @@ void accept_tcp_conn(EventLoop* el,
     UNUSED(w);
     UNUSED(revents);
     
-    struct timeval s, e, s1, e1; 
-    int new_fd;
+    struct timeval start, end;
     Ipv4Address addr;
     GenericDispatcher* dp = (GenericDispatcher*)data;
-
     NetworkManager* network_manager = dp->network_manager();
     if (!network_manager) 
         return;
-    gettimeofday(&s, NULL);
-    new_fd = network_manager->tcp_accept(fd, addr); 
-    if (new_fd == NetworkManager::NET_ERROR) {
-        log_warning("[accept socket failed]");
+
+    gettimeofday(&start, NULL);
+    Socket* s = network_manager->generic_accept(listen_fd, addr); 
+    if (!s) {
+        log_warning("[generic accept failed]");
         return;
     }
-    
-    gettimeofday(&s1, NULL);
-    if (dp->dispatch_new_conn(new_fd, PROTOCOL_TCP) == DISPATCHER_ERROR) {
-        log_warning("[dispatch new connection failed]");
+    if (dp->dispatch_new_conn(s) == DISPATCHER_ERROR) {
+        log_warning("[dispatch new conn failed]");
         return;
     }
-
-    gettimeofday(&e1, NULL);
-    log_debug("[dispatch new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s1, e1), new_fd);
-
-    gettimeofday(&e, NULL);
-    log_debug("[accept new conn] cost[%luus] cfd[%d]", TIME_US_DIFF(s, e), new_fd);
+    gettimeofday(&end, NULL);
+    log_debug("[accept tcp conn] cost[%luus] client_fd[%d]", TIME_US_DIFF(start, end), s->fd());
 }
 
 /**
@@ -139,41 +121,42 @@ void accept_udp_conn(EventLoop *el,
 }
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
-        : options(o),
+        : _options(o),
           _el(NULL), 
           _io_watcher(NULL), 
           _pipe_watcher(NULL),
-          next_worker(0)
+          _next_worker(0)
 {
     _el = new EventLoop((void*)this, false);
     _network_manager = new NetworkManager(_el);
 }
 
 GenericDispatcher::~GenericDispatcher() {
-    for (size_t i = 0; i < workers.size(); i++) {
-        if (workers[i] != NULL) {
-            delete workers[i];
-            workers[i] = NULL;
+    for (size_t i = 0; i < _workers.size(); i++) {
+        if (_workers[i] != NULL) {
+            delete _workers[i];
+            _workers[i] = NULL;
         }
     }
     delete _el;
 }
 
 int GenericDispatcher::initialize() {
-    if (create_pipe() == -1)
+    if (create_pipe() == DISPATCHER_ERROR)
         return DISPATCHER_ERROR;
 
-    if (create_server(options.server_type, 
-                options.ip, options.port,
-                options.server_type == G_SERVER_TCP ?
-                accept_tcp_conn : accept_udp_conn) == -1) {
+    if (create_server(_options.server_type, 
+                _options.ip, _options.port,
+                _options.server_type == G_SERVER_TCP ? 
+                accept_tcp_conn : accept_udp_conn) 
+                == DISPATCHER_ERROR) 
+    {
         return DISPATCHER_ERROR;
     }
 
-    for (int i = 0; i < options.worker_num; i++) {
-        if (spawn_worker() == DISPATCHER_ERROR) {
+    for (int i = 0; i < _options.worker_num; i++) {
+        if (spawn_worker() == DISPATCHER_ERROR) 
             return DISPATCHER_ERROR;
-        }
     }
 
     return DISPATCHER_OK;
@@ -188,27 +171,30 @@ int GenericDispatcher::create_pipe() {
     _notify_recv_fd = fds[0];
     _notify_send_fd = fds[1];
     _pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
-    if (_pipe_watcher == NULL)
+    if (_pipe_watcher == NULL) {
+        log_fatal("can't create io event for recv_notify");
         return DISPATCHER_ERROR;
+    }
     _el->start_io_event(_pipe_watcher, _notify_recv_fd, EventLoop::READ);
+    log_debug("[create notify pipe ok]");
 
     return DISPATCHER_OK;
 }
 
-int GenericDispatcher::create_server(uint8_t type, char* ip, uint16_t port, 
-        accept_cb_t accept_cb) 
+int GenericDispatcher::create_server(uint8_t type, 
+        char* ip, uint16_t port, accept_cb_t accept_cb) 
 {
-    SOCKET fd = _network_manager->create_server(type, ip, port);
-    if (fd == NetworkManager::NET_ERROR) {
-        log_fatal("Create %s server failed on %s:%d", type, ip, port);
+    Socket* s = _network_manager->create_server(type, ip, port);
+    if (!s) {
+        log_fatal("create %s server failed on %s:%d", type, ip, port);
         return DISPATCHER_ERROR;
     }
     _io_watcher = _el->create_io_event(accept_cb, (void*)this);
     if (_io_watcher == NULL) {
-        log_fatal("Can't create io event for accept_tcp_conn");
+        log_fatal("can't create io event for accept_tcp_conn");
         return DISPATCHER_ERROR;
     }
-    _el->start_io_event(_io_watcher, fd, EventLoop::READ);
+    _el->start_io_event(_io_watcher, s->fd(), EventLoop::READ);
 
     return DISPATCHER_OK;
 }
@@ -240,12 +226,12 @@ void GenericDispatcher::run() {
 }
 
 int GenericDispatcher::spawn_worker() {
-    if (options.worker_factory_func == NULL) {
-        log_fatal("you should specify worker_factory_func to create worker");
+    if (_options.worker_factory_func == NULL) {
+        log_fatal("don't specify worker_factory_func to create worker");
         return DISPATCHER_ERROR;
     }
 
-    GenericWorker* new_worker = options.worker_factory_func(options);
+    GenericWorker* new_worker = _options.worker_factory_func(_options);
     new_worker->initialize();
     new_worker->set_network(_network_manager);
     if (create_thread(new_worker) == THREAD_ERROR) {
@@ -255,16 +241,16 @@ int GenericDispatcher::spawn_worker() {
     std::stringstream worker_id;
     worker_id << new_worker->_thread_name << "_" << new_worker->_thread_id;
     new_worker->set_worker_id(worker_id.str());
-    workers.push_back(new_worker);
+    _workers.push_back(new_worker);
 
     return DISPATCHER_OK;
 }
 
 int GenericDispatcher::join_workers() {
-    for (size_t i = 0; i < workers.size(); i++) {
-        if (workers[i] != NULL) {
-            workers[i]->notify(GenericWorker::QUIT);
-            if (join_thread(workers[i]) == THREAD_ERROR) {
+    for (size_t i = 0; i < _workers.size(); i++) {
+        if (_workers[i] != NULL) {
+            _workers[i]->notify(GenericWorker::QUIT);
+            if (join_thread(_workers[i]) == THREAD_ERROR) {
                 log_fatal("failed to join worker thread");
             }
         }
@@ -273,14 +259,11 @@ int GenericDispatcher::join_workers() {
     return DISPATCHER_OK;
 }
 
-int GenericDispatcher::dispatch_new_conn(int fd, int protocol) {
-    log_debug("[dispatch new connection] fd[%d]", fd);
-
+int GenericDispatcher::dispatch_new_conn(Socket* s) {
     // Just use a round-robin right now.
-    GenericWorker* worker = workers[next_worker];
-    next_worker = (next_worker + 1) % workers.size();
-    int* nfd = new int(fd);
-    worker->mq_push((void*)nfd);
+    GenericWorker* worker = _workers[_next_worker];
+    _next_worker = (_next_worker + 1) % _workers.size();
+    worker->mq_push((void*)s);
 
     // Notify worker the arrival of a new connection.
     if (worker->notify(GenericWorker::NEW_CONNECTION) != WORKER_OK) {
@@ -288,6 +271,8 @@ int GenericDispatcher::dispatch_new_conn(int fd, int protocol) {
         return DISPATCHER_ERROR;             
     }
 
+    log_debug("[dispatch new connection] fd[%d] worker_id[%s]", 
+            s->fd(), worker->worker_id().c_str());
     return DISPATCHER_OK;
 }
 
@@ -316,23 +301,23 @@ int GenericDispatcher::notify(int msg) {
 }
 
 void GenericDispatcher::mq_push(void *msg) {
-    mq.produce(msg);
+    _mq.produce(msg);
 }
 
 bool GenericDispatcher::mq_pop(void **msg) {
-    return mq.consume(msg);
+    return _mq.consume(msg);
 }
 
 int64_t GenericDispatcher::get_clients_count(std::string& clients_detail) {
     std::stringstream temp;
     int64_t current_count = 0;
     temp << "[";
-    for (size_t i = 0; i < workers.size(); i++) {
-        if (workers[i] != NULL) {
-            std::string workerid_temp = workers[i]->get_worker_id();
-            int64_t  count_temp = workers[i]->get_clients_count();
+    for (size_t i = 0; i < _workers.size(); i++) {
+        if (_workers[i] != NULL) {
+            std::string worker_id_temp = _workers[i]->worker_id();
+            int64_t count_temp = _workers[i]->get_clients_count();
             current_count += count_temp;
-            temp << "," << workerid_temp << ":" << count_temp;
+            temp << "," << worker_id_temp << ":" << count_temp;
         }
     }
     temp << "]";

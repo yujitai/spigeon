@@ -32,6 +32,8 @@
 
 typedef int SOCKET;
 
+#define INVALID_SOCKET -1
+
 #endif  //__SOCKET_INCLUDE_H_
 
 

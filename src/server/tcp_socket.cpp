@@ -38,7 +38,7 @@ int TCPSocket::create(int family, int type) {
     // create async noblocking socket.
     if ((_s = ::socket(family, type | SOCK_NONBLOCK, 0)) == -1) {
         log_warning("create socket: %s", strerror(errno));
-        return NET_ERROR;
+        return SOCKET_ERROR;
     }
     log_debug("sockfd[%d]", _s);
 
@@ -48,27 +48,27 @@ int TCPSocket::create(int family, int type) {
     set_option(Socket::OPT_NODELAY, on);
     set_noblock();
 
-    return NET_OK;
+    return SOCKET_OK;
 }
 
 int TCPSocket::bind(SocketAddress& sa) {
     if (::bind(_s, (struct sockaddr*)sa, (socklen_t)sa) == -1) {
         log_warning("bind: %s", strerror(errno));
         close(_s);
-        return NET_ERROR;
+        return SOCKET_ERROR;
     }
 
-    return NET_OK;
+    return SOCKET_OK;
 }
 
 int TCPSocket::listen(int backlog) {
     if (::listen(_s, 4095) == -1) {
         log_warning("listen: %s", strerror(errno));
         close(_s);
-        return NET_ERROR;
+        return SOCKET_ERROR;
     }
 
-    return NET_OK;
+    return SOCKET_OK;
 }
 
 SOCKET TCPSocket::accept(SocketAddress& sa) {
@@ -80,7 +80,7 @@ SOCKET TCPSocket::accept(SocketAddress& sa) {
                 continue;
             else {
                 log_warning("accept: %s", strerror(errno));
-                return NET_ERROR;
+                return SOCKET_ERROR;
             }
         }
         log_debug("accept: new_fd[%d]", a_s);
@@ -94,13 +94,12 @@ int TCPSocket::connect(SocketAddress* sa) {
 
 int TCPSocket::write(const char* buf, size_t len) {
     int w = ::write(_s, buf, len);
-    cout << "write:" << w << endl;
     if (w == -1) {
         if (errno == EAGAIN)
             w = 0;
         else {
             log_debug("write: %s", strerror(errno));
-            return NET_ERROR;
+            return SOCKET_ERROR;
         }
     }
 
@@ -109,17 +108,16 @@ int TCPSocket::write(const char* buf, size_t len) {
 
 int TCPSocket::read(char* buf, size_t len) {
     int r = ::read(_s, buf, len);
-    cout << "read:" << r << endl;
     if (r == -1) {
         if (errno == EAGAIN)
             r = 0;
         else {
             log_debug("read: %s", strerror(errno));
-            return NET_ERROR;
+            return SOCKET_ERROR;
         }
     } else if (r == 0) {
         log_debug("read: peer closed");
-        return NET_PEER_CLOSED;
+        return SOCKET_PEER_CLOSED;
     }
     
     return r;
@@ -162,7 +160,7 @@ int TCPSocket::set_option(Option opt, int value) {
    int slevel, sopt;
    if (translate_option(opt, &slevel, &sopt) == -1) {
        log_warning("translate socket option failed");
-       return NET_ERROR;
+       return SOCKET_ERROR;
    }
    
    return ::setsockopt(_s, slevel, sopt, &value, sizeof(value));
@@ -186,11 +184,7 @@ int TCPSocket::translate_option(Option opt, int* slevel, int* sopt) {
             break;
     }
 
-    return NET_OK;
-}
-
-SOCKET TCPSocket::fd() {
-    return _s; 
+    return SOCKET_OK;
 }
 
 int TCPSocket::set_noblock() {
@@ -202,15 +196,19 @@ int TCPSocket::set_noblock() {
      */
     if ((flags = fcntl(_s, F_GETFL)) == -1) {
         log_warning("fcntl(F_GETFL): %s", strerror(errno));
-        return NET_ERROR;
+        return SOCKET_ERROR;
     }
     if (fcntl(_s, F_SETFL, flags | O_NONBLOCK) == -1) {
         log_warning("fcntl(F_SETFL, O_NONBLOCK): %s", strerror(errno));
-        return NET_ERROR;
+        return SOCKET_ERROR;
     }
     log_debug("[set noblocking] fd[%d]", _s);
 
-    return NET_OK;
+    return SOCKET_OK;
+}
+
+SOCKET TCPSocket::fd() {
+    return _s; 
 }
 
 } // namespace zf

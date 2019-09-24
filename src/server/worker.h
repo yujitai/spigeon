@@ -50,8 +50,8 @@ class GenericWorker: public Runnable {
 
     virtual int initialize();
     void run();
-    void mq_push(void *msg);            
-    bool mq_pop(void **msg);    
+    void mq_push(void* msg);            
+    bool mq_pop(void** msg);    
     
     // process io event
     void read_io(int fd);
@@ -64,13 +64,13 @@ class GenericWorker: public Runnable {
     int64_t get_clients_count();
     void set_clients_count(int64_t count);
     void set_worker_id(const std::string& id);
-    const std::string& get_worker_id();
+    const std::string& worker_id();
     void set_network(NetworkManager* network_manager);
 public:
     void process_internal_notify(int msg);
 protected:
     void stop();
-    Connection* new_conn(SOCKET s);
+    Connection* new_conn(Socket* s);
     void close_conn(Connection *c);
     virtual void before_remove_conn(Connection *c) { UNUSED(c); }
     virtual void after_remove_conn(Connection *c) { UNUSED(c); }
@@ -96,7 +96,7 @@ protected:
     /**
      *  worker_id = thread_name + thread_id.
      */
-    std::string worker_id;
+    std::string _worker_id;
 
     /**
      *  Notify pipe fd, used for thread communication. 
@@ -113,10 +113,10 @@ protected:
     NetworkManager* _network_manager;
 
 private:
-    void tcp_read_io(Connection* c, Socket* s);
-    void tcp_write_io(Connection* c, Socket*s);
-    void udp_read_io(Connection* c, Socket* s);
-    void udp_write_io(Connection* c, Socket* s);
+    void tcp_read_io(Connection* c);
+    void tcp_write_io(Connection* c);
+    void udp_read_io(Connection* c);
+    void udp_write_io(Connection* c);
 };
 
 } // namespace zf
