@@ -49,9 +49,9 @@ static void recv_notify(EventLoop *el,
 }
 
 /**
- * Callback for TCPConnection io events 
+ * Callback for Connection io events 
  */
-void tcp_conn_io_cb(EventLoop* el, 
+void conn_io_cb(EventLoop* el, 
         IOWatcher* w, 
         int fd, 
         int revents, 
@@ -62,31 +62,10 @@ void tcp_conn_io_cb(EventLoop* el,
 
     GenericWorker* worker = (GenericWorker*)(el->owner);
     if (revents & EventLoop::READ)
-        worker->tcp_read_io(fd);
+        worker->read_io(fd);
 
     if (revents & EventLoop::WRITE) 
-        worker->tcp_write_io(fd);
-}
-
-/**
- * Callback for UDPConnection io events 
- */
-void udp_conn_io_cb(EventLoop *el, 
-        IOWatcher *w, 
-        int fd, 
-        int revents, 
-        void *data) 
-{
-    UNUSED(w);
-    UNUSED(data);
-
-    GenericWorker* worker = (GenericWorker*)(el->owner);
-    if (revents & EventLoop::READ) {
-        //worker->udp_read_io(fd);
-    }
-    if (revents & EventLoop::WRITE) {
-        //worker->udp_write_io(fd);
-    } 
+        worker->write_io(fd);
 }
 
 /**
@@ -135,29 +114,39 @@ void GenericWorker::set_network(NetworkManager* network_manager) {
     _network_manager = network_manager;
 }
 
-void GenericWorker::tcp_read_io(int fd) {
+void GenericWorker::read_io(int fd) {
     assert(fd >= 0);
-    
-    if ((unsigned int)fd >= conns.size()) {
+
+    if (fd >= conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
-
     auto& sockets = _network_manager->get_sockets();
-    Socket* socket = sockets[fd]; 
-    if (!socket)
+    Socket* s = sockets[fd]; 
+    if (!s) {
+        log_warning("connection not exists");
         return;
+    }
 
-    TCPConnection* c = (TCPConnection*)conns[fd];
+    Connection* c = conns[fd];
     if (!c) {
         log_warning("connection not exists");
         return;
     }
-  
+
+    if (dynamic_cast<TCPConnection*>(c)) {
+        tcp_read_io(c, s);
+    } else if (dynamic_cast<UDPConnection*>(c)) {
+        udp_read_io(c, s);
+    }
+}
+
+void GenericWorker::tcp_read_io(Connection* conn, Socket* s) {
+    TCPConnection* c = (TCPConnection*)conn;
     int rlen = c->_bytes_expected;
     size_t iblen = sdslen(c->_io_buffer);
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
-    int r = socket->read(c->_io_buffer + iblen, rlen);
+    int r = s->read(c->_io_buffer + iblen, rlen);
     if (r == NetworkManager::NET_ERROR) {
         log_debug("socket read: return error, close connection");
         close_conn(c);
@@ -180,21 +169,8 @@ void GenericWorker::tcp_read_io(int fd) {
     }
 }
 
-/*
-void GenericWorker::udp_read_io(int fd) {
-    assert(fd >= 0);
-    
-    if ((unsigned int)fd >= conns.size()) {
-        log_warning("invalid fd: %d", fd);
-        return;
-    }
-
-    UDPConnection* c = (UDPConnection*)conns[fd];
-    if (c == NULL) {
-        log_warning("connection not exists");
-        return;
-    }
-
+void GenericWorker::udp_read_io(Connection* c, Socket* s) {
+#if 0
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, 1024);
     int r = sock_read_data(fd, c->_io_buffer, 1024);
     if (r > 0) {
@@ -203,8 +179,8 @@ void GenericWorker::udp_read_io(int fd) {
     c->_last_interaction - el->now();
 
     this->process_io_buffer(c);
+#endif
 }
-*/
 
 int GenericWorker::add_reply(Connection* c, const Slice& reply) {
     if (dynamic_cast<TCPConnection*>(c)) {
@@ -226,27 +202,40 @@ int GenericWorker::reply_list_size(Connection* c) {
     // return c->_reply_list_size;
 }
 
-void GenericWorker::tcp_write_io(int fd) {
+void GenericWorker::write_io(int fd) {
     assert(fd >= 0);
-    if ((unsigned int)fd >= conns.size()) {
+
+    if (fd >= conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
 
     auto& sockets = _network_manager->get_sockets();
-    Socket* socket = sockets[fd]; 
-    if (!socket)
-        return;
-
-    TCPConnection* c = (TCPConnection*)conns[fd];
-    if (c == NULL) {
+    Socket* s = sockets[fd]; 
+    if (!s) {
         log_warning("connection not exists");
         return;
     }
 
+    Connection* c = conns[fd];
+    if (!c) {
+        log_warning("connection not exists");
+        return;
+    }
+
+    if (dynamic_cast<TCPConnection*>(c)) {
+        tcp_write_io(c, s);
+    } else if (dynamic_cast<UDPConnection*>(c)) {
+        udp_write_io(c, s);
+    }
+}
+
+void GenericWorker::tcp_write_io(Connection* conn, Socket* s) {
+    TCPConnection* c = (TCPConnection*)conn;
+
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
-        int w = socket->write(reply.data() + c->_bytes_written,
+        int w = s->write(reply.data() + c->_bytes_written,
                 reply.size() - c->_bytes_written);
 
         if (w == NetworkManager::NET_ERROR) {
@@ -267,24 +256,13 @@ void GenericWorker::tcp_write_io(int fd) {
     }
     c->_last_interaction = _el->now();
 
-    /* no more replies to write */
+    // no more replies to write
     if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
 }
 
+void GenericWorker::udp_write_io(Connection* c, Socket* s) {
 #if 0
-void GenericWorker::udp_write_io(int fd) {
-    assert(fd >= 0);
-    if ((unsigned int)fd >= conns.size()) {
-        log_warning("invalid fd: %d", fd);
-        return;
-    }
-    UDPConnection* c = (UDPConnection*)conns[fd]; 
-    if (c == NULL) {
-        log_warning("connection not exists");
-        return;
-    }
-
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
         int w = sock_write_data(fd, reply.data(), reply.size());
@@ -296,11 +274,11 @@ void GenericWorker::udp_write_io(int fd) {
     }
     c->_last_interaction = el->now();
 
-    /* no more replies to write */
+    // no more replies to write
     if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
-}
 #endif
+}
 
 void GenericWorker::disable_events(Connection *c, int events) {
     _el->stop_io_event(c->_watcher, c->_fd, events);
@@ -314,9 +292,9 @@ void GenericWorker::start_timer(Connection *c) {
     _el->start_timer(c->_timer, options.tick);
 }
 
-Connection* GenericWorker::new_tcp_conn(SOCKET s) {
+Connection* GenericWorker::new_conn(SOCKET s) {
     assert(s >= 0);
-    log_debug("[new connection] fd[%d]", s);
+    log_debug("[new conn] fd[%d]", s);
 
     Connection* c = new TCPConnection(s);
 
@@ -324,7 +302,7 @@ Connection* GenericWorker::new_tcp_conn(SOCKET s) {
     c->_last_interaction = _el->now();
 
     // create io event and timer for the connection.
-    c->_watcher = _el->create_io_event(tcp_conn_io_cb, (void*)c);
+    c->_watcher = _el->create_io_event(conn_io_cb, (void*)c);
     c->_timer = _el->create_timer(timeout_cb, (void*)c, true);
 
     // start io and timer.
@@ -335,42 +313,12 @@ Connection* GenericWorker::new_tcp_conn(SOCKET s) {
     }
     start_timer(c);
 
-    if ((unsigned int)s >= conns.size())
+    if (s >= conns.size())
         conns.resize(s*2, NULL);
     conns[s] = c;
 
     return c;
 }
-
-/*
-Connection* GenericWorker::new_udp_conn(int fd) {
-    assert(fd >= 0);
-    log_debug("[new udp connection] fd[%d]", fd);
-
-    //sock_setnonblock(fd);
-    Connection* c = new UDPConnection(fd);
-    c->_last_interaction = el->now();
-
-    // create io event and timer for the connection.
-    c->_watcher = el->create_io_event(udp_conn_io_cb, (void*)c);
-    c->_timer = el->create_timer(timeout_cb, (void*)c, true);
-
-    // start io and timer.
-    if (options.ssl_open) {
-        enable_events(c, EventLoop::READ | EventLoop::WRITE);
-    } else {
-        enable_events(c, EventLoop::READ);
-    }
-    start_timer(c);
-
-    if ((unsigned int)fd >= conns.size())
-        conns.resize(fd*2, NULL);
-
-    conns[fd] = c;
-
-    return c;
-}
-*/
 
 void GenericWorker::close_conn(Connection *c) {
     log_debug("close connection");
@@ -423,7 +371,7 @@ const std::string& GenericWorker::get_worker_id() {
     return worker_id;
 }
 
-int GenericWorker::init() {
+int GenericWorker::initialize() {
     int fds[2];
     if (pipe(fds)) {
         log_fatal("can't create notify pipe");
@@ -471,11 +419,11 @@ void GenericWorker::run() {
 int GenericWorker::notify(int msg) {
     struct timeval s, e; 
     gettimeofday(&s, NULL);
-    int written = write(notify_send_fd, &msg, sizeof(int));
+    int w = write(notify_send_fd, &msg, sizeof(int));
     gettimeofday(&e, NULL);
     log_debug("[write worker pipe] cost[%luus] msg_type[%d]", TIME_US_DIFF(s, e), msg);
 
-    if (written == sizeof(int))
+    if (w == sizeof(int))
         return WORKER_OK;
     else
         return WORKER_ERROR;
@@ -487,15 +435,9 @@ void GenericWorker::process_internal_notify(int msg) {
         case QUIT:          
             stop();
             break;
-        case TCPCONNECTION:         
+        case NEW_CONNECTION:         
             if (mq_pop((void**)&s)) {
-                new_tcp_conn(*s);
-                delete s;
-            }
-            break;
-        case UDPCONNECTION:
-            if (mq_pop((void**)&s)) {
-                //new_udp_conn(*s);
+                new_conn(*s);
                 delete s;
             }
             break;

@@ -40,8 +40,7 @@ class GenericWorker: public Runnable {
     // notification messages
     enum {
         QUIT = 0,
-        TCPCONNECTION = 1,
-        UDPCONNECTION = 2
+        NEW_CONNECTION = 1
     };
 
     GenericWorker(const GenericServerOptions& options, 
@@ -49,20 +48,15 @@ class GenericWorker: public Runnable {
 
     virtual ~GenericWorker();
 
-    virtual int init();
+    virtual int initialize();
     void run();
     void mq_push(void *msg);            
     bool mq_pop(void **msg);    
     
-    // process tcp io event
-    virtual void tcp_read_io(int fd);
-    virtual void tcp_write_io(int fd);
+    // process io event
+    void read_io(int fd);
+    void write_io(int fd);
 
-#if 0
-    // process udp io event
-    virtual void udp_read_io(int fd);
-    virtual void udp_write_io(int fd);
-#endif
     virtual int notify(int msg);
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
@@ -76,8 +70,7 @@ public:
     void process_internal_notify(int msg);
 protected:
     void stop();
-    Connection* new_tcp_conn(SOCKET s);
-    //Connection* new_udp_conn(int fd);
+    Connection* new_conn(SOCKET s);
     void close_conn(Connection *c);
     virtual void before_remove_conn(Connection *c) { UNUSED(c); }
     virtual void after_remove_conn(Connection *c) { UNUSED(c); }
@@ -118,6 +111,12 @@ protected:
     
     // owned by dispatcher
     NetworkManager* _network_manager;
+
+private:
+    void tcp_read_io(Connection* c, Socket* s);
+    void tcp_write_io(Connection* c, Socket*s);
+    void udp_read_io(Connection* c, Socket* s);
+    void udp_write_io(Connection* c, Socket* s);
 };
 
 } // namespace zf

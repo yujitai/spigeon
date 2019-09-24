@@ -246,7 +246,7 @@ int GenericDispatcher::spawn_worker() {
     }
 
     GenericWorker* new_worker = options.worker_factory_func(options);
-    new_worker->init();
+    new_worker->initialize();
     new_worker->set_network(_network_manager);
     if (create_thread(new_worker) == THREAD_ERROR) {
         log_fatal("failed to create worker thread");
@@ -283,26 +283,11 @@ int GenericDispatcher::dispatch_new_conn(int fd, int protocol) {
     worker->mq_push((void*)nfd);
 
     // Notify worker the arrival of a new connection.
-    switch (protocol) {
-        case PROTOCOL_TCP: {
-            if (worker->notify(GenericWorker::TCPCONNECTION) != WORKER_OK) {
-                log_warning("[write worker notify pipe failed");
-                return DISPATCHER_ERROR;             
-            }
-            break;
-        }
-        case PROTOCOL_UDP: {
-            if (worker->notify(GenericWorker::UDPCONNECTION) != WORKER_OK) {
-                log_warning("[write worker notify pipe failed");
-                return DISPATCHER_ERROR;             
-            }
-            break;
-        }
-        default:
-            log_warning("[unknown protocol]");
-            break;
+    if (worker->notify(GenericWorker::NEW_CONNECTION) != WORKER_OK) {
+        log_warning("[write worker notify pipe failed");
+        return DISPATCHER_ERROR;             
     }
-       
+
     return DISPATCHER_OK;
 }
 
