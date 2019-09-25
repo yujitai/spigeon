@@ -33,8 +33,8 @@ class UDPConnection : public Connection {
 public:
     UDPConnection(Socket* s);
     virtual ~UDPConnection() override;
-
-    
+    //int read(char* buf, size_t len) override;
+    //int write(const char* buf, size_t len) override;
 };
 
 } // namespace zf

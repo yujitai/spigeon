@@ -41,6 +41,9 @@ public:
     Connection(Socket* s);
     virtual ~Connection();
 
+    virtual int read(char* buf, size_t len) = 0;
+    virtual int write(const char* buf, size_t len) = 0;
+
     SOCKET fd();
 
     char _ip[20];            
@@ -60,6 +63,7 @@ public:
     int _reply_list_size;
     std::list<Slice> _reply_list;
 
+protected:
     Socket* _s;
 };
 

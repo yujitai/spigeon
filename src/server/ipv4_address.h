@@ -28,17 +28,15 @@ namespace zf {
  **/
 class Ipv4Address : public SocketAddress {
 public:
-    /** 
-     * Construct without ip and port,
-     * used on the 'accept' situation.
-     **/
+    // construct without ip and port, 
+    // used on the 'accept' situation
     Ipv4Address();
-
-    // Consturct with ip and port.
+    // consturct with ip and port
     Ipv4Address(const std::string& ip, uint16_t port);
-
-    // Copy consturct
-    Ipv4Address(const Ipv4Address& from);
+    // copy construct
+    Ipv4Address(const Ipv4Address& from) = default;
+    // copy operator
+    Ipv4Address& operator=(const Ipv4Address& from) = default;
 
     ~Ipv4Address();
 
@@ -48,7 +46,8 @@ public:
     int family() override;
     const std::string ip() override;
     uint16_t port() override;
-//private:
+
+private:
     std::string _ip;
     uint16_t _port;
     struct sockaddr_in _addr;

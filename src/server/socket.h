@@ -48,8 +48,8 @@ public:
     virtual int connect(SocketAddress* sa);
     virtual int write(const char* buf, size_t len) = 0;
     virtual int read(char* buf, size_t len) = 0;
-    virtual SocketAddress* get_local_address() const = 0; 
-    virtual SocketAddress* get_remote_address() const = 0; 
+    virtual bool get_local_address(SocketAddress* sa) const = 0; 
+    virtual bool get_remote_address(SocketAddress* sa) const = 0; 
 
     // Socket options config
     enum Option {

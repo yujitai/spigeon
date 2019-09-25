@@ -123,32 +123,50 @@ int TCPSocket::read(char* buf, size_t len) {
     return r;
 }
 
-SocketAddress* TCPSocket::get_local_address() const {
-    return _local_addr;
-    /*
-    struct sockaddr_storage addr_storage = {0};
-    socklen_t addrlen = sizeof(addr_storage);
+bool TCPSocket::get_local_address(SocketAddress* const sa) const {
+    struct sockaddr_storage addr = {0};
+    socklen_t addr_len = sizeof(addr);
+    sockaddr* saddr = reinterpret_cast<sockaddr*>(&addr);
 
-    SocketAddress* address = new Ipv4Address();
-    if (::getsockname(_s, (struct sockaddr*)addr_storage, &addrlen) == -1)
-        return nullptr;
+    if(::getsockname(_s, saddr, &addr_len) == SOCKET_ERROR) {
+        log_warning("[get remote address failed] fd[%d]", _s);
+        return false;
+    }
 
-    return socket_address_from_sockaddr_storage(addr_storage, address);
-    */
+    if (addr.ss_family == AF_INET) {
+        sockaddr_in* saddr = (sockaddr_in*)&addr;
+        *((Ipv4Address*)sa) = Ipv4Address(
+                inet_ntoa(saddr->sin_addr), 
+                htons(saddr->sin_port)); 
+    } 
+    
+    if (addr.ss_family == AF_INET6) {
+    }
+
+    return true;
 }
 
-SocketAddress* TCPSocket::get_remote_address() const {
-    //return _remote_addr;
-    /*
-    struct sockaddr_storage addr_storage = {0};
-    socklen_t addrlen = sizeof(addr_storage);
+bool TCPSocket::get_remote_address(SocketAddress* const sa) const {
+    struct sockaddr_storage addr = {0};
+    socklen_t addr_len = sizeof(addr);
+    sockaddr* saddr = reinterpret_cast<sockaddr*>(&addr);
 
-    SocketAddress* address = new Ipv4Address();
-    if (::getpeername(_s, (struct sockaddr*)&sa, &salen) == -1)
-        return nullptr;
+    if(::getpeername(_s, saddr, &addr_len) == SOCKET_ERROR) {
+        log_warning("[get remote address failed] fd[%d]", _s);
+        return false;
+    }
 
-    return socket_address_from_sockaddr_storage(addr_storage, address);
-    */
+    if (addr.ss_family == AF_INET) {
+        sockaddr_in* saddr = (sockaddr_in*)&addr;
+        *((Ipv4Address*)sa) = Ipv4Address(
+                inet_ntoa(saddr->sin_addr), 
+                htons(saddr->sin_port)); 
+    } 
+    
+    if (addr.ss_family == AF_INET6) {
+    }
+
+    return true;
 }
 
 int TCPSocket::get_option(Option opt, int* value) {

@@ -27,13 +27,6 @@ Ipv4Address::Ipv4Address()
     memset(&_addr, 0, sizeof(_addr));
 }
 
-Ipv4Address::Ipv4Address(const Ipv4Address& from) 
-    : _ip(from._ip), _port(from._port)
-{
-    memset(&_addr, 0, sizeof(_addr));
-    // TODO:sockaddr_in use copy construct
-}
-
 Ipv4Address::Ipv4Address(const std::string& ip, uint16_t port) 
     : _ip(ip), _port(port)
 {

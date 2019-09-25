@@ -70,7 +70,7 @@ public:
     void process_internal_notify(int msg);
 protected:
     void stop();
-    Connection* new_conn(Socket* s);
+    Connection* create_connection(Socket* s);
     void close_conn(Connection *c);
     virtual void before_remove_conn(Connection *c) { UNUSED(c); }
     virtual void after_remove_conn(Connection *c) { UNUSED(c); }

@@ -20,7 +20,8 @@
 namespace zf {
 
 Connection::Connection(Socket* s)
-    : _priv_data(NULL), 
+    : _port(0),
+      _priv_data(NULL), 
       _priv_data_destructor(NULL),
       _watcher(NULL), 
       _timer(NULL),

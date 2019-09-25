@@ -20,6 +20,7 @@
 #define  __TCP_SOCKET_H_
 
 #include "server/socket.h"
+#include "server/ipv4_address.h"
 
 namespace zf {
 
@@ -33,12 +34,12 @@ public:
     int create(int family, int type) override;
     int bind(SocketAddress& sa) override;
     int listen(int backlog) override;
-    int accept(SocketAddress& sa) override;
+    SOCKET accept(SocketAddress& sa) override;
     int connect(SocketAddress* sa) override;
     int write(const char* buf, size_t len) override;
     int read(char* buf, size_t len) override;
-    SocketAddress* get_local_address() const override;
-    SocketAddress* get_remote_address() const override;
+    bool get_local_address(SocketAddress* const sa) const override;
+    bool get_remote_address(SocketAddress* const sa) const override;
     int get_option(Option opt, int* value) override;
     int set_option(Option opt, int value) override;
 

@@ -24,24 +24,10 @@
 
 namespace zf {
 
-/*
-bool socket_address_from_sockaddr_storage(const sockaddr_storage& addr, 
-        SocketAddress* out_addr) 
-{
-    if (!out_addr)
-        return false;
-
-    if (addr.ss_family == AF_INET) {
-        const sockaddr_in* saddr = (const sockaddr_in*)&addr;
-        *out
-    }
-}
-*/
-
 /**
- * This interface class and its subclasses is intended to be used as replacement for 
- * the UNIX SOCKET data type 'struct sockaddr_in' and 'struct sockaddr_in6' and records 
- * an IP address and port.
+ * This interface class and its subclasses is intended to be used as 
+ * replacement for the UNIX SOCKET data type 'struct sockaddr_in' and 
+ * 'struct sockaddr_in6' and records an IP address and port.
  **/
 class SocketAddress {
 public:

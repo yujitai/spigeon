@@ -137,7 +137,7 @@ void GenericWorker::tcp_read_io(Connection* conn) {
     int rlen = c->_bytes_expected;
     size_t iblen = sdslen(c->_io_buffer);
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
-    int r = c->_s->read(c->_io_buffer + iblen, rlen);
+    int r = c->read(c->_io_buffer + iblen, rlen);
     if (r == SOCKET_ERROR) {
         log_debug("socket read: return error, close connection");
         close_conn(c);
@@ -226,7 +226,7 @@ void GenericWorker::tcp_write_io(Connection* conn) {
 
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
-        int w = c->_s->write(reply.data() + c->_bytes_written,
+        int w = c->write(reply.data() + c->_bytes_written,
                 reply.size() - c->_bytes_written);
 
         if (w == SOCKET_ERROR) {
@@ -271,29 +271,32 @@ void GenericWorker::udp_write_io(Connection* c) {
 #endif
 }
 
-void GenericWorker::disable_events(Connection *c, int events) {
-    _el->stop_io_event(c->_watcher, c->_s->fd(), events);
+void GenericWorker::disable_events(Connection* c, int events) {
+    _el->stop_io_event(c->_watcher, c->fd(), events);
 }
 
-void GenericWorker::enable_events(Connection *c, int events) {
-    _el->start_io_event(c->_watcher, c->_s->fd(), events);
+void GenericWorker::enable_events(Connection* c, int events) {
+    _el->start_io_event(c->_watcher, c->fd(), events);
 }
 
-void GenericWorker::start_timer(Connection *c) {
+void GenericWorker::start_timer(Connection* c) {
     _el->start_timer(c->_timer, options.tick);
 }
 
-Connection* GenericWorker::new_conn(Socket* s) {
-    if (!s || s->fd() < 0) {
-        log_fatal("[socket error]");
+Connection* GenericWorker::create_connection(Socket* s) {
+    if (!s) {
+        log_fatal("[invalid Socket*]");
+        return nullptr;
+    }
+
+    SOCKET fd = s->fd();
+    if (fd == INVALID_SOCKET) {
+        log_fatal("[invalid fd]");
         return nullptr;
     }
 
     Connection* c = new TCPConnection(s);
-    // sock_peer_to_str(s, c->_ip, &(c->_port));
     c->_last_interaction = _el->now();
-
-    // create io event and timer for the connection.
     c->_watcher = _el->create_io_event(conn_io_cb, (void*)c);
     c->_timer = _el->create_timer(timeout_cb, (void*)c, true);
 
@@ -305,12 +308,11 @@ Connection* GenericWorker::new_conn(Socket* s) {
     }
     start_timer(c);
 
-    if (s->fd() >= conns.size())
-        conns.resize(s->fd()*2, NULL);
-    conns[s->fd()] = c;
+    if (fd >= conns.size())
+        conns.resize(fd*2, NULL);
+    conns[fd] = c;
 
-    log_debug("[new connection] fd[%d]", s->fd());
-
+    log_debug("[new connection] fd[%d]", fd);
     return c;
 }
 
@@ -430,9 +432,8 @@ void GenericWorker::process_internal_notify(int msg) {
             stop();
             break;
         case NEW_CONNECTION:         
-            if (mq_pop((void**)&s)) {
-                new_conn(s);
-            }
+            if (mq_pop((void**)&s)) 
+                create_connection(s);
             break;
         default:
             process_notify(msg);
