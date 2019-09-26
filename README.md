@@ -53,7 +53,6 @@
 ## 使用
 
 ## 作者
-CONTRIBUTORS ordered by first contribution.
 yujitai<yujitai@zuoyebang.com>
 
 
