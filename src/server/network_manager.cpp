@@ -31,67 +31,71 @@ NetworkManager::~NetworkManager() {
 
 }
 
-Socket* NetworkManager::create_server(uint8_t type, const std::string& ip, uint16_t port) {
-    // TODO:addr storage.
-    Ipv4Address addr(ip, port);
-    Socket* socket = nullptr;
+Socket* NetworkManager::create_server(uint8_t type, 
+                                      const std::string& ip, 
+                                      uint16_t port) 
+{
+    Ipv4Address srv_addr(ip, port);
+    Socket* s = nullptr;
 
     if (G_SERVER_TCP == type) {
-        socket = new TCPSocket();
-        socket->create(AF_INET, SOCK_STREAM);
-        socket->bind(addr);
-        socket->listen(1024);
-    } 
-    
-    if (G_SERVER_UDP == type) {
-        //socket = new UDPSocket();
-        //socket->create(AF_INET, SOCK_DGRAM);
-        //socket->bind(addr);
+        s = new TCPSocket(srv_addr);
+        s->create_bind(AF_INET, SOCK_STREAM);
+        s->listen(1024);
+    } else if (G_SERVER_UDP == type) {
+        s = new UDPSocket(srv_addr);
+        s->create_bind(AF_INET, SOCK_DGRAM);
     }
 
-    log_debug("[server address] type[%d] ip[%s] port[%d] addrlen[%d]", 
-            type, addr.ip().c_str(), addr.port(), (socklen_t)addr);
-
-    SOCKET fd = socket->fd();
+    SOCKET fd = s->fd();
     if (fd >= _sockets.size())
-        _sockets.resize(fd * 2, NULL);
-    _sockets[fd] = socket;
+        _sockets.resize(fd*2, NULL);
+    _sockets[fd] = s;
 
-    return socket;
+    return s;
 }
 
 Socket* NetworkManager::generic_accept(SOCKET listen_fd, SocketAddress& sa) {
-    Socket* socket = _sockets[listen_fd];
+    Socket* s = _sockets[listen_fd];
 
-    SOCKET s = socket->accept(sa);
-    if (INVALID_SOCKET == s) {
+    SOCKET fd = s->accept(sa);
+    if (fd == INVALID_SOCKET) {
         log_fatal("[generic accept: invalid socket]");
         return nullptr;
     }
 
-    log_debug("generic accept: client info: ip[%s] port[%d]", sa.ip().c_str(), sa.port());
-    return wrap_socket(s);
+    log_debug("generic accept: client info: ip[%s] port[%d]", 
+            sa.ip().c_str(), sa.port());
+
+    return wrap_socket(s, fd);
 }
 
-Socket* NetworkManager::wrap_socket(SOCKET s) {
-    Socket* socket = new TCPSocket(s);
-
+Socket* NetworkManager::wrap_socket(Socket* listen_s, SOCKET fd) {
     int on = 1;
-    socket->set_option(Socket::OPT_NODELAY, on);
-    socket->set_noblock();
+    Socket* s = nullptr;
 
-    if ((uint32_t)s >= _sockets.size())
-        _sockets.resize(s*2, NULL);
-    _sockets[s] = socket;
+    if (dynamic_cast<TCPSocket*>(listen_s)) {
+        s = new TCPSocket(fd);
+        s->set_option(Socket::OPT_NODELAY, on);
+        s->set_noblock();
+    } else if (dynamic_cast<UDPSocket*>(listen_s)) {
+        s = new UDPSocket(fd);
+        s->set_option(Socket::OPT_REUSEADDR, on);
+        s->set_noblock();
+    }
+
+    if (fd >= _sockets.size())
+        _sockets.resize(fd*2, NULL);
+    _sockets[fd] = s;
     
-    return socket;
+    return s;
 }   
 
-std::vector<Socket*>& NetworkManager::get_sockets() {
+std::vector<Socket*>& NetworkManager::sockets() {
     return _sockets;
 }
 
-/*
+#if 0
 SOCKET NetworkManager::tcp_connect(const char* addr, uint16_t port) {
     int s = create_socket(AF_INET, SOCK_STREAM);
     if (s == NET_ERROR)
@@ -118,39 +122,7 @@ SOCKET NetworkManager::tcp_connect(const char* addr, uint16_t port) {
 
     return s;
 }
-
-int sock_get_name(int fd, char* ip, uint16_t* port) {
-    struct sockaddr_in sa;
-    socklen_t salen = sizeof(sa);
-
-    if (getsockname(fd, (struct sockaddr*)&sa, &salen) == -1) {
-        *port = 0;
-        ip[0] = '?';
-        ip[1] = '\0';
-        return NET_ERROR;
-    }
-    if (ip) strcpy(ip, inet_ntoa(sa.sin_addr));
-    if (port) *port = ntohs(sa.sin_port);
-
-    return NET_OK;
-}
-
-int sock_peer_to_str(int fd, char* ip, uint16_t* port) {
-    struct sockaddr_in sa;
-    socklen_t salen = sizeof(sa);
-
-    if (getpeername(fd,(struct sockaddr*)&sa,&salen) == -1) {
-        *port = 0;
-        ip[0] = '?';
-        ip[1] = '\0';
-        return NET_ERROR;
-    }
-    if (ip) strcpy(ip,inet_ntoa(sa.sin_addr));
-    if (port) *port = ntohs(sa.sin_port);
-
-    return NET_OK;
-}
-*/
+#endif
 
 } // namespace zf
 

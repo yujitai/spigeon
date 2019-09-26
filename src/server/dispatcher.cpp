@@ -44,10 +44,10 @@ void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
 }
 
 /**
- * TCP server socket io handler
- * TODO:后续把这些回调写成仿函数
+ * TCP and UDP acceptor
+ * TODO:后续把这些回调写成仿函数 class Acceptor
  **/
-void accept_tcp_conn(EventLoop* el, 
+void accept_new_conn(EventLoop* el, 
         IOWatcher* w, 
         int listen_fd, 
         int revents, 
@@ -58,14 +58,14 @@ void accept_tcp_conn(EventLoop* el,
     UNUSED(revents);
     
     struct timeval start, end;
-    Ipv4Address addr;
+    Ipv4Address cli_addr;
     GenericDispatcher* dp = (GenericDispatcher*)data;
     NetworkManager* network_manager = dp->network_manager();
     if (!network_manager) 
         return;
 
     gettimeofday(&start, NULL);
-    Socket* s = network_manager->generic_accept(listen_fd, addr); 
+    Socket* s = network_manager->generic_accept(listen_fd, cli_addr); 
     if (!s) {
         log_warning("[generic accept failed]");
         return;
@@ -75,49 +75,7 @@ void accept_tcp_conn(EventLoop* el,
         return;
     }
     gettimeofday(&end, NULL);
-    log_debug("[accept tcp conn] cost[%luus] client_fd[%d]", TIME_US_DIFF(start, end), s->fd());
-}
-
-/**
- * @brief Udp server socket io handler
- */
-void accept_udp_conn(EventLoop *el, 
-        IOWatcher* w, 
-        int fd, 
-        int revents, 
-        void* data)  
-{
-    /*
-    UNUSED(el);
-    UNUSED(w);
-    UNUSED(revents);
-    
-    GenericDispatcher* dp = (GenericDispatcher*)data;
-
-    struct sockaddr_in ca;
-    memset(&ca, 0, sizeof(struct sockaddr_in));
-    socklen_t calen = sizeof(ca);
-    char buf[1024] = {0};
-
-    size_t r = ::recvfrom(fd, buf, 1024, 0, (struct sockaddr*)&ca, &calen);
-    if (r) {
-        char ip[20];
-        uint16_t port;
-        cout << "udp recv" << r << endl;
-        cout << "ip=" << ip << inet_ntoa(ca.sin_addr) << endl;
-        cout << "port=" << ntohs(ca.sin_port) << endl;
-    }
-
-    int new_fd = create_udp_server(NULL, 8888);
-    cout << "new udp fd =" << new_fd << endl;
-
-    if (connect(new_fd, (struct sockaddr*)&ca, sizeof(struct sockaddr)) < 0) {
-        perror("connect");
-        return;
-    } 
-
-    dp->dispatch_new_conn(new_fd, PROTOCOL_UDP);
-    */
+    log_debug("[accept new conn] cost[%luus] client_fd[%d]", TIME_US_DIFF(start, end), s->fd());
 }
 
 GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
@@ -147,10 +105,7 @@ int GenericDispatcher::initialize() {
 
     if (create_server(_options.server_type, 
                 _options.ip, _options.port,
-                _options.server_type == G_SERVER_TCP ? 
-                accept_tcp_conn : accept_udp_conn) 
-                == DISPATCHER_ERROR) 
-    {
+                accept_new_conn)) {
         return DISPATCHER_ERROR;
     }
 
@@ -191,7 +146,7 @@ int GenericDispatcher::create_server(uint8_t type,
     }
     _io_watcher = _el->create_io_event(accept_cb, (void*)this);
     if (_io_watcher == NULL) {
-        log_fatal("can't create io event for accept_tcp_conn");
+        log_fatal("can't create io event for accept_new_conn");
         return DISPATCHER_ERROR;
     }
     _el->start_io_event(_io_watcher, s->fd(), EventLoop::READ);

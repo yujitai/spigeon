@@ -36,6 +36,14 @@ Connection::~Connection() {
     delete _s;
 }
 
+int Connection::read(char* buf, size_t len) {
+    _s->read(buf, len);
+}
+
+int Connection::write(const char* buf, size_t len) {
+    _s->write(buf, len);
+}
+
 SOCKET Connection::fd() { 
     return _s->fd(); 
 }

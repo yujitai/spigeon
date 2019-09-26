@@ -61,8 +61,7 @@ class GenericWorker: public Runnable {
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
     virtual void process_cron_work();
-    int64_t get_clients_count();
-    void set_clients_count(int64_t count);
+    int get_clients_count();
     void set_worker_id(const std::string& id);
     const std::string& worker_id();
     void set_network(NetworkManager* network_manager);
@@ -84,9 +83,9 @@ protected:
     void enable_events(Connection *c, int events);
     void start_timer(Connection *c);
 
-    const GenericServerOptions options;
-    LockFreeQueue<void*> mq;      // new connection queue
-    int64_t online_count;
+    const GenericServerOptions _options;
+    // new connection queue
+    LockFreeQueue<void*> _mq;      
 
     // owned by worker
     EventLoop* _el;
@@ -101,13 +100,13 @@ protected:
     /**
      *  Notify pipe fd, used for thread communication. 
      */
-    int notify_recv_fd;             
-    int notify_send_fd;         
+    int _notify_recv_fd;             
+    int _notify_send_fd;         
     /**
      *  Alive connections, index is fd.
      *  i.e. conns[fd] = conn;
      */
-    std::vector<Connection*> conns;
+    std::vector<Connection*> _conns;
     
     // owned by dispatcher
     NetworkManager* _network_manager;

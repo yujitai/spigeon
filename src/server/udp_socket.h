@@ -25,9 +25,13 @@ namespace zf {
 
 class UDPSocket : public Socket {
 public:
-    UDPSocket(int family, int type);
-private:
-    SOCKET _s;
+    UDPSocket(Ipv4Address addr);
+    UDPSocket(SOCKET fd);
+    ~UDPSocket();
+
+    // Socket implementation.
+    SOCKET accept(SocketAddress& sa) override;
+    int connect(SOCKET fd, SocketAddress& sa);
 };
 
 } // namespace zf 

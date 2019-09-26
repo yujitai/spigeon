@@ -48,7 +48,7 @@ int init_server() {
     options.max_reply_list_size = 1024;
     options.worker_factory_func = worker_factory;
     g_server->init_conf(options);
-    if (g_server->init() != 0) {
+    if (g_server->initialize() != 0) {
         return -1;
     }
 

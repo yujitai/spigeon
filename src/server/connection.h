@@ -41,8 +41,8 @@ public:
     Connection(Socket* s);
     virtual ~Connection();
 
-    virtual int read(char* buf, size_t len) = 0;
-    virtual int write(const char* buf, size_t len) = 0;
+    virtual int read(char* buf, size_t len);
+    virtual int write(const char* buf, size_t len);
 
     SOCKET fd();
 

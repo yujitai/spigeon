@@ -49,7 +49,7 @@ static void recv_notify(EventLoop *el,
  */
 void conn_io_cb(EventLoop* el, 
         IOWatcher* w, 
-        int fd, 
+        SOCKET fd, 
         int revents, 
         void* data) 
 {
@@ -90,14 +90,13 @@ void cron_cb(EventLoop* el, TimerWatcher* w, void* data)
 GenericWorker::GenericWorker(const GenericServerOptions &o, 
         const std::string& thread_name)
     : Runnable(thread_name), 
-      options(o), 
+      _options(o), 
       _el(NULL), 
       pipe_watcher(NULL), 
       cron_timer(NULL)
 {
-    conns.resize(INITIAL_FD_NUM, NULL);
+    _conns.resize(INITIAL_FD_NUM, NULL);
     _el = new EventLoop((void*)this, false);
-    online_count = 0;
     _worker_id = "";
 }
 
@@ -113,12 +112,12 @@ void GenericWorker::set_network(NetworkManager* network_manager) {
 void GenericWorker::read_io(SOCKET fd) {
     assert(fd != INVALID_SOCKET);
 
-    if (fd >= conns.size()) {
+    if (fd >= _conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
 
-    Connection* c = conns[fd];
+    Connection* c = _conns[fd];
     if (!c) {
         log_warning("connection not exists");
         return;
@@ -160,17 +159,17 @@ void GenericWorker::tcp_read_io(Connection* conn) {
     }
 }
 
-void GenericWorker::udp_read_io(Connection* c) {
-#if 0
+void GenericWorker::udp_read_io(Connection* conn) {
+    UDPConnection* c = (UDPConnection*)conn;
+
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, 1024);
-    int r = sock_read_data(fd, c->_io_buffer, 1024);
+    int r = c->read(c->_io_buffer, 1024);
     if (r > 0) {
         sdsIncrLen(c->_io_buffer, r);
     }
-    c->_last_interaction - el->now();
+    c->_last_interaction = _el->now();
 
     this->process_io_buffer(c);
-#endif
 }
 
 int GenericWorker::add_reply(Connection* c, const Slice& reply) {
@@ -196,19 +195,19 @@ int GenericWorker::reply_list_size(Connection* c) {
 void GenericWorker::write_io(int fd) {
     assert(fd >= 0);
 
-    if (fd >= conns.size()) {
+    if (fd >= _conns.size()) {
         log_warning("invalid fd: %d", fd);
         return;
     }
 
-    auto& sockets = _network_manager->get_sockets();
+    auto& sockets = _network_manager->sockets();
     Socket* s = sockets[fd]; 
     if (!s) {
-        log_warning("connection not exists");
+        log_warning("socket not exists");
         return;
     }
 
-    Connection* c = conns[fd];
+    Connection* c = _conns[fd];
     if (!c) {
         log_warning("connection not exists");
         return;
@@ -253,22 +252,20 @@ void GenericWorker::tcp_write_io(Connection* conn) {
 }
 
 void GenericWorker::udp_write_io(Connection* c) {
-#if 0
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
-        int w = sock_write_data(fd, reply.data(), reply.size());
+        int w = c->write(reply.data(), reply.size());
         if (w == reply.size()) {
             c->_reply_list.pop_front();
             c->_reply_list_size--;
             zfree((void*)reply.data());
         } 
     }
-    c->_last_interaction = el->now();
+    c->_last_interaction = _el->now();
 
     // no more replies to write
     if (c->_reply_list.empty())
         disable_events(c, EventLoop::WRITE);
-#endif
 }
 
 void GenericWorker::disable_events(Connection* c, int events) {
@@ -280,7 +277,7 @@ void GenericWorker::enable_events(Connection* c, int events) {
 }
 
 void GenericWorker::start_timer(Connection* c) {
-    _el->start_timer(c->_timer, options.tick);
+    _el->start_timer(c->_timer, _options.tick);
 }
 
 Connection* GenericWorker::create_connection(Socket* s) {
@@ -295,22 +292,28 @@ Connection* GenericWorker::create_connection(Socket* s) {
         return nullptr;
     }
 
-    Connection* c = new TCPConnection(s);
+    Connection* c = nullptr;
+    if (dynamic_cast<TCPSocket*>(s)) {
+        c = new TCPConnection(s);
+    } else if (dynamic_cast<UDPSocket*>(s)) {
+        c = new UDPConnection(s);
+    }
+
     c->_last_interaction = _el->now();
     c->_watcher = _el->create_io_event(conn_io_cb, (void*)c);
     c->_timer = _el->create_timer(timeout_cb, (void*)c, true);
 
     // start io and timer.
-    if (options.ssl_open) {
+    if (_options.ssl_open) {
         enable_events(c, EventLoop::READ | EventLoop::WRITE);
     } else {
         enable_events(c, EventLoop::READ);
     }
     start_timer(c);
 
-    if (fd >= conns.size())
-        conns.resize(fd*2, NULL);
-    conns[fd] = c;
+    if (fd >= _conns.size())
+        _conns.resize(fd*2, NULL);
+    _conns[fd] = c;
 
     log_debug("[new connection] fd[%d]", fd);
     return c;
@@ -324,10 +327,10 @@ void GenericWorker::close_conn(Connection* c) {
 }
 
 void GenericWorker::close_all_conns() {
-    for (std::vector<Connection*>::iterator it = conns.begin();
-         it != conns.end(); ++it)
-    {
-        if (*it != NULL) close_conn(*it);
+    std::vector<Connection*>::iterator it = _conns.begin();
+    for (; it != _conns.end(); ++it) {
+        if (*it != NULL) 
+            close_conn(*it);
     }
 }
 
@@ -341,7 +344,7 @@ void GenericWorker::remove_conn(Connection *c) {
         c->priv_data_destructor(c->priv_data);
     }
     */
-    conns[c->fd()] = NULL;
+    _conns[c->fd()] = NULL;
     after_remove_conn(c);
 
     delete c;
@@ -350,12 +353,8 @@ void GenericWorker::remove_conn(Connection *c) {
 void GenericWorker::process_cron_work() {
 }
 
-int64_t GenericWorker::get_clients_count(){
-    return online_count;
-}
-void GenericWorker::set_clients_count(int64_t count){
-     online_count = count;
-     return;
+int GenericWorker::get_clients_count(){
+    return _conns.size();
 }
 
 void GenericWorker::set_worker_id(const std::string& id) {
@@ -373,17 +372,17 @@ int GenericWorker::initialize() {
         log_fatal("can't create notify pipe");
         return WORKER_ERROR;
     }
-    notify_recv_fd = fds[0];
-    notify_send_fd = fds[1];
+    _notify_recv_fd = fds[0];
+    _notify_send_fd = fds[1];
 
     // Listen for notifications from dispatcher thread
     pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
     if (pipe_watcher == NULL)
         return WORKER_ERROR;
-    _el->start_io_event(pipe_watcher, notify_recv_fd, EventLoop::READ);
+    _el->start_io_event(pipe_watcher, _notify_recv_fd, EventLoop::READ);
     // start cron timer
     cron_timer = _el->create_timer(cron_cb, (void*)this, true);
-    _el->start_timer(cron_timer, options.tick);
+    _el->start_timer(cron_timer, _options.tick);
 
     return WORKER_OK;
 }
@@ -391,21 +390,21 @@ int GenericWorker::initialize() {
 void GenericWorker::stop() {
     _el->delete_timer(cron_timer);    
     _el->delete_io_event(pipe_watcher);
-    close(notify_recv_fd);
-    close(notify_send_fd);
+    close(_notify_recv_fd);
+    close(_notify_send_fd);
     _el->stop();
-    for (size_t i = 0; i < conns.size(); i++) {
-        if (conns[i] != NULL)
-            close_conn(conns[i]);
+    for (size_t i = 0; i < _conns.size(); i++) {
+        if (_conns[i] != NULL)
+            close_conn(_conns[i]);
     }
 }
 
 void GenericWorker::mq_push(void* msg) {
-    mq.produce(msg);
+    _mq.produce(msg);
 }
 
 bool GenericWorker::mq_pop(void** msg) {
-    return mq.consume(msg);
+    return _mq.consume(msg);
 }
 
 void GenericWorker::run() {
@@ -415,7 +414,7 @@ void GenericWorker::run() {
 int GenericWorker::notify(int msg) {
     struct timeval s, e; 
     gettimeofday(&s, NULL);
-    int w = write(notify_send_fd, &msg, sizeof(int));
+    int w = write(_notify_send_fd, &msg, sizeof(int));
     gettimeofday(&e, NULL);
     log_debug("[write worker pipe] cost[%luus] msg_type[%d]", TIME_US_DIFF(s, e), msg);
 
@@ -447,7 +446,7 @@ void GenericWorker::process_notify(int msg) {
 
 void GenericWorker::process_timeout(Connection* c) {
     if ((_el->now() - c->_last_interaction) > 
-            (uint64_t)options.connection_timeout)
+            (uint64_t)_options.connection_timeout)
     {
         log_debug("[time out] close fd[%d]", c->fd());
         close_conn(c);

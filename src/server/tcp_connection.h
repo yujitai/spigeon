@@ -31,8 +31,6 @@ public:
     TCPConnection(Socket* s);
     virtual ~TCPConnection() override;
 
-    int read(char* buf, size_t len) override;
-    int write(const char* buf, size_t len) override;
     void reset(int initial_state, size_t initial_bytes_expected);
     void expect_next(int next_state, size_t next_bytes_expected);
     void shrink_processed(int next_state, size_t next_bytes_expected);

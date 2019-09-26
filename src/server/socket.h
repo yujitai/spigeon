@@ -22,6 +22,7 @@
 #include "server/common_include.h"
 #include "server/socket_include.h"
 #include "server/socket_address.h"
+#include "server/ipv4_address.h"
 
 namespace zf { 
 
@@ -32,40 +33,51 @@ enum {
 };
 
 /**
- * General interface for the socket implementations of 
- * various networks. The methods match those of normal 
+ * Base socket of various networks which match those of normal 
  * UNIX sockets very closely.
  **/
 class Socket {
 public:
+    // for server
+    Socket(Ipv4Address srv_addr);
+
+    // for client
+    Socket(SOCKET fd);
+
     virtual ~Socket() {}
 
-    // Create a async socket
-    virtual int create(int family, int type) = 0;
-    virtual int bind(SocketAddress& sa) = 0;
+    // create a async socket and bind it to the specified address
+    int create_bind(int family, int type);
+    SOCKET create_bind2(int family, int type);
+
     virtual int listen(int backlog);
     virtual SOCKET accept(SocketAddress& sa);
-    virtual int connect(SocketAddress* sa);
-    virtual int write(const char* buf, size_t len) = 0;
-    virtual int read(char* buf, size_t len) = 0;
-    virtual bool get_local_address(SocketAddress* sa) const = 0; 
-    virtual bool get_remote_address(SocketAddress* sa) const = 0; 
+    virtual int connect(SocketAddress& sa);
 
-    // Socket options config
+    int write(const char* buf, size_t len);
+    int read(char* buf, size_t len);
+
+    bool get_local_address(SocketAddress* sa) const; 
+    bool get_remote_address(SocketAddress* sa) const; 
+
+    // socket options config
     enum Option {
         OPT_RCVBUF,
         OPT_SNDBUF,
         OPT_NODELAY,
         OPT_REUSEADDR,
     };
-    virtual int get_option(Option opt, int* value) = 0;
-    virtual int set_option(Option opt, int value) = 0;
-    virtual int set_noblock() = 0;
 
-    virtual SOCKET fd() = 0;
+    int set_noblock();
+    int set_option(Option opt, int value);
+    int set_option(SOCKET fd, Option opt, int value);
+    int translate_option(Option opt, int* slevel, int* sopt);
+
+    SOCKET fd() { return _s; }
 
 protected:
-    Socket() {}
+    SOCKET _s;
+    Ipv4Address _local_addr;
 };
 
 }; // namespace zf

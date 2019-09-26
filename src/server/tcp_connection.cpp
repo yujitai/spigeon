@@ -40,14 +40,6 @@ TCPConnection::~TCPConnection() {
     _reply_list.clear();
 }
 
-int TCPConnection::read(char* buf, size_t len) {
-    _s->read(buf, len);
-}
-
-int TCPConnection::write(const char* buf, size_t len) {
-    _s->write(buf, len);
-}
-
 void TCPConnection::reset(int initial_state, size_t initial_bytes_expected) {
     _bytes_processed = 0;
     _receive_state   = initial_state;
