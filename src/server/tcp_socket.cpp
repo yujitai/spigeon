@@ -36,7 +36,7 @@ int TCPSocket::listen(int backlog) {
     if (::listen(_s, 4095) == -1) {
         log_warning("listen: %s", strerror(errno));
         close(_s);
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
 
     return SOCKET_OK;
@@ -51,7 +51,7 @@ SOCKET TCPSocket::accept(SocketAddress& sa) {
                 continue;
             else {
                 log_warning("accept: %s", strerror(errno));
-                return SOCKET_ERROR;
+                return SOCKET_ERR;
             }
         }
         log_debug("accept: new_fd[%d]", a_s);
@@ -60,7 +60,7 @@ SOCKET TCPSocket::accept(SocketAddress& sa) {
 }
 
 int TCPSocket::connect(SocketAddress& sa) {
-    return SOCKET_ERROR;
+    return SOCKET_ERR;
 }
 
 } // namespace zf

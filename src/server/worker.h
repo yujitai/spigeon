@@ -44,7 +44,7 @@ class GenericWorker: public Runnable {
     };
 
     GenericWorker(const GenericServerOptions& options, 
-            const std::string& thread_name);
+                  const std::string& thread_name);
 
     virtual ~GenericWorker();
 
@@ -93,7 +93,7 @@ protected:
     TimerWatcher* cron_timer;
 
     /**
-     *  worker_id = thread_name + thread_id.
+     * worker_id = thread_name + thread_id.
      */
     std::string _worker_id;
 

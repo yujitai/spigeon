@@ -166,7 +166,7 @@ void GenericDispatcher::stop() {
     _el->stop();
     log_notice("event loop stopped");
 
-    // close socket
+    // TODO:close socket
     // close(listen_fd);
     // log_notice("close listening socket");
 

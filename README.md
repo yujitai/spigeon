@@ -45,12 +45,15 @@
 * v1.0, 2019-08-19, 正式更名为 `zframework`, 开始开发 1.0 版本
 * v1.0, 2019-09-11, 从代码的布局、逻辑以及底层库的服务角度完成第一次精简和优化
 * v1.0, 2019-09-18, 增加基础 UDP 服务模型
-* v1.0, 2019-09-24, 底层网络层 Socket 抽象完成
+* v1.0, 2019-09-26, 底层网络层 Socket 抽象完成, 1.0 整体架构调整完成
 
 ## 构建
 ./build.sh
 
+## 使用
+
 ## 作者
+CONTRIBUTORS ordered by first contribution.
 yujitai<yujitai@zuoyebang.com>
 
 

@@ -35,7 +35,7 @@ int Socket::create_bind(int family, int type) {
     // Create async noblocking socket
     if ((_s = ::socket(family, type | SOCK_NONBLOCK, 0)) == -1) {
         log_warning("create socket: %s", strerror(errno));
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
 
     // For concurrent server module, the port should be reused
@@ -47,7 +47,7 @@ int Socket::create_bind(int family, int type) {
     if (::bind(_s, (struct sockaddr*)sa, (socklen_t)sa) == -1) {
         log_fatal("bind: %s", strerror(errno));
         close(_s);
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
 
     log_debug("[socket info] type[%d] fd[%d] ip[%s] port[%d]",
@@ -60,7 +60,7 @@ SOCKET Socket::create_bind2(int family, int type) {
     SOCKET fd = ::socket(family, type | SOCK_NONBLOCK, 0);
     if (fd == INVALID_SOCKET) {
         log_warning("create socket: %s", strerror(errno));
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
 
     int on = 1;
@@ -70,7 +70,7 @@ SOCKET Socket::create_bind2(int family, int type) {
     if (::bind(fd, (struct sockaddr*)sa, (socklen_t)sa) == -1) {
         log_fatal("bind: %s", strerror(errno));
         close(fd);
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
 
     log_debug("[socket info] type[%d] fd[%d] ip[%s] port[%d]",
@@ -83,13 +83,13 @@ int Socket::set_option(SOCKET fd, Option opt, int value) {
    int slevel, sopt;
    if (translate_option(opt, &slevel, &sopt) == -1) {
        log_warning("translate socket option failed");
-       return SOCKET_ERROR;
+       return SOCKET_ERR;
    }
    
    if (::setsockopt(fd, slevel, sopt, &value, sizeof(value)) == -1) {
         log_warning("setsockopt failed: %s, fd[%d] opt[%d]", 
                 strerror(errno), fd, opt);
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
    }
 
    log_debug("[setsockopt] opt[%d]", opt);
@@ -100,13 +100,13 @@ int Socket::set_option(Option opt, int value) {
    int slevel, sopt;
    if (translate_option(opt, &slevel, &sopt) == -1) {
        log_warning("translate socket option failed");
-       return SOCKET_ERROR;
+       return SOCKET_ERR;
    }
    
    if (::setsockopt(_s, slevel, sopt, &value, sizeof(value)) == -1) {
         log_warning("setsockopt failed: %s, fd[%d] opt[%d]", 
                 strerror(errno), _s, opt);
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
    }
 
    log_debug("[setsockopt] opt[%d]", opt);
@@ -143,11 +143,11 @@ int Socket::set_noblock() {
      */
     if ((flags = fcntl(_s, F_GETFL)) == -1) {
         log_warning("fcntl(F_GETFL): %s", strerror(errno));
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
     if (fcntl(_s, F_SETFL, flags | O_NONBLOCK) == -1) {
         log_warning("fcntl(F_SETFL, O_NONBLOCK): %s", strerror(errno));
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     }
 
     log_debug("[set noblocking] fd[%d]", _s);
@@ -160,7 +160,7 @@ bool Socket::get_local_address(SocketAddress* const sa) const {
     socklen_t addr_len = sizeof(addr);
     sockaddr* saddr = reinterpret_cast<sockaddr*>(&addr);
 
-    if(::getsockname(_s, saddr, &addr_len) == SOCKET_ERROR) {
+    if(::getsockname(_s, saddr, &addr_len) == SOCKET_ERR) {
         log_warning("[get remote address failed] fd[%d]", _s);
         return false;
     }
@@ -183,7 +183,7 @@ bool Socket::get_remote_address(SocketAddress* const sa) const {
     socklen_t addr_len = sizeof(addr);
     sockaddr* saddr = reinterpret_cast<sockaddr*>(&addr);
 
-    if(::getpeername(_s, saddr, &addr_len) == SOCKET_ERROR) {
+    if(::getpeername(_s, saddr, &addr_len) == SOCKET_ERR) {
         log_warning("[get remote address failed] fd[%d]", _s);
         return false;
     }
@@ -202,15 +202,15 @@ bool Socket::get_remote_address(SocketAddress* const sa) const {
 }
 
 int Socket::listen(int backlog) {
-    return SOCKET_ERROR;
+    return SOCKET_ERR;
 }
 
 SOCKET Socket::accept(SocketAddress& sa) {
-    return SOCKET_ERROR;
+    return SOCKET_ERR;
 }
 
 int Socket::connect(SocketAddress& sa) {
-    return SOCKET_ERROR;
+    return SOCKET_ERR;
 }
 
 int Socket::write(const char* buf, size_t len) {
@@ -220,7 +220,7 @@ int Socket::write(const char* buf, size_t len) {
             w = 0;
         else {
             log_debug("write: %s", strerror(errno));
-            return SOCKET_ERROR;
+            return SOCKET_ERR;
         }
     }
 
@@ -234,7 +234,7 @@ int Socket::read(char* buf, size_t len) {
             r = 0;
         else {
             log_debug("read: %s", strerror(errno));
-            return SOCKET_ERROR;
+            return SOCKET_ERR;
         }
     } else if (r == 0) {
         log_debug("read: peer closed");

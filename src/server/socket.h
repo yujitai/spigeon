@@ -28,7 +28,7 @@ namespace zf {
 
 enum {
     SOCKET_OK = 0,
-    SOCKET_ERROR = -1,       
+    SOCKET_ERR = -1,       
     SOCKET_PEER_CLOSED = -2
 };
 

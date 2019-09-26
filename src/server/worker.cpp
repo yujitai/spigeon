@@ -137,7 +137,7 @@ void GenericWorker::tcp_read_io(Connection* conn) {
     size_t iblen = sdslen(c->_io_buffer);
     c->_io_buffer = sdsMakeRoomFor(c->_io_buffer, rlen);
     int r = c->read(c->_io_buffer + iblen, rlen);
-    if (r == SOCKET_ERROR) {
+    if (r == SOCKET_ERR) {
         log_debug("socket read: return error, close connection");
         close_conn(c);
         return;
@@ -228,7 +228,7 @@ void GenericWorker::tcp_write_io(Connection* conn) {
         int w = c->write(reply.data() + c->_bytes_written,
                 reply.size() - c->_bytes_written);
 
-        if (w == SOCKET_ERROR) {
+        if (w == SOCKET_ERR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;

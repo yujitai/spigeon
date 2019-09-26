@@ -54,7 +54,7 @@ SOCKET UDPSocket::accept(SocketAddress& sa) {
 int UDPSocket::connect(SOCKET fd, SocketAddress& sa) {
     if (::connect(fd, (struct sockaddr*)sa, (socklen_t)sa) == -1) {
         log_fatal("connect failed: %s", strerror(errno));
-        return SOCKET_ERROR;
+        return SOCKET_ERR;
     } 
     return SOCKET_OK;
 }

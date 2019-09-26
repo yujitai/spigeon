@@ -82,7 +82,6 @@ public:
     void stop();
 
     int64_t get_clients_count(std::string& clients_detail);
-
 protected:
     GenericServerOptions _options;
     GenericDispatcher* _dispatcher;
