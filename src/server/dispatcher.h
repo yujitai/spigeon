@@ -18,9 +18,9 @@
 #ifndef __DISPATCHER_H_
 #define __DISPATCHER_H_
 
-#include <vector>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include "server/server.h"
 #include "util/lock.h"
@@ -41,7 +41,7 @@ enum {
 typedef void (*accept_cb_t)(EventLoop*, IOWatcher*, int, int, void*);
 
 /**
- * Generic dispatcher
+ * Generic dispatcher.
  **/
 class GenericDispatcher {
 public:
@@ -71,7 +71,7 @@ protected:
     void stop();
     /**
      * Spawn a new worker and push it into 
-     * GenericDispatcher::workers
+     * GenericDispatcher::workers.
      **/
     virtual int spawn_worker();
     virtual int join_workers();

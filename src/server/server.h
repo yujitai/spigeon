@@ -46,7 +46,7 @@ enum SERVER_TYPE {
 
 class GenericServerOptions : public Options {
 public:
-    // default constructor
+    // default constructor.
     GenericServerOptions();
 
     char* ip;

@@ -16,6 +16,7 @@
  **/
 
 #include "server/server.h"
+
 #include "server/dispatcher.h"
 #include "util/zmalloc.h"
 
@@ -132,7 +133,7 @@ int GenericServer::validate_conf() {
 int GenericServer::initialize() {
     _dispatcher = new GenericDispatcher(_options);
     if (_dispatcher->initialize() != DISPATCHER_OK) {
-        log_fatal("failed to create dispatcher");
+        log_fatal("Init dispatcher failed.");
         return SERVER_ERROR;
     }
 
@@ -147,6 +148,7 @@ void GenericServer::stop() {
     _dispatcher->notify(GenericDispatcher::QUIT);
 }
 
+// TODO:测试
 int64_t GenericServer::get_clients_count(std::string& clients_detail) {
     return _dispatcher->get_clients_count(clients_detail);
 }

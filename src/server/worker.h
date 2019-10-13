@@ -21,9 +21,9 @@
 #include "server/thread.h"
 #include "server/server.h"
 #include "server/dispatcher.h"
+#include "server/network_manager.h"
 #include "server/tcp_connection.h"
 #include "server/udp_connection.h"
-#include "server/network_manager.h"
 
 namespace zf {
 
@@ -37,7 +37,7 @@ class EventLoop;
 
 class GenericWorker: public Runnable {
  public:
-    // notification messages
+    // notification messages.
     enum {
         QUIT = 0,
         NEW_CONNECTION = 1
@@ -53,7 +53,7 @@ class GenericWorker: public Runnable {
     void mq_push(void* msg);            
     bool mq_pop(void** msg);    
     
-    // process io event
+    // process io event.
     void read_io(int fd);
     void write_io(int fd);
 
@@ -110,7 +110,6 @@ protected:
     
     // owned by dispatcher
     NetworkManager* _network_manager;
-
 private:
     void tcp_read_io(Connection* c);
     void tcp_write_io(Connection* c);

@@ -28,12 +28,13 @@
 namespace zf {
 
 /**
- * @brief Dispatcher pipe message hanler
+ * @brief Dispatcher pipe message hanler.
  **/
 void recv_notify(EventLoop *el, IOWatcher *w, int fd, int revents, void *data) {
     UNUSED(el);
     UNUSED(w);
     UNUSED(revents);
+
     int msg;
     if (read(fd, &msg, sizeof(int)) != sizeof(int)) {
         log_warning("can't read from notify pipe");
@@ -96,7 +97,9 @@ GenericDispatcher::~GenericDispatcher() {
             _workers[i] = NULL;
         }
     }
+
     delete _el;
+    delete _network_manager;
 }
 
 int GenericDispatcher::initialize() {
@@ -104,10 +107,9 @@ int GenericDispatcher::initialize() {
         return DISPATCHER_ERROR;
 
     if (create_server(_options.server_type, 
-                _options.ip, _options.port,
-                accept_new_conn)) {
+                      _options.ip, _options.port,
+                      accept_new_conn)) 
         return DISPATCHER_ERROR;
-    }
 
     for (int i = 0; i < _options.worker_num; i++) {
         if (spawn_worker() == DISPATCHER_ERROR) 
@@ -136,8 +138,8 @@ int GenericDispatcher::create_pipe() {
     return DISPATCHER_OK;
 }
 
-int GenericDispatcher::create_server(uint8_t type, 
-        char* ip, uint16_t port, accept_cb_t accept_cb) 
+int GenericDispatcher::create_server(uint8_t type, char* ip, uint16_t port, 
+        accept_cb_t accept_cb) 
 {
     Socket* s = _network_manager->create_server(type, ip, port);
     if (!s) {
@@ -202,12 +204,11 @@ int GenericDispatcher::spawn_worker() {
 }
 
 int GenericDispatcher::join_workers() {
-    for (size_t i = 0; i < _workers.size(); i++) {
-        if (_workers[i] != NULL) {
-            _workers[i]->notify(GenericWorker::QUIT);
-            if (join_thread(_workers[i]) == THREAD_ERROR) {
-                log_fatal("failed to join worker thread");
-            }
+    for (auto worker : _workers) {
+        worker->notify(GenericWorker::QUIT);
+        if (join_thread(worker) == THREAD_ERROR) {
+            log_fatal("failed to join worker thread");
+            return DISPATCHER_ERROR;
         }
     }
 
@@ -228,6 +229,7 @@ int GenericDispatcher::dispatch_new_conn(Socket* s) {
 
     log_debug("[dispatch new connection] fd[%d] worker_id[%s]", 
             s->fd(), worker->worker_id().c_str());
+
     return DISPATCHER_OK;
 }
 
@@ -243,7 +245,7 @@ void GenericDispatcher::process_internal_notify(int msg) {
 }
 
 void GenericDispatcher::process_notify(int msg) {
-    log_warning("unknow notification: %d", msg);
+    log_warning("Unknow notification: %d", msg);
 }
 
 int GenericDispatcher::notify(int msg) {
@@ -263,6 +265,7 @@ bool GenericDispatcher::mq_pop(void **msg) {
     return _mq.consume(msg);
 }
 
+// TODO:测试
 int64_t GenericDispatcher::get_clients_count(std::string& clients_detail) {
     std::stringstream temp;
     int64_t current_count = 0;

@@ -18,7 +18,6 @@
 #include "server/worker.h"
 
 #include "server/event.h"
-#include "util/status.h"
 #include "util/zmalloc.h"
 
 namespace zf {
@@ -45,7 +44,7 @@ static void recv_notify(EventLoop *el,
 }
 
 /**
- * Callback for Connection io events 
+ * Callback for Connection io events.
  */
 void conn_io_cb(EventLoop* el, 
         IOWatcher* w, 
@@ -65,7 +64,7 @@ void conn_io_cb(EventLoop* el,
 }
 
 /**
- * Connection timeout callback
+ * Connection timeout callback.
  **/
 void timeout_cb(EventLoop* el, TimerWatcher* w, void* data) {
     UNUSED(w);
@@ -76,7 +75,7 @@ void timeout_cb(EventLoop* el, TimerWatcher* w, void* data) {
 }
 
 /**
- * Callback for cron work
+ * Callback for cron work.
  **/
 void cron_cb(EventLoop* el, TimerWatcher* w, void* data) 
 {
@@ -87,7 +86,7 @@ void cron_cb(EventLoop* el, TimerWatcher* w, void* data)
     worker->process_cron_work();
 }
 
-GenericWorker::GenericWorker(const GenericServerOptions &o, 
+GenericWorker::GenericWorker(const GenericServerOptions& o, 
         const std::string& thread_name)
     : Runnable(thread_name), 
       _options(o), 
@@ -105,12 +104,37 @@ GenericWorker::~GenericWorker() {
     delete _el;
 }
 
+int GenericWorker::initialize() {
+    int fds[2];
+    if (pipe(fds)) {
+        log_fatal("can't create notify pipe");
+        return WORKER_ERROR;
+    }
+    _notify_recv_fd = fds[0];
+    _notify_send_fd = fds[1];
+
+    // Listen for notifications from dispatcher thread.
+    pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
+    if (pipe_watcher == NULL)
+        return WORKER_ERROR;
+    _el->start_io_event(pipe_watcher, _notify_recv_fd, EventLoop::READ);
+
+    // Start cron timer.
+    cron_timer = _el->create_timer(cron_cb, (void*)this, true);
+    _el->start_timer(cron_timer, _options.tick);
+
+    return WORKER_OK;
+}
+
 void GenericWorker::set_network(NetworkManager* network_manager) {
     _network_manager = network_manager;
 }
 
 void GenericWorker::read_io(SOCKET fd) {
-    assert(fd != INVALID_SOCKET);
+    if (fd == INVALID_SOCKET) {
+        log_fatal("Invalid socket. fd[%d]", fd);
+        return;
+    }
 
     if (fd >= _conns.size()) {
         log_warning("invalid fd: %d", fd);
@@ -119,7 +143,7 @@ void GenericWorker::read_io(SOCKET fd) {
 
     Connection* c = _conns[fd];
     if (!c) {
-        log_warning("connection not exists");
+        log_warning("connection not exists.");
         return;
     }
 
@@ -189,11 +213,14 @@ int GenericWorker::add_reply(Connection* c, const Slice& reply) {
 }
 
 int GenericWorker::reply_list_size(Connection* c) {
-    // return c->_reply_list_size;
+    return c->_reply_list_size;
 }
 
-void GenericWorker::write_io(int fd) {
-    assert(fd >= 0);
+void GenericWorker::write_io(SOCKET fd) {
+    if (fd == INVALID_SOCKET) {
+        log_fatal("Invalid socket. fd[%d]", fd);
+        return;
+    }
 
     if (fd >= _conns.size()) {
         log_warning("invalid fd: %d", fd);
@@ -226,16 +253,15 @@ void GenericWorker::tcp_write_io(Connection* conn) {
     while (! c->_reply_list.empty()) {
         Slice reply = c->_reply_list.front();
         int w = c->write(reply.data() + c->_bytes_written,
-                reply.size() - c->_bytes_written);
-
+                         reply.size() - c->_bytes_written);
         if (w == SOCKET_ERR) {
             log_debug("sock_write_data: return error, close connection");
             close_conn(c);
             return;
-        } else if(w == 0) {         /* would block */
+        } else if(w == 0) { // would block.
             log_warning("write zero bytes, want[%d] fd[%d] ip[%s]", int(reply.size() - c->_bytes_written), c->fd(), c->_ip);
             return;
-        } else if ((w + c->_bytes_written) == reply.size()) { /* finish */
+        } else if ((w + c->_bytes_written) == reply.size()) { // finish.
             c->_reply_list.pop_front();
             c->_reply_list_size--;
             c->_bytes_written = 0;
@@ -282,7 +308,7 @@ void GenericWorker::start_timer(Connection* c) {
 
 Connection* GenericWorker::create_connection(Socket* s) {
     if (!s) {
-        log_fatal("[invalid Socket*]");
+        log_fatal("[Invalid Socket*]");
         return nullptr;
     }
 
@@ -366,27 +392,6 @@ const std::string& GenericWorker::worker_id() {
     return _worker_id;
 }
 
-int GenericWorker::initialize() {
-    int fds[2];
-    if (pipe(fds)) {
-        log_fatal("can't create notify pipe");
-        return WORKER_ERROR;
-    }
-    _notify_recv_fd = fds[0];
-    _notify_send_fd = fds[1];
-
-    // Listen for notifications from dispatcher thread
-    pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
-    if (pipe_watcher == NULL)
-        return WORKER_ERROR;
-    _el->start_io_event(pipe_watcher, _notify_recv_fd, EventLoop::READ);
-    // start cron timer
-    cron_timer = _el->create_timer(cron_cb, (void*)this, true);
-    _el->start_timer(cron_timer, _options.tick);
-
-    return WORKER_OK;
-}
-
 void GenericWorker::stop() {
     _el->delete_timer(cron_timer);    
     _el->delete_io_event(pipe_watcher);
@@ -416,7 +421,7 @@ int GenericWorker::notify(int msg) {
     gettimeofday(&s, NULL);
     int w = write(_notify_send_fd, &msg, sizeof(int));
     gettimeofday(&e, NULL);
-    log_debug("[write worker pipe] cost[%luus] msg_type[%d]", TIME_US_DIFF(s, e), msg);
+    log_debug("[Write pipe] cost[%luus] msg_type[%d]", TIME_US_DIFF(s, e), msg);
 
     if (w == sizeof(int))
         return WORKER_OK;
@@ -441,14 +446,12 @@ void GenericWorker::process_internal_notify(int msg) {
 }
 
 void GenericWorker::process_notify(int msg) {
-    log_warning("unknow notify: %d", msg);
+    log_warning("[Unknown notify] msg[%d]", msg);
 }
 
 void GenericWorker::process_timeout(Connection* c) {
-    if ((_el->now() - c->_last_interaction) > 
-            (uint64_t)_options.connection_timeout)
-    {
-        log_debug("[time out] close fd[%d]", c->fd());
+    if ((_el->now() - c->_last_interaction) > _options.connection_timeout) {
+        log_debug("[Time out] close fd[%d]", c->fd());
         close_conn(c);
     }
 }
