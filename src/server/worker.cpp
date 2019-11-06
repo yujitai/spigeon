@@ -363,14 +363,13 @@ void GenericWorker::close_all_conns() {
 void GenericWorker::remove_conn(Connection *c) {
     c->_last_interaction = _el->now();
     before_remove_conn(c);
+
     _el->delete_io_event(c->_watcher);  
     _el->delete_timer(c->_timer);
-    /*
-    if (c->priv_data_destructor) {
-        c->priv_data_destructor(c->priv_data);
-    }
-    */
+    if (c->_priv_data_destructor)
+        c->_priv_data_destructor(c->_priv_data);
     _conns[c->fd()] = NULL;
+
     after_remove_conn(c);
 
     delete c;

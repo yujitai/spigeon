@@ -132,7 +132,7 @@
 #define JEMALLOC_HAVE_SBRK 
 
 /* Non-empty if the tls_model attribute is supported. */
-#define JEMALLOC_TLS_MODEL __attribute__((tls_model("initial-exec")))
+#define JEMALLOC_TLS_MODEL 
 
 /* JEMALLOC_CC_SILENCE enables code that silences unuseful compiler warnings. */
 /* #undef JEMALLOC_CC_SILENCE */

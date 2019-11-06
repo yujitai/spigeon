@@ -76,6 +76,7 @@ void accept_new_conn(EventLoop* el,
         return;
     }
     gettimeofday(&end, NULL);
+
     log_debug("[accept new conn] cost[%luus] client_fd[%d]", TIME_US_DIFF(start, end), s->fd());
 }
 

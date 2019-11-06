@@ -19,6 +19,11 @@ private:
     int _unix_socket_post;
     int _unix_socket_wait;
     IOWatcher* _unix_watcher;
+
+    // cmd type -> queue of the cmd type
+    typedef std::unordered_map<int, LockFreeQueue<BaseCmd>*> QueueMap;
+    // worker id -> queues map
+    typedef std::unordered_map<uint32_t, QueueMap> WorkerQueue; 
 };
 
 } // namespace zf
