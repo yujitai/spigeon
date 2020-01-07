@@ -20,6 +20,7 @@
 #define  __SOCKET_INCLUDE_H_
 
 // common uinx socket includes / defines
+#include <sys/un.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>

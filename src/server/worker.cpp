@@ -113,6 +113,9 @@ int GenericWorker::initialize() {
     _notify_recv_fd = fds[0];
     _notify_send_fd = fds[1];
 
+    fcntl(_notify_send_fd, F_SETFL, fcntl(_notify_send_fd, F_GETFL) | O_NONBLOCK);
+    fcntl(_notify_recv_fd, F_SETFL, fcntl(_notify_send_fd, F_GETFL) | O_NONBLOCK);
+
     // Listen for notifications from dispatcher thread.
     pipe_watcher = _el->create_io_event(recv_notify, (void*)this);
     if (pipe_watcher == NULL)

@@ -9,7 +9,16 @@
 #ifndef  __BASECMD_H_
 #define  __BASECMD_H_
 
+#include <stdint.h>
+
 namespace zf {
+
+class NewGenericWorker;
+
+struct CmdInfo {
+    uint32_t worker_id;
+    int cmd_type;
+};
 
 class BaseCmd {
 public:
@@ -17,7 +26,7 @@ public:
     virtual ~BaseCmd();
 
     virtual bool process(NewGenericWorker* wk);
-}
+};
 
 } // namespace zf
 
