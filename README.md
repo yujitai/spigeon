@@ -29,7 +29,7 @@
 ```
 
 ## 特性
-* 两种不同的服务框架模型, 开发者可自由选择
+* 两种不同的服务框架模型 `message-pipe` 和 `command-unix`, 开发者可自由选择
 * 支持 `TCP` 并发服务编程
 * 支持 `UDP` 并发服务编程
 * 支持 `HTTP` 客户端编程  
@@ -42,6 +42,8 @@
 * 更高性能的 `jemalloc` 内存管理
 
 ## 开发历程
+
+###zframework v1.0
 * v1.0, 2015-10-25, 从百度 ksarch 迁移 store-framework
 * v1.0, 2019-01-17, 为满足 `zrtc` 的需求, 开始优化 store-framework
 * v1.0, 2019-08-19, 正式更名为 `zframework`, 开始开发 1.0 版本
@@ -50,10 +52,14 @@
 * v1.0, 2019-09-26, 底层网络层 Socket 抽象完成, 1.0 整体架构调整完成
 * v1.0, 2019-10-29, 开始加入 `gsdm` 模型
 
+###zframework v2.0
+* v2.0, 2020-01-10, 支持 `worker` 线程的 cpu 亲和性绑定
+
 ## 构建
 ./build.sh
 
 ## 使用
+参考 `examples/demo`
 
 ## 作者
 yujitai<yujitai@zuoyebang.com>

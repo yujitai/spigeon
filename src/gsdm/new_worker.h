@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include "gsdm/basecmd.h"
-#include "gsdm/map_def.h"
+#include "gsdm/stlwrapper.h"
 #include "server/event.h"
 #include "server/worker.h"
 #include "server/socket_include.h"

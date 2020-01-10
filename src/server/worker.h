@@ -58,13 +58,17 @@ class GenericWorker: public Runnable {
     void write_io(int fd);
 
     virtual int notify(int msg);
+    // user can imply it.
     virtual void process_notify(int msg);
     virtual void process_timeout(Connection *c);
     virtual void process_cron_work();
     int get_clients_count();
+    void set_cpu_id(int cpu_id) { _cpu_id = cpu_id; }
+    int cpu_id() { return _cpu_id; }
     void set_worker_id(const std::string& id);
     const std::string& worker_id();
     void set_network(NetworkManager* network_manager);
+    bool bind_cpu();
 public:
     void process_internal_notify(int msg);
 protected:
@@ -92,6 +96,7 @@ protected:
     IOWatcher* pipe_watcher;
     TimerWatcher* cron_timer;
 
+    int _cpu_id;
     /**
      * worker_id = thread_name + thread_id.
      */

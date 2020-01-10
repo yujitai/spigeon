@@ -89,6 +89,7 @@ GenericDispatcher::GenericDispatcher(GenericServerOptions &o)
 {
     _el = new EventLoop((void*)this, false);
     _network_manager = new NetworkManager(_el);
+    _cpu_id = 0;
 }
 
 GenericDispatcher::~GenericDispatcher() {
@@ -189,20 +190,30 @@ void GenericDispatcher::run() {
 
 int GenericDispatcher::spawn_worker() {
     if (_options.worker_factory_func == NULL) {
-        log_fatal("don't specify worker_factory_func to create worker");
+        log_fatal("not specify worker_factory_func to create worker");
         return DISPATCHER_ERROR;
     }
 
     GenericWorker* new_worker = _options.worker_factory_func(_options);
     new_worker->initialize();
     new_worker->set_network(_network_manager);
+
+    std::stringstream worker_id;
+    new_worker->set_cpu_id(_cpu_id);
+    new_worker->_thread_name = new_worker->_thread_name + "_" + std::to_string(_cpu_id++);
+    worker_id << new_worker->_thread_name << "_" << new_worker->_thread_id;
+    new_worker->set_worker_id(worker_id.str());
+
     if (create_thread(new_worker) == THREAD_ERROR) {
         log_fatal("failed to create worker thread");
         return DISPATCHER_ERROR;
     }
-    std::stringstream worker_id;
-    worker_id << new_worker->_thread_name << "_" << new_worker->_thread_id;
-    new_worker->set_worker_id(worker_id.str());
+
+    if (_options.bind_cpu == true && !new_worker->bind_cpu()) {
+        delete new_worker;
+        return DISPATCHER_ERROR;
+    }
+    
     _workers.push_back(new_worker);
 
     return DISPATCHER_OK;

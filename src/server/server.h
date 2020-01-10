@@ -36,7 +36,7 @@ typedef GenericWorker* (*worker_factory_func_t) (GenericServerOptions& o);
 
 enum {
     SERVER_OK = 0,
-    SERVER_ERROR = 1
+    SERVER_ERROR = -1
 };
 
 enum SERVER_TYPE {
@@ -53,6 +53,7 @@ public:
     uint16_t port;
     int worker_num;
     SERVER_TYPE server_type;
+    bool bind_cpu = true;
     uint64_t connection_timeout;
     uint64_t tick;
     uint64_t max_io_buffer_size;

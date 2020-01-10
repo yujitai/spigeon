@@ -35,6 +35,10 @@ static command_t server_cmd_table[] = {
       conf_set_num_slot,
       offsetof(GenericServerOptions, worker_num) },
 
+    { "bind_cpu",
+      conf_set_flag_slot,
+      offsetof(GenericServerOptions, bind_cpu) },
+
     { "server_type",
       conf_set_num_slot,
       offsetof(GenericServerOptions, server_type) },
@@ -62,6 +66,7 @@ GenericServerOptions::GenericServerOptions()
     : ip(NULL),
       port(0),
       worker_num(8),
+      bind_cpu(true),
       server_type(G_SERVER_TCP),
       connection_timeout(60*1000*1000),
       tick(1000),
@@ -107,6 +112,7 @@ int GenericServer::load_conf(const char* filename) {
                 "ip: %s\n"
                 "port: %d\n"
                 "worker_num: %d\n"
+                "bind_cpu: %d\n"
                 "server_type: %d\n"
                 "connection_timeout: %lld\n"
                 "tick: %lld\n"
@@ -115,6 +121,7 @@ int GenericServer::load_conf(const char* filename) {
                 _options.ip,
                 _options.port,
                 _options.worker_num,
+                _options.bind_cpu,
                 _options.server_type,
                 _options.connection_timeout,
                 _options.tick,

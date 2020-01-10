@@ -91,6 +91,8 @@ private:
     int create_server(uint8_t type, 
             char* ip, uint16_t port, 
             accept_cb_t accept_cb);
+
+    int _cpu_id;
 };
 
 } // namespace zf

@@ -24,6 +24,24 @@ namespace zf {
 
 static const size_t INITIAL_FD_NUM = 1024;
 
+static bool setaffinity_np(std::vector<int> &cpuID, pthread_t thread) {
+    int s;
+    cpu_set_t cpuset;
+
+    CPU_ZERO(&cpuset);
+    for (uint32_t j = 0; j < cpuID.size(); j++) {
+        CPU_SET(cpuID[j], &cpuset);
+    }
+
+    s = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+    if (s != 0) {
+        log_fatal("pthread_setaffinity_np failed, errno is %d", errno);
+        return false;
+    }
+
+    return true;
+}
+
 static void recv_notify(EventLoop *el, 
         IOWatcher *w, 
         int fd, 
@@ -96,6 +114,7 @@ GenericWorker::GenericWorker(const GenericServerOptions& o,
 {
     _conns.resize(INITIAL_FD_NUM, NULL);
     _el = new EventLoop((void*)this, false);
+    _cpu_id = -1;
     _worker_id = "";
 }
 
@@ -456,6 +475,20 @@ void GenericWorker::process_timeout(Connection* c) {
         log_debug("[Time out] close fd[%d]", c->fd());
         close_conn(c);
     }
+}
+
+bool GenericWorker::bind_cpu() {
+    if (_cpu_id == -1) 
+        return false;
+
+    std::vector<int> cpus;
+    cpus.push_back(_cpu_id);
+    if (!setaffinity_np(cpus, _thread_id)) {
+        log_fatal("worker bind cpu failed.");
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace zf

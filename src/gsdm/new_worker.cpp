@@ -6,7 +6,7 @@
  * @date 2020/01/03 15:47:58
  ******************************************************************/
 
-#include "gsdm/worker.h"
+#include "gsdm/new_worker.h"
 
 #include "iostream"
 using namespace std;
