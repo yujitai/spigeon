@@ -25,7 +25,7 @@ namespace zf {
 
 class UDPSocket : public Socket {
 public:
-    UDPSocket(Ipv4Address addr);
+    UDPSocket(const Ipv4Address& addr);
     UDPSocket(SOCKET fd);
     ~UDPSocket();
 

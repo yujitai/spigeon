@@ -184,7 +184,7 @@ void GenericDispatcher::stop() {
 }
 
 void GenericDispatcher::run() {
-    log_notice("dispatcher start");
+    log_debug("dispatcher run");
     _el->run();
 }
 
@@ -201,13 +201,14 @@ int GenericDispatcher::spawn_worker() {
     std::stringstream worker_id;
     new_worker->set_cpu_id(_cpu_id);
     new_worker->_thread_name = new_worker->_thread_name + "_" + std::to_string(_cpu_id++);
-    worker_id << new_worker->_thread_name << "_" << new_worker->_thread_id;
-    new_worker->set_worker_id(worker_id.str());
 
     if (create_thread(new_worker) == THREAD_ERROR) {
         log_fatal("failed to create worker thread");
         return DISPATCHER_ERROR;
     }
+
+    worker_id << new_worker->_thread_name << "_" << new_worker->_thread_id;
+    new_worker->set_worker_id(worker_id.str());
 
     if (_options.bind_cpu == true && !new_worker->bind_cpu()) {
         delete new_worker;

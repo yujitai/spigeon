@@ -21,7 +21,7 @@
 
 namespace zf {
 
-Socket::Socket(Ipv4Address srv_addr)
+Socket::Socket(const Ipv4Address& srv_addr)
     : _local_addr(srv_addr) 
 {
 }

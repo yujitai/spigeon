@@ -19,7 +19,7 @@
 
 namespace zf {
 
-TCPSocket::TCPSocket(Ipv4Address srv_addr) 
+TCPSocket::TCPSocket(const Ipv4Address& srv_addr) 
     : Socket(srv_addr) 
 {
 }

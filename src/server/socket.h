@@ -39,7 +39,7 @@ enum {
 class Socket {
 public:
     // for server
-    Socket(Ipv4Address srv_addr);
+    Socket(const Ipv4Address& srv_addr);
 
     // for client
     Socket(SOCKET fd);

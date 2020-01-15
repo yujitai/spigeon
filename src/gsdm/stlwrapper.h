@@ -36,6 +36,7 @@ if(MAP_HAS1((m),(k1))){ \
 #define ADD_VECTOR_BEGIN(v,i) (v).insert((v).begin(),(i))
 #define VECTOR_VAL(i) (*(i))
 
+
 #endif  //__STLWRAPPER_H_
 
 

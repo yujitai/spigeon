@@ -20,7 +20,7 @@
 
 namespace zf {
 
-UDPSocket::UDPSocket(Ipv4Address srv_addr) 
+UDPSocket::UDPSocket(const Ipv4Address& srv_addr) 
     : Socket(srv_addr)
 {
 }

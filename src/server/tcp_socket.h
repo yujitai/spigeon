@@ -25,7 +25,7 @@ namespace zf {
 
 class TCPSocket : public Socket {
 public:
-    TCPSocket(Ipv4Address srv_addr);
+    TCPSocket(const Ipv4Address& srv_addr);
     TCPSocket(SOCKET s);
     ~TCPSocket();
 
