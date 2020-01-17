@@ -1,6 +1,6 @@
 #use lower case 'makefile', 'Makefile' will ignored in .git2svnignore
 LIBEV=libev-4.11/.libs/libev.a
-LIBJEMALLOC=jemalloc/lib/libjemalloc.a
+LIBJEMALLOC=jemalloc_stable4/lib/libjemalloc.a
 LIBCONFIG=new-config/libconfig.a
 LIBPROTOBUF=protobuf/src/.libs/libprotobuf.a
 LIBEVHTTPCLIENT=evhttpclient/libevhttpclient.a
@@ -14,7 +14,7 @@ clean:
 	echo "clean"
 	# sometimes make clean not working if configure is not ok
 	cd libev-4.11 && ./configure && make clean
-	cd jemalloc && ./configure && make clean
+	cd jemalloc_stable4 && ./configure && make clean
 	cd new-config && make clean
 	cd evhttpclient && make clean
 
@@ -25,7 +25,7 @@ $(LIBEV):
 	cd libev-4.11 && ./configure && make
 
 $(LIBJEMALLOC):
-	cd jemalloc && ./configure && make
+	cd jemalloc_stable4 && ./configure && make
 
 $(LIBPROTOBUF):
 	cd protobuf && ./configure && make

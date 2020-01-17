@@ -17,7 +17,7 @@ CFLAGS('-g -ggdb -pipe -W -Wall -O0 -DDEBUG')
 CXXFLAGS('-g -std=c++11 -ggdb -pipe -W -Wall -O0 -DDEBUG')
 
 #头文件路径.
-INCPATHS('. ./src ./deps/libev-4.11 ./deps/evhttpclient ./deps/jemalloc/include/jemalloc ./deps ./deps/protobuf/src')
+INCPATHS('. ./src ./deps/libev-4.11 ./deps/evhttpclient ./deps/jemalloc_stable4/include ./deps ./deps/protobuf/src')
 
 #使用库
 #LIBS('./deps/libev-4.11/.lib/libev.a')

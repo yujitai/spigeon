@@ -33,6 +33,7 @@
 #include "util/zmalloc.h"
 // 测试阶段
 #include "gsdm/stlwrapper.h"
+// #include "jemalloc/jemalloc.h"
 
 #endif  //__ZFRAMEWORK_H_
 
