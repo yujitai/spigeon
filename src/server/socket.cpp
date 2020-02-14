@@ -58,7 +58,7 @@ int Socket::create_bind(int family, int type) {
 
 SOCKET Socket::create_bind2(int family, int type) {
     SOCKET fd = ::socket(family, type | SOCK_NONBLOCK, 0);
-    if (fd == INVALID_SOCKET) {
+    if (fd == ZF_INVALID_SOCKET) {
         log_warning("create socket: %s", strerror(errno));
         return SOCKET_ERR;
     }

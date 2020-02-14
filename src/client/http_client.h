@@ -70,13 +70,18 @@ public:
     int post(const std::string &path, const header_map_t &headers,
         const Slice &body, void *data);
 
+    int del(const std::string &path, const Slice &body, void *data);
+    int del(const std::string &path, const header_map_t &headers,
+        const Slice &body, void *data);
+
 private:
     static void client_callback(ResponseInfo *resp, void *data, void *data2);
 
     EvHttpClient *_client;
     HttpClientCallback _client_cb;
 };
-}
+
+} // namespace zf
 
 #endif //__HTTP_CLIENT_H__
 

@@ -76,6 +76,23 @@ int HttpClient::post(const std::string &path, const Slice &body, void *data) {
     return post(path, map<std::string, std::string>(), body, data);
 }
 
+int HttpClient::del(const std::string &path, const header_map_t &headers,
+    const Slice &body, void *data)
+{
+    std::string body_str(body.data(), body.size());
+    int ret = _client->makeDelete(client_callback,
+        path, headers, body_str, data);
+    if (ret) {
+        log_warning("HttpClient del failed. error:%s", _client->lastError());
+        return -1;
+    }
+    return 0;
+}
+
+int HttpClient::del(const std::string &path, const Slice &body, void *data) {
+    return del(path, map<std::string, std::string>(), body, data);
+}
+
 void HttpClient::client_callback(ResponseInfo *ri, void *data, void *data2) {
     HttpClient *c = (HttpClient*)data2;
     if (ri) {

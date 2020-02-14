@@ -59,7 +59,7 @@ Socket* NetworkManager::generic_accept(SOCKET listen_fd, SocketAddress& sa) {
     Socket* s = _sockets[listen_fd];
 
     SOCKET fd = s->accept(sa);
-    if (fd == INVALID_SOCKET) {
+    if (fd == ZF_INVALID_SOCKET) {
         log_fatal("[generic accept: invalid socket]");
         return nullptr;
     }

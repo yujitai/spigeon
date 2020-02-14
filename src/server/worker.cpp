@@ -153,7 +153,7 @@ void GenericWorker::set_network(NetworkManager* network_manager) {
 }
 
 void GenericWorker::read_io(SOCKET fd) {
-    if (fd == INVALID_SOCKET) {
+    if (fd == ZF_INVALID_SOCKET) {
         log_fatal("Invalid socket. fd[%d]", fd);
         return;
     }
@@ -239,7 +239,7 @@ int GenericWorker::reply_list_size(Connection* c) {
 }
 
 void GenericWorker::write_io(SOCKET fd) {
-    if (fd == INVALID_SOCKET) {
+    if (fd == ZF_INVALID_SOCKET) {
         log_fatal("Invalid socket. fd[%d]", fd);
         return;
     }
@@ -335,7 +335,7 @@ Connection* GenericWorker::create_connection(Socket* s) {
     }
 
     SOCKET fd = s->fd();
-    if (fd == INVALID_SOCKET) {
+    if (fd == ZF_INVALID_SOCKET) {
         log_fatal("[invalid fd]");
         return nullptr;
     }
