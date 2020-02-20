@@ -152,6 +152,7 @@ int GenericDispatcher::create_server(uint8_t type, char* ip, uint16_t port,
         log_fatal("create %s server failed on %s:%d", type, ip, port);
         return DISPATCHER_ERROR;
     }
+
     _io_watcher = _el->create_io_event(accept_cb, (void*)this);
     if (_io_watcher == NULL) {
         log_fatal("can't create io event for accept_new_conn");

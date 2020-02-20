@@ -55,6 +55,9 @@ private:
 
     // index is fd.
     std::vector<Socket*> _sockets;
+
+    // TODO:未来会扩展ListenSocket类
+    SOCKET _listen_fd;
 };
 
 } // namespace zf

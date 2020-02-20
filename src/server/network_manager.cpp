@@ -18,17 +18,23 @@
 #include "server/network_manager.h"
 
 #include "server/server.h"
+#include "gsdm/stlwrapper.h"
 
 namespace zf {
 
 NetworkManager::NetworkManager(EventLoop* el)
-    : _el(el)
+    : _el(el), _listen_fd(-1)
 {
-
 }
 
 NetworkManager::~NetworkManager() {
+    if (_listen_fd != ZF_INVALID_SOCKET) {
+        // TODO:暂时只delete监听套接字
+        delete _sockets[_listen_fd];
+        close(_listen_fd);
+    }
 
+    _sockets.clear();
 }
 
 Socket* NetworkManager::create_server(uint8_t type, 
@@ -40,17 +46,27 @@ Socket* NetworkManager::create_server(uint8_t type,
 
     if (G_SERVER_TCP == type) {
         s = new TCPSocket(srv_addr);
-        s->create_bind(AF_INET, SOCK_STREAM);
+        if (SOCKET_ERR == s->create_bind(AF_INET, SOCK_STREAM)) {
+            log_fatal("[create server failed] type[%d] ip[%s] port[%d]", type, STR(ip), port);
+            delete s;
+            return nullptr;
+        }
         s->listen(1024);
     } else if (G_SERVER_UDP == type) {
         s = new UDPSocket(srv_addr);
-        s->create_bind(AF_INET, SOCK_DGRAM);
+        if (SOCKET_ERR == s->create_bind(AF_INET, SOCK_DGRAM)) {
+            log_fatal("[create server failed] type[%d] ip[%s] port[%d]", type, STR(ip), port);
+            delete s;
+            return nullptr;
+        }
     }
 
     SOCKET fd = s->fd();
     if (fd >= _sockets.size())
         _sockets.resize(fd*2, NULL);
     _sockets[fd] = s;
+
+    _listen_fd = fd;
 
     return s;
 }
