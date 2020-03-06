@@ -9,6 +9,7 @@ buildmake=$HOME/tools/buildmake/buildmake
 # Build zframework and deps
 echo "buildmake: Create Makefile"
 eval $buildmake 
+# make -C deps clean 
 make -C deps || exit 1
 rm -rf output && rm -f libzframework.a
 make clean && make -j8 || exit 1

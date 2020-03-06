@@ -25,7 +25,7 @@ $(LIBEV):
 	cd libev-4.11 && ./configure && make
 
 $(LIBJEMALLOC):
-	cd jemalloc_stable4 && ./configure && make
+	cd jemalloc_stable4 && ./autogen.sh && ./configure && make
 
 $(LIBPROTOBUF):
 	cd protobuf && ./configure && make
