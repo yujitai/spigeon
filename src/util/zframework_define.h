@@ -1,28 +1,23 @@
-/***************************************************************************
- * 
- * Copyright (c) 2012 Baidu.com, Inc. All Rights Reserved
- * 
- **************************************************************************/
- 
-/**
- * @file store_define.h
- * @author li_zhe(li_zhe@baidu.com)
- * @date 2012/11/26 17:25:07
- * @brief 全局常用的宏放在这里
- **/
+/*****************************************************************
+* Copyright (C) 2020 Zuoyebang.com, Inc. All Rights Reserved.
+* 
+* @file zframework_define.h
+* @author yujitai(yujitai@zuoyebang.com)
+* @date 2020/03/23
+* @brief 
+*****************************************************************/
 
-#ifndef __STORE_DEFINE_H__
-#define __STORE_DEFINE_H__
 
-// 全局常用的宏放在这里
-
-#define UNUSED(x) (void)(x)
+#ifndef _ZFRAMEWORK_DEFINE_H
+#define _ZFRAMEWORK_DEFINE_H
 
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include "log.h"
+
+#define UNUSED(x) (void)(x)
 
 #ifdef DEBUG
 #define ABORT() abort()
@@ -54,5 +49,6 @@ do { \
 
 #define TIME_US_DIFF(pre, cur) (((cur.tv_sec)-(pre.tv_sec))*1000000 + (cur.tv_usec) - (pre.tv_usec))
 
-#endif //__STORE_DEFINE_H__
+#endif // _ZFRAMEWORK_DEFINE_H
+
 

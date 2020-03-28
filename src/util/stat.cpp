@@ -17,7 +17,7 @@
 #include <map>
 #include <vector>
 
-#include "util/store_define.h"
+#include "util/zframework_define.h"
 
 namespace zf {
 

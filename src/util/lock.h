@@ -16,7 +16,7 @@
 
 #include <pthread.h>
 
-#include "util/store_define.h"
+#include "util/zframework_define.h"
 #include "util/log.h"
 
 namespace zf {
@@ -59,6 +59,7 @@ public:
     RWLock()            { ASSERT_EQUAL_0(pthread_rwlock_init(&_l, NULL)); }
     ~RWLock()           { ASSERT_EQUAL_0(pthread_rwlock_destroy(&_l)); }
     void rdlock()       { ASSERT_EQUAL_0(pthread_rwlock_rdlock(&_l)); }
+    void tryrdlock()    { ASSERT_EQUAL_0(pthread_rwlock_tryrdlock(&_l)); }
     void wrlock()       { ASSERT_EQUAL_0(pthread_rwlock_wrlock(&_l)); }
     void unlock()       { ASSERT_EQUAL_0(pthread_rwlock_unlock(&_l)); }
 private:

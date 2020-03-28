@@ -20,7 +20,7 @@
 
 #include "util/hash.h"
 #include "util/slice.h"
-#include "util/store_define.h"
+#include "util/zframework_define.h"
 
 namespace zf {
 
